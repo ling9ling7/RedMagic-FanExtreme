@@ -76,8 +76,10 @@ fi
 vibe_boost() {
     local gain=$(cfg "振动增益" | sed 's/%%//g; s/%//g')
     local dur=$(cfg "振动时长" | sed 's/ms//g')
+    local vmax=$(cfg "振动上限")
     [ -z "$gain" ] && gain=168
     [ -z "$dur" ] && dur=18
+    [ -z "$vmax" ] && vmax=128
     local VIBE=/sys/class/leds/vibrator
     for i in $(seq 1 15); do
         [ -e "$VIBE/gain" ] && break
@@ -86,9 +88,9 @@ vibe_boost() {
     if [ -e "$VIBE/gain" ]; then
         printf 0x%x "$gain" > $VIBE/gain
         printf 0x%x "$dur" > $VIBE/duration_aw
+        printf 0x%x "$vmax" > $VIBE/vmax
         echo 0x01 > $VIBE/cont_brk_time
         echo 0x03 > $VIBE/cont_wait_num
-        echo 0x50 > $VIBE/vmax
     fi
 }
 

@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 ui_print "===================================="
-ui_print "  FanExtreme v1.4.0"
+ui_print "  FanExtreme v1.4.1"
 ui_print "===================================="
 
 CONFIG="$MODPATH/config.txt"
@@ -40,11 +40,13 @@ fi
 if [ "$(cfg '振动增强')" = "1" ]; then
     gain=$(cfg '振动增益')
     dur=$(cfg '振动时长')
+    vmax=$(cfg '振动上限')
     [ -z "$gain" ] && gain=168
     [ -z "$dur" ] && dur=18
-    ui_print "  ✅ 振动增强 (${gain}/${dur})"
+    [ -z "$vmax" ] && vmax=128
+    ui_print "  ✅ 振动增强 (增益${gain}/时长${dur}/上限${vmax})"
     touch "$MODPATH/.vibe"
-    DESC="$DESC 振动增强(${gain}/${dur})"
+    DESC="$DESC 振动增强(${gain}/${dur}/${vmax})"
 fi
 
 echo "description=${DESC# }" >> "$MODPATH/module.prop"
