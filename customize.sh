@@ -1,0 +1,54 @@
+#!/system/bin/sh
+
+ui_print "===================================="
+ui_print "  FanExtreme v1.4.0"
+ui_print "===================================="
+
+CONFIG="$MODPATH/config.txt"
+cfg() { grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tail -1; }
+
+DESC=""
+
+if [ "$(cfg '风扇极速')" = "1" ]; then
+    ui_print "  ✅ 风扇极速"
+    touch "$MODPATH/.fan"
+    DESC="$DESC 风扇极速"
+fi
+
+if [ "$(cfg '充电分离')" = "1" ]; then
+    threshold=$(cfg '充电分离阈值')
+    [ -z "$threshold" ] && threshold=100
+    ui_print "  ✅ 充电分离 ($threshold%)"
+    touch "$MODPATH/.charge"
+    DESC="$DESC 充电分离($threshold%%)"
+fi
+
+if [ "$(cfg '云控屏蔽')" = "1" ]; then
+    ui_print "  ✅ 云控屏蔽"
+    touch "$MODPATH/.cloud"
+    DESC="$DESC 云控屏蔽"
+fi
+
+if [ "$(cfg '温控移除')" = "1" ]; then
+    ui_print "  ✅ 温控移除"
+    touch "$MODPATH/.thermal"
+    DESC="$DESC 温控移除"
+else
+    rm -f "$MODPATH/vendor/etc/thermal-engine.conf"
+fi
+
+if [ "$(cfg '振动增强')" = "1" ]; then
+    gain=$(cfg '振动增益')
+    dur=$(cfg '振动时长')
+    [ -z "$gain" ] && gain=168
+    [ -z "$dur" ] && dur=18
+    ui_print "  ✅ 振动增强 (${gain}/${dur})"
+    touch "$MODPATH/.vibe"
+    DESC="$DESC 振动增强(${gain}/${dur})"
+fi
+
+echo "description=${DESC# }" >> "$MODPATH/module.prop"
+
+ui_print "===================================="
+ui_print "重启生效"
+ui_print "===================================="
