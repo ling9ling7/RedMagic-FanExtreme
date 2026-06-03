@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 ui_print "===================================="
-ui_print "  FanExtreme v1.4.1"
+ui_print "  FanExtreme v1.5.0"
 ui_print "===================================="
 
 CONFIG="$MODPATH/config.txt"
@@ -47,6 +47,13 @@ if [ "$(cfg '振动增强')" = "1" ]; then
     ui_print "  ✅ 振动增强 (增益${gain}/时长${dur}/上限${vmax})"
     touch "$MODPATH/.vibe"
     DESC="$DESC 振动增强(${gain}/${dur}/${vmax})"
+fi
+
+rate=$(cfg '触控优化')
+if [ "$rate" = "1" ]; then
+    ui_print "  ✅ 触控优化 (采样率4档+游戏模式+跟手度拉满)"
+    touch "$MODPATH/.touch"
+    DESC="$DESC 触控优化"
 fi
 
 echo "description=${DESC# }" >> "$MODPATH/module.prop"

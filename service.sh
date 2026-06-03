@@ -114,4 +114,21 @@ else
     rm -f "$MODDIR/vendor/etc/thermal-engine.conf"
 fi
 
+touch_boost() {
+    local TP=/proc/touchscreen
+    for i in $(seq 1 15); do
+        [ -e "$TP/tp_report_rate" ] && break
+        sleep 1
+    done
+    if [ -e "$TP/tp_report_rate" ]; then
+        echo 4 > $TP/tp_report_rate
+        echo 1 > $TP/play_game
+        echo 5 > $TP/follow_hand_level
+    fi
+}
+
+if [ "$(cfg '触控优化')" = "1" ]; then
+    touch_boost
+fi
+
 touch_firmware
