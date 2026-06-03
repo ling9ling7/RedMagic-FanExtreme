@@ -1,4 +1,4 @@
-# FanExtreme
+# FanExtreme—更好的红魔
 
 红魔手机 KernelSU 模块 | 风扇极速 · 充电分离 · 云控屏蔽 · 温控移除 · 振动增强
 
