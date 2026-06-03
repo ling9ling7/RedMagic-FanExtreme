@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 ui_print "===================================="
-ui_print "  FanExtreme v1.5.0"
+ui_print "  FanExtreme v1.5.1"
 ui_print "===================================="
 
 CONFIG="$MODPATH/config.txt"
