@@ -69,6 +69,15 @@ if [ "$(cfg '充电分离')" = "1" ]; then
     charge_separation_monitor &
 fi
 
+if [ "$(cfg '充电分离')" = "1" ]; then
+    for i in $(seq 1 15); do
+        [ -e /sys/class/qcom-battery/restrict_cur ] && break
+        sleep 1
+    done
+    echo 0 > /sys/class/qcom-battery/restrict_cur 2>/dev/null
+    echo 0 > /sys/class/qcom-battery/restrict_chg 2>/dev/null
+fi
+
 if [ "$(cfg '云控屏蔽')" = "1" ]; then
     block_cloud_control
 fi
@@ -125,6 +134,7 @@ touch_boost() {
         echo 1 > $TP/play_game
         echo 4 > $TP/follow_hand_level
     fi
+    settings put system touch_sampling_rate 960 2>/dev/null
 }
 
 if [ "$(cfg '触控优化')" = "1" ]; then
