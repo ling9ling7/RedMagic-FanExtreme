@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FanExtreme</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0f1a,#1a1a2e,#16213e);color:#e0e0e0;min-height:100vh;padding:20px}
+.header{text-align:center;margin-bottom:24px}
+.header .icon{font-size:36px;margin-bottom:4px}
+.header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#ff6b6b,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .sub{font-size:12px;color:#666;margin-top:4px}
+.grid{display:grid;gap:12px}
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:18px;backdrop-filter:blur(10px);transition:all .2s}
+.card:hover{border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.06)}
+.card .icon-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.card .icon-row .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.card .icon-row h2{font-size:15px;font-weight:600;color:#ccc}
+.card .icon-row .badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:auto}
+.badge.on{background:rgba(76,175,80,.2);color:#4caf50}
+.badge.off{background:rgba(255,255,255,.06);color:#888}
+.metric{font-size:28px;font-weight:700;margin-bottom:6px}
+.metric.on{color:#fff}
+.metric.off{color:#555}
+.info{font-size:11px;color:#777;margin-bottom:10px}
+.switch-row{display:flex;align-items:center;gap:10px}
+.switch{position:relative;width:50px;height:28px;background:#333;border-radius:14px;cursor:pointer;transition:all .3s;border:none}
+.switch.on{background:#4caf50}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:all .3s}
+.switch.on::after{transform:translateX(22px)}
+.slider-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+.slider-row span{font-size:11px;color:#888;min-width:32px}
+.slider-row input[type=range]{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:#333;border-radius:2px;outline:none}
+.slider-row input[type=range]::-webkit-slider-thumb{width:16px;height:16px;border-radius:50%;background:#ff6b6b;cursor:pointer;-webkit-appearance:none}
+.footer{text-align:center;margin-top:20px;font-size:10px;color:#555}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="icon">🌀</div>
+  <h1>FanExtreme</h1>
+  <div class="sub">更好的红魔 · v2.0.0-alpha.1</div>
+</div>
+
+<div class="grid">
+
+  <div class="card" id="card-fan">
+    <div class="icon-row">
+      <div class="ico" style="background:rgba(255,107,107,.15)">💨</div>
+      <h2>风扇极速</h2>
+      <span class="badge off" id="fanBadge">关闭</span>
+    </div>
+    <div class="metric off" id="fanMetric">--</div>
+    <div class="info" id="fanInfo"></div>
+    <button class="switch off" id="fanSwitch" onclick="toggleFan()"></button>
+  </div>
+
+  <div class="card" id="card-charge">
+    <div class="icon-row">
+      <div class="ico" style="background:rgba(255,217,61,.15)">⚡</div>
+      <h2>充电分离</h2>
+      <span class="badge off" id="chargeBadge">关闭</span>
+    </div>
+    <div class="metric off" id="chargeMetric">--</div>
+    <div class="info" id="chargeInfo">电池: --%</div>
+    <button class="switch off" id="chargeSwitch" onclick="toggleCharge()"></button>
+  </div>
+
+  <div class="card" id="card-touch">
+    <div class="icon-row">
+      <div class="ico" style="background:rgba(100,149,237,.15)">👆</div>
+      <h2>触控优化</h2>
+      <span class="badge off" id="touchBadge">关闭</span>
+    </div>
+    <div class="metric off" id="touchMetric">--</div>
+    <div class="info" id="touchInfo"></div>
+    <button class="switch off" id="touchSwitch" onclick="toggleTouch()"></button>
+  </div>
+
+  <div class="card" id="card-vibe">
+    <div class="icon-row">
+      <div class="ico" style="background:rgba(186,104,200,.15)">📳</div>
+      <h2>振动增强</h2>
+      <span class="badge on" id="vibeBadge">启用</span>
+    </div>
+    <div class="metric on" id="vibeMetric">--</div>
+    <div class="slider-row">
+      <span>增益</span>
+      <input type="range" min="80" max="255" value="168" id="gainSlider" onchange="setGain(this.value)">
+      <span id="gainVal">168</span>
+    </div>
+    <div class="slider-row">
+      <span>上限</span>
+      <input type="range" min="32" max="255" value="128" id="vmaxSlider" onchange="setVmax(this.value)">
+      <span id="vmaxVal">128</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">MIT · 酷安@ling_凌</div>
+
+<script>
+function exec(cmd) {
+  try { let r = ksu.exec(cmd); return r.stdout ? r.stdout.trim() : ''; }
+  catch(e) { return ''; }
+}
+
+function el(id) { return document.getElementById(id); }
+
+function setSwitch(el, on) {
+  el.className = 'switch' + (on ? ' on' : ' off');
+}
+
+function setBadge(el, on, text) {
+  el.textContent = text || (on ? '启用' : '关闭');
+  el.className = 'badge' + (on ? ' on' : ' off');
+}
+
+function setMetric(el, text, on) {
+  el.textContent = text;
+  el.className = 'metric' + (on ? ' on' : ' off');
+}
+
+function toggleFan() {
+  let cur = exec('cat /sys/kernel/fan/fan_enable 2>/dev/null');
+  if (cur === '1') {
+    exec('echo 0 > /sys/kernel/fan/fan_enable');
+  } else {
+    exec('echo 5 > /sys/kernel/fan/fan_speed_level');
+    exec('echo 1 > /sys/kernel/fan/fan_enable');
+  }
+  setTimeout(refresh, 500);
+}
+
+function toggleCharge() {
+  let cur = exec('settings get global charge_separation_switch 2>/dev/null');
+  exec('settings put global charge_separation_switch ' + (cur==='1'?'0':'1'));
+  setTimeout(refresh, 500);
+}
+
+function toggleTouch() {
+  let cur = exec('cat /proc/touchscreen/tp_report_rate 2>/dev/null');
+  if (cur === '4') {
+    exec('echo 1 > /proc/touchscreen/tp_report_rate');
+    exec('echo 0 > /proc/touchscreen/play_game');
+    exec('echo 2 > /proc/touchscreen/follow_hand_level');
+  } else {
+    exec('echo 4 > /proc/touchscreen/tp_report_rate');
+    exec('echo 1 > /proc/touchscreen/play_game');
+    exec('echo 4 > /proc/touchscreen/follow_hand_level');
+  }
+  setTimeout(refresh, 500);
+}
+
+function setGain(v) {
+  exec('printf 0x%x ' + v + ' > /sys/class/leds/vibrator/gain');
+  el('gainVal').textContent = v;
+}
+
+function setVmax(v) {
+  exec('printf 0x%x ' + v + ' > /sys/class/leds/vibrator/vmax');
+  el('vmaxVal').textContent = v;
+}
+
+function refresh() {
+  let fan = exec('cat /sys/kernel/fan/fan_enable 2>/dev/null');
+  let fanLvl = exec('cat /sys/kernel/fan/fan_speed_level 2>/dev/null');
+  let fanOn = fan === '1';
+  setMetric('fanMetric', fanOn ? '极速 '+fanLvl+' 档' : '已关闭', fanOn);
+  setBadge('fanBadge', fanOn, fanOn ? '极速' : '关闭');
+  setSwitch('fanSwitch', fanOn);
+  el('fanInfo').textContent = fanOn ? '风扇满速运行中' : '';
+
+  let cs = exec('settings get global charge_separation_switch 2>/dev/null');
+  let bat = exec('dumpsys battery 2>/dev/null | grep level | head -1');
+  bat = bat.replace(/[^0-9]/g, '');
+  let csOn = cs === '1';
+  setMetric('chargeMetric', csOn ? '已分离' : '充电中', csOn);
+  setBadge('chargeBadge', csOn, csOn ? '分离' : '充电');
+  setSwitch('chargeSwitch', csOn);
+  el('chargeInfo').textContent = '电池 ' + bat + '%';
+
+  let rate = exec('cat /proc/touchscreen/tp_report_rate 2>/dev/null');
+  let game = exec('cat /proc/touchscreen/play_game 2>/dev/null');
+  let fh = exec('cat /proc/touchscreen/follow_hand_level 2>/dev/null');
+  let rateMap = {'1':'120Hz','2':'240Hz','3':'360Hz','4':'480Hz'};
+  let tOn = rate === '4';
+  setMetric('touchMetric', tOn ? (rateMap[rate]||rate) : '默认', tOn);
+  setBadge('touchBadge', tOn);
+  setSwitch('touchSwitch', tOn);
+  el('touchInfo').textContent = tOn ? '游戏模式 '+(game==='1'?'开':'关')+' · 跟手度 '+fh : '';
+
+  let gainH = exec('cat /sys/class/leds/vibrator/gain 2>/dev/null');
+  let vmaxH = exec('cat /sys/class/leds/vibrator/vmax 2>/dev/null');
+  let gDec = parseInt(gainH, 16);
+  let vDec = parseInt(vmaxH, 16);
+  setMetric('vibeMetric', '增益 '+gDec+' / 上限 '+vDec, true);
+  el('gainSlider').value = gDec || 168;
+  el('gainVal').textContent = gDec || 168;
+  el('vmaxSlider').value = vDec || 128;
+  el('vmaxVal').textContent = vDec || 128;
+}
+
+refresh();
+setInterval(refresh, 2500);
+</script>
+</body>
+</html>
