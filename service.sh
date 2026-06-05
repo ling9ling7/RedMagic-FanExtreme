@@ -69,7 +69,7 @@ if [ "$(cfg '充电分离')" = "1" ]; then
     charge_separation_monitor &
 fi
 
-if [ "$(cfg '充电分离')" = "1" ]; then
+if [ "$(cfg '充电加速')" = "1" ]; then
     for i in $(seq 1 15); do
         [ -e /sys/class/qcom-battery/restrict_cur ] && break
         sleep 1

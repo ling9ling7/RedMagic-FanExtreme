@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 ui_print "===================================="
-ui_print "  FanExtreme v1.5.2"
+ui_print "  FanExtreme v1.5.3"
 ui_print "===================================="
 
 CONFIG="$MODPATH/config.txt"
@@ -51,9 +51,15 @@ fi
 
 rate=$(cfg '触控优化')
 if [ "$rate" = "1" ]; then
-    ui_print "  ✅ 触控优化 (采样率4档+游戏模式+跟手度拉满)"
+    ui_print "  ✅ 触控优化 (采样率4档+游戏模式+跟手度拉满+960Hz)"
     touch "$MODPATH/.touch"
     DESC="$DESC 触控优化"
+fi
+
+if [ "$(cfg '充电加速')" = "1" ]; then
+    ui_print "  ✅ 充电加速 (解除充电时的部分电流限制)"
+    touch "$MODPATH/.chargeboost"
+    DESC="$DESC 充电加速"
 fi
 
 echo "description=${DESC# }" >> "$MODPATH/module.prop"
