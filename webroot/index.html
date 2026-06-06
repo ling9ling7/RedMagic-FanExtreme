@@ -8,203 +8,245 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0f1a,#1a1a2e,#16213e);color:#e0e0e0;min-height:100vh;padding:20px}
 .header{text-align:center;margin-bottom:24px}
-.header .icon{font-size:36px;margin-bottom:4px}
 .header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#ff6b6b,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header .sub{font-size:12px;color:#666;margin-top:4px}
-.grid{display:grid;gap:12px}
-.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:18px;backdrop-filter:blur(10px);transition:all .2s}
-.card:hover{border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.06)}
-.card .icon-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.card .icon-row .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.card .icon-row h2{font-size:15px;font-weight:600;color:#ccc}
-.card .icon-row .badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:auto}
-.badge.on{background:rgba(76,175,80,.2);color:#4caf50}
-.badge.off{background:rgba(255,255,255,.06);color:#888}
-.metric{font-size:28px;font-weight:700;margin-bottom:6px}
-.metric.on{color:#fff}
-.metric.off{color:#555}
-.info{font-size:11px;color:#777;margin-bottom:10px}
-.switch-row{display:flex;align-items:center;gap:10px}
-.switch{position:relative;width:50px;height:28px;background:#333;border-radius:14px;cursor:pointer;transition:all .3s;border:none}
-.switch.on{background:#4caf50}
-.switch::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:all .3s}
-.switch.on::after{transform:translateX(22px)}
-.slider-row{display:flex;align-items:center;gap:8px;margin-top:4px}
-.slider-row span{font-size:11px;color:#888;min-width:32px}
-.slider-row input[type=range]{flex:1;height:4px;-webkit-appearance:none;appearance:none;background:#333;border-radius:2px;outline:none}
-.slider-row input[type=range]::-webkit-slider-thumb{width:16px;height:16px;border-radius:50%;background:#ff6b6b;cursor:pointer;-webkit-appearance:none}
-.footer{text-align:center;margin-top:20px;font-size:10px;color:#555}
+.stats{display:flex;gap:10px;margin-bottom:20px}
+.stat{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px 10px;text-align:center}
+.stat .val{font-size:20px;font-weight:700;color:#fff}
+.stat .lbl{font-size:10px;color:#666;margin-top:2px}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:18px;margin-bottom:12px}
+.card .title{font-size:15px;font-weight:600;color:#ccc;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card .title .emoji{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.toggle{position:relative;width:52px;height:28px;border-radius:14px;cursor:pointer;transition:all .3s;border:none;background:#333;flex-shrink:0;outline:none}
+.toggle.on{background:#4caf50}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:all .3s}
+.toggle.on::after{transform:translateX(24px)}
+.row{display:flex;align-items:center;justify-content:space-between}
+.row .right{display:flex;align-items:center;gap:10px}
+.setting-row{margin-top:12px;gap:8px;align-items:center}
+.setting-row.off{opacity:.4;pointer-events:none;display:flex}
+.setting-row.on{display:flex}
+.setting-row input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;color:#fff;font-size:14px;outline:none;width:60px}
+.setting-row input:focus{border-color:#ff6b6b}
+.setting-row input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:#333;border-radius:2px;flex:1;padding:0;border:none}
+.setting-row input[type=range]::-webkit-slider-thumb{width:20px;height:20px;border-radius:50%;background:#ff6b6b;cursor:pointer;-webkit-appearance:none}
+.setting-row .unit{color:#888;font-size:12px;white-space:nowrap}
+.setting-row button{background:#ff6b6b;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.setting-row button:active{opacity:.8}
+.sep-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-right:8px}
+.sep-badge.active{background:rgba(76,175,80,.2);color:#4caf50}
+.sep-badge.inactive{background:rgba(255,255,255,.06);color:#888}
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#4caf50;color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.err{background:#ff4444}
+.footer{text-align:center;margin-top:20px;font-size:11px;color:#555}
 </style>
 </head>
 <body>
 <div class="header">
-  <div class="icon">🌀</div>
   <h1>FanExtreme</h1>
-  <div class="sub">更好的红魔 · v2.0.0-alpha.1</div>
+  <div class="sub">v2.0.0</div>
 </div>
 
-<div class="grid">
+<div class="toast" id="toast"></div>
 
-  <div class="card" id="card-fan">
-    <div class="icon-row">
-      <div class="ico" style="background:rgba(255,107,107,.15)">💨</div>
-      <h2>风扇极速</h2>
-      <span class="badge off" id="fanBadge">关闭</span>
-    </div>
-    <div class="metric off" id="fanMetric">--</div>
-    <div class="info" id="fanInfo"></div>
-    <button class="switch off" id="fanSwitch" onclick="toggleFan()"></button>
-  </div>
-
-  <div class="card" id="card-charge">
-    <div class="icon-row">
-      <div class="ico" style="background:rgba(255,217,61,.15)">⚡</div>
-      <h2>充电分离</h2>
-      <span class="badge off" id="chargeBadge">关闭</span>
-    </div>
-    <div class="metric off" id="chargeMetric">--</div>
-    <div class="info" id="chargeInfo">电池: --%</div>
-    <button class="switch off" id="chargeSwitch" onclick="toggleCharge()"></button>
-  </div>
-
-  <div class="card" id="card-touch">
-    <div class="icon-row">
-      <div class="ico" style="background:rgba(100,149,237,.15)">👆</div>
-      <h2>触控优化</h2>
-      <span class="badge off" id="touchBadge">关闭</span>
-    </div>
-    <div class="metric off" id="touchMetric">--</div>
-    <div class="info" id="touchInfo"></div>
-    <button class="switch off" id="touchSwitch" onclick="toggleTouch()"></button>
-  </div>
-
-  <div class="card" id="card-vibe">
-    <div class="icon-row">
-      <div class="ico" style="background:rgba(186,104,200,.15)">📳</div>
-      <h2>振动增强</h2>
-      <span class="badge on" id="vibeBadge">启用</span>
-    </div>
-    <div class="metric on" id="vibeMetric">--</div>
-    <div class="slider-row">
-      <span>增益</span>
-      <input type="range" min="80" max="255" value="168" id="gainSlider" onchange="setGain(this.value)">
-      <span id="gainVal">168</span>
-    </div>
-    <div class="slider-row">
-      <span>上限</span>
-      <input type="range" min="32" max="255" value="128" id="vmaxSlider" onchange="setVmax(this.value)">
-      <span id="vmaxVal">128</span>
-    </div>
-  </div>
-
+<div class="stats">
+  <div class="stat"><div class="val" id="batteryPct">--</div><div class="lbl">电量</div></div>
+  <div class="stat"><div class="val" id="batteryTemp">--</div><div class="lbl">温度</div></div>
+  <div class="stat"><div class="val" id="chargePower">--</div><div class="lbl">充电功率</div></div>
 </div>
 
-<div class="footer">MIT · 酷安@ling_凌</div>
+<div class="card" id="card-fan">
+  <div class="row">
+    <div class="title">
+      <div class="emoji" style="background:rgba(255,107,107,.15)">🌀</div>
+      风扇极速
+    </div>
+    <div class="right">
+      <span class="sep-badge inactive" id="fanStatus">-</span>
+      <button class="toggle off" id="fanToggle" onclick="toggleFan()"></button>
+    </div>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <span style="font-size:12px;color:#888" id="fanInfo">等待同步...</span>
+  </div>
+  <div class="setting-row off" id="fanRow">
+    <span class="unit">挡位</span>
+    <input type="range" id="fanLevel" min="1" max="5" value="5" oninput="document.getElementById('fanLevelVal').textContent=this.value">
+    <span class="unit" id="fanLevelVal">5</span>
+    <button onclick="saveFanLevel()">保存</button>
+  </div>
+</div>
+
+<div class="card" id="card-charge">
+  <div class="row">
+    <div class="title">
+      <div class="emoji" style="background:rgba(255,217,61,.15)">⚡</div>
+      充电分离
+    </div>
+    <div class="right">
+      <span class="sep-badge inactive" id="sepStatus">未分离</span>
+      <button class="toggle off" id="chargeToggle" onclick="toggleCharge()"></button>
+    </div>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <span style="font-size:12px;color:#888" id="chargeInfo">等待同步...</span>
+  </div>
+  <div class="setting-row off" id="thresholdRow">
+    <span class="unit">触发阈值</span>
+    <input type="number" id="thresholdVal" min="20" max="100" placeholder="100" inputmode="numeric">
+    <span class="unit">%</span>
+    <button onclick="saveThreshold()">保存</button>
+  </div>
+</div>
+
+<div class="footer">MIT © 酷安@ling_凌</div>
 
 <script>
-function exec(cmd) {
-  try { let r = ksu.exec(cmd); return r.stdout ? r.stdout.trim() : ''; }
-  catch(e) { return ''; }
+var CMD = '/data/adb/modules/FanExtreme/webui_cmd';
+var STATUS = '/data/adb/modules/FanExtreme/webui_status';
+var editingThreshold = false;
+var editingFan = false;
+
+function ksuExec(cmd) {
+  try {
+    var r = ksu.exec(cmd);
+    if (!r) return '';
+    if (typeof r === 'string') return r.trim();
+    if (r.stdout) return r.stdout.trim();
+    if (r.out) return r.out.trim();
+    if (r.result) return r.result.toString().trim();
+    return '';
+  } catch(e) { return ''; }
 }
 
-function el(id) { return document.getElementById(id); }
-
-function setSwitch(el, on) {
-  el.className = 'switch' + (on ? ' on' : ' off');
+function execWebUI(action, value) {
+  var d = JSON.stringify({action: action, value: value || ''});
+  var esc = d.replace(/"/g, '\\"');
+  ksuExec('echo "' + esc + '" > ' + CMD);
 }
 
-function setBadge(el, on, text) {
-  el.textContent = text || (on ? '启用' : '关闭');
-  el.className = 'badge' + (on ? ' on' : ' off');
+function showToast(msg, err) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  setTimeout(function(){ t.className = 'toast'; }, 2000);
 }
 
-function setMetric(el, text, on) {
-  el.textContent = text;
-  el.className = 'metric' + (on ? ' on' : ' off');
-}
+function setToggle(btn, on) { btn.className = 'toggle' + (on ? ' on' : ' off'); }
 
 function toggleFan() {
-  let cur = exec('cat /sys/kernel/fan/fan_enable 2>/dev/null');
-  if (cur === '1') {
-    exec('echo 0 > /sys/kernel/fan/fan_enable');
-  } else {
-    exec('echo 5 > /sys/kernel/fan/fan_speed_level');
-    exec('echo 1 > /sys/kernel/fan/fan_enable');
-  }
-  setTimeout(refresh, 500);
+  var tgl = document.getElementById('fanToggle');
+  var isOn = tgl.classList.contains('on');
+  execWebUI('auto_fan', isOn ? 'off' : 'on');
+  showToast(isOn ? '已关闭风扇控制' : '已开启风扇控制');
+}
+
+function saveFanLevel() {
+  var v = document.getElementById('fanLevel').value;
+  execWebUI('fan_level', v);
+  showToast('风扇挡位: ' + v);
 }
 
 function toggleCharge() {
-  let cur = exec('settings get global charge_separation_switch 2>/dev/null');
-  exec('settings put global charge_separation_switch ' + (cur==='1'?'0':'1'));
-  setTimeout(refresh, 500);
+  var tgl = document.getElementById('chargeToggle');
+  var isOn = tgl.classList.contains('on');
+  execWebUI('auto_charge', isOn ? 'off' : 'on');
+  showToast(isOn ? '已关闭自动充电分离' : '已开启自动充电分离');
 }
 
-function toggleTouch() {
-  let cur = exec('cat /proc/touchscreen/tp_report_rate 2>/dev/null');
-  if (cur === '4') {
-    exec('echo 1 > /proc/touchscreen/tp_report_rate');
-    exec('echo 0 > /proc/touchscreen/play_game');
-    exec('echo 2 > /proc/touchscreen/follow_hand_level');
-  } else {
-    exec('echo 4 > /proc/touchscreen/tp_report_rate');
-    exec('echo 1 > /proc/touchscreen/play_game');
-    exec('echo 4 > /proc/touchscreen/follow_hand_level');
-  }
-  setTimeout(refresh, 500);
-}
-
-function setGain(v) {
-  exec('printf 0x%x ' + v + ' > /sys/class/leds/vibrator/gain');
-  el('gainVal').textContent = v;
-}
-
-function setVmax(v) {
-  exec('printf 0x%x ' + v + ' > /sys/class/leds/vibrator/vmax');
-  el('vmaxVal').textContent = v;
+function saveThreshold() {
+  var v = document.getElementById('thresholdVal').value;
+  if (!v || v < 20 || v > 100) { showToast('阈值需在 20-100 之间', true); return; }
+  execWebUI('threshold', v);
+  showToast('阈值已保存: ' + v + '%');
 }
 
 function refresh() {
-  let fan = exec('cat /sys/kernel/fan/fan_enable 2>/dev/null');
-  let fanLvl = exec('cat /sys/kernel/fan/fan_speed_level 2>/dev/null');
-  let fanOn = fan === '1';
-  setMetric('fanMetric', fanOn ? '极速 '+fanLvl+' 档' : '已关闭', fanOn);
-  setBadge('fanBadge', fanOn, fanOn ? '极速' : '关闭');
-  setSwitch('fanSwitch', fanOn);
-  el('fanInfo').textContent = fanOn ? '风扇满速运行中' : '';
+  var raw = ksuExec('cat ' + STATUS + ' 2>/dev/null');
+  if (!raw) return;
+  try {
+    var s = JSON.parse(raw);
 
-  let cs = exec('settings get global charge_separation_switch 2>/dev/null');
-  let bat = exec('dumpsys battery 2>/dev/null | grep level | head -1');
-  bat = bat.replace(/[^0-9]/g, '');
-  let csOn = cs === '1';
-  setMetric('chargeMetric', csOn ? '已分离' : '充电中', csOn);
-  setBadge('chargeBadge', csOn, csOn ? '分离' : '充电');
-  setSwitch('chargeSwitch', csOn);
-  el('chargeInfo').textContent = '电池 ' + bat + '%';
+    // Stats
+    if (s.battery) document.getElementById('batteryPct').textContent = s.battery + '%';
+    if (s.temp_deg) document.getElementById('batteryTemp').textContent = s.temp_deg + '°C';
+    document.getElementById('chargePower').textContent = s.power ? s.power + 'W' : '未充电';
 
-  let rate = exec('cat /proc/touchscreen/tp_report_rate 2>/dev/null');
-  let game = exec('cat /proc/touchscreen/play_game 2>/dev/null');
-  let fh = exec('cat /proc/touchscreen/follow_hand_level 2>/dev/null');
-  let rateMap = {'1':'120Hz','2':'240Hz','3':'360Hz','4':'480Hz'};
-  let tOn = rate === '4';
-  setMetric('touchMetric', tOn ? (rateMap[rate]||rate) : '默认', tOn);
-  setBadge('touchBadge', tOn);
-  setSwitch('touchSwitch', tOn);
-  el('touchInfo').textContent = tOn ? '游戏模式 '+(game==='1'?'开':'关')+' · 跟手度 '+fh : '';
+    // ---- 风扇 ----
+    var fanCard = document.getElementById('card-fan');
+    var fanBtn = document.getElementById('fanToggle');
+    var fanRow = document.getElementById('fanRow');
+    var fanStatus = document.getElementById('fanStatus');
+    var fanInfo = document.getElementById('fanInfo');
+    var fanLevelInput = document.getElementById('fanLevel');
+    var fanLevelVal = document.getElementById('fanLevelVal');
 
-  let gainH = exec('cat /sys/class/leds/vibrator/gain 2>/dev/null');
-  let vmaxH = exec('cat /sys/class/leds/vibrator/vmax 2>/dev/null');
-  let gDec = parseInt(gainH, 16);
-  let vDec = parseInt(vmaxH, 16);
-  setMetric('vibeMetric', '增益 '+gDec+' / 上限 '+vDec, true);
-  el('gainSlider').value = gDec || 168;
-  el('gainVal').textContent = gDec || 168;
-  el('vmaxSlider').value = vDec || 128;
-  el('vmaxVal').textContent = vDec || 128;
+    if (s.fan_enabled === 1) {
+      fanCard.style.opacity = ''; fanCard.style.pointerEvents = '';
+      fanBtn.style.display = '';
+      var fanOn = s.auto_fan === 1;
+      setToggle(fanBtn, fanOn);
+      fanRow.className = 'setting-row ' + (fanOn ? 'on' : 'off');
+      fanStatus.textContent = s.fan_level ? '挡位 ' + s.fan_level : '-';
+      fanStatus.className = fanOn ? 'sep-badge active' : 'sep-badge inactive';
+      fanInfo.textContent = fanOn ? '风扇当前挡位 ' + (s.fan_level || '-') : '风扇控制已关闭';
+      if (!editingFan && s.fan_level) {
+        fanLevelInput.value = s.fan_level;
+        fanLevelVal.textContent = s.fan_level;
+      }
+    } else {
+      fanCard.style.opacity = '.4'; fanCard.style.pointerEvents = 'none';
+      fanBtn.style.display = 'none';
+      fanStatus.textContent = '未启用';
+      fanStatus.className = 'sep-badge inactive';
+      fanInfo.textContent = '请在config.txt内将风扇极速设为1后重启';
+      fanRow.className = 'setting-row off';
+    }
+
+    // ---- 充电分离 ----
+    var chargeCard = document.getElementById('card-charge');
+    var chargeBtn = document.getElementById('chargeToggle');
+    var chargeRow = document.getElementById('thresholdRow');
+    var sepStatus = document.getElementById('sepStatus');
+    var chargeInfo = document.getElementById('chargeInfo');
+    var thresholdVal = document.getElementById('thresholdVal');
+
+    if (s.charge_enabled === 1) {
+      chargeCard.style.opacity = ''; chargeCard.style.pointerEvents = '';
+      chargeBtn.style.display = '';
+      var autoOn = s.auto_charge === 1;
+      setToggle(chargeBtn, autoOn);
+      var sepOn = s.cs === '1' || s.cs === 1;
+      sepStatus.textContent = sepOn ? '已分离' : '未分离';
+      sepStatus.className = 'sep-badge ' + (sepOn ? 'active' : 'inactive');
+      chargeRow.className = 'setting-row ' + (autoOn ? 'on' : 'off');
+      if (autoOn) {
+        chargeInfo.textContent = sepOn ? '电量≥'+s.threshold+'%，已自动分离' : '电量达到'+s.threshold+'%自动分离';
+      } else {
+        chargeInfo.textContent = '自动充电分离已关闭';
+      }
+      if (!editingThreshold && s.threshold) thresholdVal.value = s.threshold;
+    } else {
+      chargeCard.style.opacity = '.4'; chargeCard.style.pointerEvents = 'none';
+      chargeBtn.style.display = 'none';
+      sepStatus.textContent = '未启用';
+      sepStatus.className = 'sep-badge inactive';
+      chargeInfo.textContent = '请在config.txt内将充电分离设为1后重启';
+      chargeRow.className = 'setting-row off';
+    }
+
+  } catch(e) {}
 }
 
+document.getElementById('thresholdVal').addEventListener('focus', function(){ editingThreshold = true; });
+document.getElementById('fanLevel').addEventListener('touchstart', function(){ editingFan = true; });
+document.getElementById('fanLevel').addEventListener('mousedown', function(){ editingFan = true; });
+document.addEventListener('click', function(e){ if (e.target.id !== 'fanLevel') editingFan = false; });
+document.addEventListener('click', function(e){ if (e.target.id !== 'thresholdVal') editingThreshold = false; });
+
 refresh();
-setInterval(refresh, 2500);
+setInterval(refresh, 2000);
 </script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Test</title></head><body>
+<div id="r">testing...</div>
+<script>
+document.getElementById('r').textContent = JSON.stringify(ksu);
+try {
+  let out = ksu.exec('echo hello');
+  document.getElementById('r').textContent = out.stdout || 'empty';
+} catch(e) {
+  document.getElementById('r').textContent = 'ERROR: ' + e;
+}
+</script>
+</body></html>
