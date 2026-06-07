@@ -45,7 +45,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="header">
   <h1>FanExtreme</h1>
-  <div class="sub">v2.0.0</div>
+  <div class="sub">v2.0.1</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -97,6 +97,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <input type="number" id="thresholdVal" min="20" max="100" placeholder="100" inputmode="numeric">
     <span class="unit">%</span>
     <button onclick="saveThreshold()">保存</button>
+  </div>
+</div>
+
+<div class="card" style="text-align:center">
+  <div style="display:flex;gap:10px">
+    <button onclick="genLog()" style="flex:1;background:rgba(255,255,255,.08);color:#ccc;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;font-size:13px;cursor:pointer">📋 生成调试日志</button>
+    <button onclick="joinQQ()" style="flex:1;background:rgba(255,255,255,.08);color:#ccc;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;font-size:13px;cursor:pointer">💬 加入QQ群</button>
   </div>
 </div>
 
@@ -247,6 +254,53 @@ document.addEventListener('click', function(e){ if (e.target.id !== 'thresholdVa
 
 refresh();
 setInterval(refresh, 2000);
+
+function genLog() {
+  var LOG = '/sdcard/Download/FanExtreme_debug.log';
+  ksuExec('echo "=== FanExtreme v2.0.1 调试日志 ===" > ' + LOG);
+  ksuExec('echo "时间: $(date)" >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[module.prop]" >> ' + LOG);
+  ksuExec('cat /data/adb/modules/FanExtreme/module.prop >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[config.txt]" >> ' + LOG);
+  ksuExec('cat /data/adb/modules/FanExtreme/config.txt >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[webui_status]" >> ' + LOG);
+  ksuExec('cat ' + STATUS + ' >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[service.sh进程]" >> ' + LOG);
+  ksuExec('ps -ef | grep FanExtreme >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[sysfs充电节点]" >> ' + LOG);
+  ksuExec('cat /sys/class/qcom-battery/restrict_cur /sys/class/qcom-battery/restrict_chg /sys/class/qcom-battery/charging_enabled /sys/class/qcom-battery/charge_mode >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[充电分离状态]" >> ' + LOG);
+  ksuExec('settings get global charge_separation_switch >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[GPU]" >> ' + LOG);
+  ksuExec('cat /sys/kernel/gpu/gpu_model /sys/kernel/gpu/gpu_clock /sys/kernel/gpu/gpu_max_clock /sys/kernel/gpu/gpu_min_clock /sys/kernel/gpu/gpu_busy >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[风扇]" >> ' + LOG);
+  ksuExec('cat /sys/kernel/fan/fan_speed_level /sys/kernel/fan/fan_enable >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[设备信息]" >> ' + LOG);
+  ksuExec('getprop ro.product.model >> ' + LOG);
+  ksuExec('getprop ro.product.board >> ' + LOG);
+  ksuExec('getprop ro.build.version.release >> ' + LOG);
+  ksuExec('getprop ro.build.version.sdk >> ' + LOG);
+  ksuExec('uname -r >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[CPU]" >> ' + LOG);
+  ksuExec('echo "governor: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)" >> ' + LOG);
+  ksuExec('for c in /sys/devices/system/cpu/cpu*/cpufreq; do echo "$(basename $(dirname $c)): cur=$(cat $c/scaling_cur_freq 2>/dev/null) min=$(cat $c/scaling_min_freq 2>/dev/null) max=$(cat $c/scaling_max_freq 2>/dev/null)"; done >> ' + LOG);
+  showToast('已输出到Download文件夹下');
+}
+
+function joinQQ() {
+  ksuExec('am start -a android.intent.action.VIEW -d https://qm.qq.com/q/QCBSaor22k');
+  showToast('正在打开浏览器...');
+}
 </script>
 </body>
 </html>
