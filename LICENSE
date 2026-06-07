@@ -1,23 +1,29 @@
-# FanExtreme 许可证
+MIT License
 
 Copyright (c) 2026 ling_凌 (酷安@ling_凌)
 
-## 允许
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-- ✅ 个人使用、学习、研究本模块
-- ✅ 转载本文档或模块，需在显著位置标明原作者（酷安@ling_凌）和项目地址（https://github.com/ling9ling7/RedMagic-FanExtreme）
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-## 禁止
-
-- ❌ **未经作者书面同意，禁止对模块进行二次修改、修改后发布（包括但不限于改个版本号、改个作者名、合并到其他模块）**
-- ❌ **禁止将本模块用于商业用途（包括但不限于付费下载、积分墙、广告引流、打包售卖）**
-
-## 免责声明
-
-本模块按"原样"提供，不提供任何形式的明示或暗示担保，包括但不限于适销性、特定用途适用性的担保。
-在任何情况下，作者均不对因使用本模块而产生的任何直接、间接、附带、特殊或后果性损害承担责任，
-包括但不限于数据丢失、设备损坏、性能下降等。
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ---
 
-如对许可有疑问或需要商用授权，请联系酷安@ling_凌 或通过项目 Issues 联系。
+## 附加条款
+
+1. 未经作者书面同意，禁止对模块进行二次修改后公开发布。
+2. 转载需在显著位置标明原作者（酷安@ling_凌）和项目地址（https://github.com/ling9ling7/RedMagic-FanExtreme）。
+3. 禁止将本模块用于任何商业用途。
