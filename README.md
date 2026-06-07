@@ -65,8 +65,8 @@ A: KernelSU Manager → 模块 → 找到「更好的红魔」→ 点击「控�
 **Q: 我是 Magisk 用户，模块列表里没有「控制面板」按钮怎么办？**  
 A: Magisk 暂不支持 WebUI 功能。你可以：① 换用 KernelSU 管理器（如 Ciallo~）；② 安装独立的 WebUI 管理软件（如 MMRL、KernelSU Manager）。模块其他功能不受影响。
 
-**Q: 功能配置不生效？**  
-A: 修改 `config.txt` 后需要**重启手机**才能生效。WebUI 中的开关是实时生效的，不需要重启。
+**Q: 我不是 KernelSU 用户，也能使用吗？**  
+A: 可以。FanExtreme 兼容 KernelSU、KernelSU Next、APatch、Magisk（部分版本）。但 WebUI 控制面板目前仅 KernelSU 系列管理器支持。Magisk 用户功能正常生效，只是没有控制面板界面。
 
 **Q: 装了模块后游戏掉帧？**  
 A: 模块本身不会导致掉帧。如果遇到问题，请用控制面板的「调试日志」功能导出日志反馈。
