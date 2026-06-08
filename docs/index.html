@@ -728,7 +728,7 @@
   try {
     const res = await fetch('https://raw.githubusercontent.com/' + REPO + '/main/module.prop');
     if (res.ok) {
-      const m = (await res.text()).match(/version\s*=\s*([\d.]+)/);
+      const m = (await res.text()).match(/version\s*=\s*v?([\d.]+)/);
       if (m) version = m[1];
     }
   } catch (e) {}
