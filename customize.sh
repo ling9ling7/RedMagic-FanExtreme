@@ -4,8 +4,17 @@ ui_print "===================================="
 ui_print "  FanExtreme v2.0.1"
 ui_print "===================================="
 
-CONFIG="$MODPATH/config.txt"
-cfg() { grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tail -1; }
+INSTALLED_CONFIG="/data/adb/modules/FanExtreme/config.txt"
+NEW_CONFIG="$MODPATH/config.txt"
+
+if [ -f "$INSTALLED_CONFIG" ]; then
+    ui_print "  📋 检测到已安装版本，保留现有配置"
+    cp -f "$INSTALLED_CONFIG" "$NEW_CONFIG"
+else
+    ui_print "  📋 全新安装，使用默认配置"
+fi
+
+cfg() { grep -o "^$1=.*" "$NEW_CONFIG" 2>/dev/null | cut -d= -f2 | tail -1; }
 
 DESC=""
 
