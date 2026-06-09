@@ -115,11 +115,11 @@ if [ "$(cfg '触控优化')" = "1" ]; then
     (
       while true; do
         sleep 60
-        touch_boost
+        [ -f "$AUTO_TOUCH_FILE" ] && touch_boost
       done
     ) &
     inotifyd - /sys/class/backlight/panel0-backlight/brightness:d | while read -r f; do
-        touch_boost
+        [ -f "$AUTO_TOUCH_FILE" ] && touch_boost
     done &
 fi
 
@@ -129,10 +129,12 @@ WEBUI_STATUS="$MODDIR/webui_status"
 THRESHOLD_FILE="/sdcard/FanExtreme/threshold"
 AUTO_CHARGE_FILE="$MODDIR/auto_charge"
 AUTO_FAN_FILE="$MODDIR/auto_fan"
+AUTO_TOUCH_FILE="$MODDIR/auto_touch"
 
 mkdir -p /sdcard/FanExtreme 2>/dev/null
 [ "$(cfg '充电分离')" = "1" ] && touch "$AUTO_CHARGE_FILE" 2>/dev/null
 [ "$(cfg '风扇极速')" = "1" ] && touch "$AUTO_FAN_FILE" 2>/dev/null
+[ "$(cfg '触控优化')" = "1" ] && touch "$AUTO_TOUCH_FILE" 2>/dev/null
 tcfg=$(cfg "充电分离阈值")
 [ -s "$THRESHOLD_FILE" ] || { [ -n "$tcfg" ] && echo "$tcfg" > "$THRESHOLD_FILE" 2>/dev/null; }
 
@@ -164,7 +166,11 @@ webui_status() {
   [ -f "$AUTO_FAN_FILE" ] && auto_fan=1
   local fan_enabled=0
   [ "$(cfg '风扇极速')" = "1" ] && fan_enabled=1
-  echo "{\"battery\":\"${bat}\",\"temp_deg\":\"${temp_deg}\",\"power\":\"${power}\",\"cs\":\"${cs}\",\"threshold\":\"${threshold}\",\"auto_charge\":${auto_charge},\"charge_enabled\":${charge_enabled},\"fan_level\":\"${fan_level}\",\"auto_fan\":${auto_fan},\"fan_enabled\":${fan_enabled}}" > "$WEBUI_STATUS"
+  local touch_enabled=0
+  [ "$(cfg '触控优化')" = "1" ] && touch_enabled=1
+  local touch_boost=0
+  [ -f "$AUTO_TOUCH_FILE" ] && touch_boost=1
+  echo "{\"battery\":\"${bat}\",\"temp_deg\":\"${temp_deg}\",\"power\":\"${power}\",\"cs\":\"${cs}\",\"threshold\":\"${threshold}\",\"auto_charge\":${auto_charge},\"charge_enabled\":${charge_enabled},\"fan_level\":\"${fan_level}\",\"auto_fan\":${auto_fan},\"fan_enabled\":${fan_enabled},\"touch_enabled\":${touch_enabled},\"touch_boost\":${touch_boost}}" > "$WEBUI_STATUS"
 }
 
 webui_loop() {
@@ -206,6 +212,18 @@ webui_loop() {
             ;;
           threshold)
             [ -n "$value" ] && echo "$value" > "$THRESHOLD_FILE"
+            ;;
+          touch_boost)
+            if [ "$value" = "on" ]; then
+              touch "$AUTO_TOUCH_FILE"
+              local TP=/proc/touchscreen
+              [ -e "$TP/tp_report_rate" ] && { echo 4 > $TP/tp_report_rate; echo 1 > $TP/play_game; echo 4 > $TP/follow_hand_level; }
+              settings put system touch_sampling_rate 960 2>/dev/null
+            else
+              rm -f "$AUTO_TOUCH_FILE"
+              [ -e /proc/touchscreen/tp_report_rate ] && { echo 1 > /proc/touchscreen/tp_report_rate; echo 0 > /proc/touchscreen/play_game; echo 1 > /proc/touchscreen/follow_hand_level; }
+              settings delete system touch_sampling_rate 2>/dev/null
+            fi
             ;;
         esac
         rm -f "$WEBUI_CMD"

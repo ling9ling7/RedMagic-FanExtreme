@@ -45,7 +45,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="header">
   <h1>FanExtreme</h1>
-  <div class="sub">v2.0.2</div>
+  <div class="sub">v2.1.0</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -100,6 +100,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<div class="card" id="card-touch">
+  <div class="row">
+    <div class="title">
+      <div class="emoji" style="background:rgba(88,166,255,.15)">👆</div>
+      触控优化
+    </div>
+    <div class="right">
+      <span class="sep-badge inactive" id="touchStatus">-</span>
+      <button class="toggle off" id="touchToggle" onclick="toggleTouch()"></button>
+    </div>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <span style="font-size:12px;color:#888" id="touchInfo">等待同步...</span>
+  </div>
+</div>
+
 <div class="card" style="text-align:center">
   <div style="display:flex;gap:10px">
     <button onclick="genLog()" style="flex:1;background:rgba(255,255,255,.08);color:#ccc;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;font-size:13px;cursor:pointer">📋 生成调试日志</button>
@@ -114,6 +130,10 @@ var CMD = '/data/adb/modules/FanExtreme/webui_cmd';
 var STATUS = '/data/adb/modules/FanExtreme/webui_status';
 var editingThreshold = false;
 var editingFan = false;
+var thresholdSaveTime = 0;
+var thresholdSyncTimer = null;
+var fanSaveTime = 0;
+var fanSyncTimer = null;
 
 function ksuExec(cmd) {
   try {
@@ -152,7 +172,16 @@ function toggleFan() {
 function saveFanLevel() {
   var v = document.getElementById('fanLevel').value;
   execWebUI('fan_level', v);
+  editingFan = true;
+  fanSaveTime = Date.now() + 4000;
   showToast('风扇挡位: ' + v);
+}
+
+function toggleTouch() {
+  var tgl = document.getElementById('touchToggle');
+  var isOn = tgl.classList.contains('on');
+  execWebUI('touch_boost', isOn ? 'off' : 'on');
+  showToast(isOn ? '已关闭触控优化' : '已开启触控优化');
 }
 
 function toggleCharge() {
@@ -166,6 +195,8 @@ function saveThreshold() {
   var v = document.getElementById('thresholdVal').value;
   if (!v || v < 20 || v > 100) { showToast('阈值需在 20-100 之间', true); return; }
   execWebUI('threshold', v);
+  editingThreshold = true;
+  thresholdSaveTime = Date.now() + 4000;
   showToast('阈值已保存: ' + v + '%');
 }
 
@@ -198,9 +229,16 @@ function refresh() {
       fanStatus.textContent = s.fan_level ? '挡位 ' + s.fan_level : '-';
       fanStatus.className = fanOn ? 'sep-badge active' : 'sep-badge inactive';
       fanInfo.textContent = fanOn ? '风扇当前挡位 ' + (s.fan_level || '-') : '风扇控制已关闭';
-      if (!editingFan && s.fan_level) {
-        fanLevelInput.value = s.fan_level;
-        fanLevelVal.textContent = s.fan_level;
+      if (s.fan_level) {
+        clearTimeout(fanSyncTimer);
+        fanSyncTimer = setTimeout(function(){
+          if (!editingFan && Date.now() > fanSaveTime) {
+            var el = document.getElementById('fanLevel');
+            var elv = document.getElementById('fanLevelVal');
+            if (el) el.value = s.fan_level;
+            if (elv) elv.textContent = s.fan_level;
+          }
+        }, 1500);
       }
     } else {
       fanCard.style.opacity = '.4'; fanCard.style.pointerEvents = 'none';
@@ -209,6 +247,28 @@ function refresh() {
       fanStatus.className = 'sep-badge inactive';
       fanInfo.textContent = '请在config.txt内将风扇极速设为1后重启';
       fanRow.className = 'setting-row off';
+    }
+
+    // ---- 触控优化 ----
+    var touchCard = document.getElementById('card-touch');
+    var touchBtn = document.getElementById('touchToggle');
+    var touchStatus = document.getElementById('touchStatus');
+    var touchInfo = document.getElementById('touchInfo');
+
+    if (s.touch_enabled === 1) {
+      touchCard.style.opacity = ''; touchCard.style.pointerEvents = '';
+      touchBtn.style.display = '';
+      var touchOn = s.touch_boost === 1;
+      setToggle(touchBtn, touchOn);
+      touchStatus.textContent = touchOn ? '已优化' : '未优化';
+      touchStatus.className = touchOn ? 'sep-badge active' : 'sep-badge inactive';
+      touchInfo.textContent = touchOn ? '采样率已拉满，触控响应最大化' : '触控优化已关闭，使用系统默认';
+    } else {
+      touchCard.style.opacity = '.4'; touchCard.style.pointerEvents = 'none';
+      touchBtn.style.display = 'none';
+      touchStatus.textContent = '未启用';
+      touchStatus.className = 'sep-badge inactive';
+      touchInfo.textContent = '请在config.txt内将触控优化设为1后重启';
     }
 
     // ---- 充电分离 ----
@@ -233,7 +293,15 @@ function refresh() {
       } else {
         chargeInfo.textContent = '自动充电分离已关闭';
       }
-      if (!editingThreshold && s.threshold) thresholdVal.value = s.threshold;
+      if (s.threshold) {
+        clearTimeout(thresholdSyncTimer);
+        thresholdSyncTimer = setTimeout(function(){
+          if (!editingThreshold && Date.now() > thresholdSaveTime) {
+            var el = document.getElementById('thresholdVal');
+            if (el) el.value = s.threshold;
+          }
+        }, 1500);
+      }
     } else {
       chargeCard.style.opacity = '.4'; chargeCard.style.pointerEvents = 'none';
       chargeBtn.style.display = 'none';
@@ -257,7 +325,7 @@ setInterval(refresh, 2000);
 
 function genLog() {
   var LOG = '/sdcard/Download/FanExtreme_debug.log';
-  ksuExec('echo "=== FanExtreme v2.0.2 调试日志 ===" > ' + LOG);
+  ksuExec('echo "=== FanExtreme v2.1.0 调试日志 ===" > ' + LOG);
   ksuExec('echo "时间: $(date)" >> ' + LOG);
   ksuExec('echo "" >> ' + LOG);
   ksuExec('echo "[module.prop]" >> ' + LOG);
