@@ -5,19 +5,32 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FanExtreme</title>
 <style>
+:root{--bg:linear-gradient(135deg,#0f0f1a,#1a1a2e,#16213e);--bg2:rgba(255,255,255,.04);--bd:rgba(255,255,255,.06);--txt:#e0e0e0;--txt2:#ccc;--txt3:#888;--card-bg:rgba(255,255,255,.04);--card-bd:rgba(255,255,255,.06);--input-bg:rgba(255,255,255,.06);--input-bd:rgba(255,255,255,.1);--input-txt:#fff;--toggle-bg:#333;--badge-on:rgba(76,175,80,.2);--badge-off:rgba(255,255,255,.06);--stat-val:#fff;--stat-lbl:#666;--btn-bg2:rgba(255,255,255,.08);--btn-bd2:rgba(255,255,255,.1);--footer:#555;--theme-icon:#888}
+body.light{--bg:linear-gradient(135deg,#e3f0ff,#d4e8ff,#cce0ff);--bg2:rgba(0,0,0,.03);--bd:rgba(0,0,0,.08);--txt:#333;--txt2:#444;--txt3:#999;--card-bg:rgba(255,255,255,.7);--card-bd:rgba(255,255,255,.9);--input-bg:rgba(0,0,0,.04);--input-bd:rgba(0,0,0,.1);--input-txt:#333;--toggle-bg:#ccc;--badge-on:rgba(76,175,80,.15);--badge-off:rgba(0,0,0,.06);--stat-val:#333;--stat-lbl:#aaa;--btn-bg2:rgba(0,0,0,.04);--btn-bd2:rgba(0,0,0,.1);--footer:#bbb;--theme-icon:#666}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0f1a,#1a1a2e,#16213e);color:#e0e0e0;min-height:100vh;padding:20px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:20px;transition:background .3s,color .3s}
 .header{text-align:center;margin-bottom:24px}
-.header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#ff6b6b,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header .sub{font-size:12px;color:#666;margin-top:4px}
-.stats{display:flex;gap:10px;margin-bottom:20px}
-.stat{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px 10px;text-align:center}
-.stat .val{font-size:20px;font-weight:700;color:#fff}
-.stat .lbl{font-size:10px;color:#666;margin-top:2px}
-.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:18px;margin-bottom:12px}
-.card .title{font-size:15px;font-weight:600;color:#ccc;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#ff6b6b,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.header .bottom-row{display:flex;align-items:center;justify-content:center;position:relative}
+.header .sub{font-size:12px;color:var(--txt3)}
+.header .theme-row{display:flex;align-items:center;gap:4px;position:absolute;right:0}
+.header .theme-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--card-bd);background:var(--card-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.header .theme-btn.active{border-color:#ff6b6b;background:rgba(255,107,107,.1);animation:themePop .3s ease-out}
+@keyframes themePop{from{transform:scale(.85);opacity:.5}to{transform:scale(1);opacity:1}}
+.header .theme-btn svg{width:16px;height:16px}
+.stats{display:flex;gap:10px;margin-bottom:20px;animation:cardIn .4s ease-out;animation-delay:0s}
+.stat{flex:1;background:var(--card-bg);border:1px solid var(--card-bd);border-radius:12px;padding:12px 10px;text-align:center;transition:background .3s,border .3s}
+.stat .val{font-size:20px;font-weight:700;color:var(--stat-val)}
+.stat .lbl{font-size:10px;color:var(--stat-lbl);margin-top:2px}
+.card{background:var(--card-bg);border:1px solid var(--card-bd);border-radius:16px;padding:18px;margin-bottom:12px;transition:background .3s,border .3s;animation:cardIn .4s ease-out both}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+#card-fan{animation-delay:.05s}
+#card-charge{animation-delay:.1s}
+#card-touch{animation-delay:.15s}
+#card-bottom{animation-delay:.2s}
+.card .title{font-size:15px;font-weight:600;color:var(--txt2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .card .title .emoji{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
-.toggle{position:relative;width:52px;height:28px;border-radius:14px;cursor:pointer;transition:all .3s;border:none;background:#333;flex-shrink:0;outline:none}
+.toggle{position:relative;width:52px;height:28px;border-radius:14px;cursor:pointer;transition:all .3s;border:none;background:var(--toggle-bg);flex-shrink:0;outline:none}
 .toggle.on{background:#4caf50}
 .toggle::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:all .3s}
 .toggle.on::after{transform:translateX(24px)}
@@ -26,26 +39,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .setting-row{margin-top:12px;gap:8px;align-items:center}
 .setting-row.off{opacity:.4;pointer-events:none;display:flex}
 .setting-row.on{display:flex}
-.setting-row input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;color:#fff;font-size:14px;outline:none;width:60px}
+.setting-row input{flex:1;background:var(--input-bg);border:1px solid var(--input-bd);border-radius:8px;padding:8px 12px;color:var(--input-txt);font-size:14px;outline:none;width:60px;transition:background .3s,border .3s,color .3s}
 .setting-row input:focus{border-color:#ff6b6b}
-.setting-row input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:#333;border-radius:2px;flex:1;padding:0;border:none}
+.setting-row input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:var(--toggle-bg);border-radius:2px;flex:1;padding:0;border:none}
 .setting-row input[type=range]::-webkit-slider-thumb{width:20px;height:20px;border-radius:50%;background:#ff6b6b;cursor:pointer;-webkit-appearance:none}
-.setting-row .unit{color:#888;font-size:12px;white-space:nowrap}
+.setting-row .unit{color:var(--txt3);font-size:12px;white-space:nowrap}
 .setting-row button{background:#ff6b6b;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
 .setting-row button:active{opacity:.8}
 .sep-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-right:8px}
-.sep-badge.active{background:rgba(76,175,80,.2);color:#4caf50}
-.sep-badge.inactive{background:rgba(255,255,255,.06);color:#888}
+.sep-badge.active{background:var(--badge-on);color:#4caf50}
+.sep-badge.inactive{background:var(--badge-off);color:var(--txt3)}
 .toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#4caf50;color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 .toast.err{background:#ff4444}
-.footer{text-align:center;margin-top:20px;font-size:11px;color:#555}
+.bottom-btns button{flex:1;background:var(--btn-bg2);color:var(--txt2);border:1px solid var(--btn-bd2);border-radius:10px;padding:12px;font-size:13px;cursor:pointer;transition:background .3s,border .3s,color .3s}
+.footer{text-align:center;margin-top:20px;font-size:11px;color:var(--footer);transition:color .3s}
 </style>
 </head>
 <body>
 <div class="header">
   <h1>FanExtreme</h1>
-  <div class="sub">v2.1.0</div>
+  <div class="bottom-row">
+    <div class="sub" id="versionSub">v2.1.1</div>
+    <div class="theme-row">
+      <button class="theme-btn active" id="themeDark" onclick="applyTheme(0)" title="深色模式">
+        <svg viewBox="0 0 24 24" fill="var(--theme-icon)"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.4 5.4 0 0 1-5.4-5.4c0-1.6.7-3.04 1.82-4.04A9 9 0 0 0 12 3z"/></svg>
+      </button>
+      <button class="theme-btn" id="themeLight" onclick="applyTheme(1)" title="浅色模式">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--theme-icon)" stroke-width="2"><circle cx="12" cy="12" r="5"/><g><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg>
+      </button>
+      <button class="theme-btn" id="themeAuto" onclick="applyTheme(2)" title="跟随系统">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--theme-icon)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -68,7 +95,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
   <div class="row" style="margin-top:8px">
-    <span style="font-size:12px;color:#888" id="fanInfo">等待同步...</span>
+    <span style="font-size:12px;color:var(--txt3)" id="fanInfo">等待同步...</span>
   </div>
   <div class="setting-row off" id="fanRow">
     <span class="unit">挡位</span>
@@ -90,7 +117,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
   <div class="row" style="margin-top:8px">
-    <span style="font-size:12px;color:#888" id="chargeInfo">等待同步...</span>
+    <span style="font-size:12px;color:var(--txt3)" id="chargeInfo">等待同步...</span>
   </div>
   <div class="setting-row off" id="thresholdRow">
     <span class="unit">触发阈值</span>
@@ -112,18 +139,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
   <div class="row" style="margin-top:8px">
-    <span style="font-size:12px;color:#888" id="touchInfo">等待同步...</span>
+    <span style="font-size:12px;color:var(--txt3)" id="touchInfo">等待同步...</span>
   </div>
 </div>
 
-<div class="card" style="text-align:center">
+<div class="card bottom-btns" id="card-bottom" style="text-align:center">
   <div style="display:flex;gap:10px">
-    <button onclick="genLog()" style="flex:1;background:rgba(255,255,255,.08);color:#ccc;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;font-size:13px;cursor:pointer">📋 生成调试日志</button>
-    <button onclick="joinQQ()" style="flex:1;background:rgba(255,255,255,.08);color:#ccc;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;font-size:13px;cursor:pointer">💬 加入QQ群</button>
+    <button onclick="genLog()">📋 生成调试日志</button>
+    <button onclick="joinQQ()">💬 加入QQ群</button>
   </div>
 </div>
 
-<div class="footer">MIT © 酷安@ling_凌</div>
+<div class="footer">酷安@ling_凌</div>
 
 <script>
 var CMD = '/data/adb/modules/FanExtreme/webui_cmd';
@@ -134,6 +161,52 @@ var thresholdSaveTime = 0;
 var thresholdSyncTimer = null;
 var fanSaveTime = 0;
 var fanSyncTimer = null;
+var debounceTimers = {};
+var toggleLocks = {fan:0, charge:0, touch:0};
+var toggleExpected = {fan:null, charge:null, touch:null};
+
+function debounce(key, fn, delay) {
+  delay = delay || 300;
+  if (debounceTimers[key]) { clearTimeout(debounceTimers[key]); }
+  debounceTimers[key] = setTimeout(function(){
+    delete debounceTimers[key];
+    fn();
+  }, delay);
+}
+var theme = 0; // 0=dark 1=light 2=auto
+
+function applyTheme(t) {
+  debounce('theme'+t, function(){
+    theme = t;
+  document.getElementById('themeDark').classList.toggle('active', t === 0);
+  document.getElementById('themeLight').classList.toggle('active', t === 1);
+  document.getElementById('themeAuto').classList.toggle('active', t === 2);
+  if (t === 2) {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      document.body.classList.add('light');
+    } else {
+      document.body.classList.remove('light');
+    }
+  } else if (t === 1) {
+    document.body.classList.add('light');
+  } else {
+    document.body.classList.remove('light');
+  }
+  localStorage.setItem('fanextreme_theme', t);
+  }, 200);
+}
+
+// Init theme
+(function(){
+  var saved = localStorage.getItem('fanextreme_theme');
+  var initial = saved !== null ? parseInt(saved) : 0;
+  applyTheme(initial);
+  if (initial === 2) {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(e){
+      if (theme === 2) document.body.classList.toggle('light', e.matches);
+    });
+  }
+})();
 
 function ksuExec(cmd) {
   try {
@@ -150,7 +223,8 @@ function ksuExec(cmd) {
 function execWebUI(action, value) {
   var d = JSON.stringify({action: action, value: value || ''});
   var esc = d.replace(/"/g, '\\"');
-  ksuExec('echo "' + esc + '" > ' + CMD);
+  var cmd = 'echo "' + esc + '" > ' + CMD;
+  setTimeout(function(){ ksuExec(cmd); }, 0);
 }
 
 function showToast(msg, err) {
@@ -163,41 +237,60 @@ function showToast(msg, err) {
 function setToggle(btn, on) { btn.className = 'toggle' + (on ? ' on' : ' off'); }
 
 function toggleFan() {
-  var tgl = document.getElementById('fanToggle');
-  var isOn = tgl.classList.contains('on');
-  execWebUI('auto_fan', isOn ? 'off' : 'on');
-  showToast(isOn ? '已关闭风扇控制' : '已开启风扇控制');
+  debounce('fan', function(){
+    var tgl = document.getElementById('fanToggle');
+    var isOn = tgl.classList.contains('on');
+    toggleExpected.fan = !isOn;
+    setToggle(tgl, !isOn);
+    toggleLocks.fan = Date.now() + 5000;
+    execWebUI('auto_fan', isOn ? 'off' : 'on');
+    showToast(!isOn ? '风扇控制已开启' : '风扇控制已关闭');
+  });
 }
 
 function saveFanLevel() {
-  var v = document.getElementById('fanLevel').value;
-  execWebUI('fan_level', v);
-  editingFan = true;
-  fanSaveTime = Date.now() + 4000;
-  showToast('风扇挡位: ' + v);
+  debounce('fanLvl', function(){
+    var v = document.getElementById('fanLevel').value;
+    execWebUI('fan_level', v);
+    editingFan = true;
+    fanSaveTime = Date.now() + 4000;
+    showToast('风扇挡位: ' + v);
+  });
 }
 
 function toggleTouch() {
-  var tgl = document.getElementById('touchToggle');
-  var isOn = tgl.classList.contains('on');
-  execWebUI('touch_boost', isOn ? 'off' : 'on');
-  showToast(isOn ? '已关闭触控优化' : '已开启触控优化');
+  debounce('touch', function(){
+    var tgl = document.getElementById('touchToggle');
+    var isOn = tgl.classList.contains('on');
+    toggleExpected.touch = !isOn;
+    setToggle(tgl, !isOn);
+    toggleLocks.touch = Date.now() + 5000;
+    execWebUI('touch_boost', isOn ? 'off' : 'on');
+    showToast(!isOn ? '触控优化已开启' : '触控优化已关闭');
+  });
 }
 
 function toggleCharge() {
-  var tgl = document.getElementById('chargeToggle');
-  var isOn = tgl.classList.contains('on');
-  execWebUI('auto_charge', isOn ? 'off' : 'on');
-  showToast(isOn ? '已关闭自动充电分离' : '已开启自动充电分离');
+  debounce('charge', function(){
+    var tgl = document.getElementById('chargeToggle');
+    var isOn = tgl.classList.contains('on');
+    toggleExpected.charge = !isOn;
+    setToggle(tgl, !isOn);
+    toggleLocks.charge = Date.now() + 5000;
+    execWebUI('auto_charge', isOn ? 'off' : 'on');
+    showToast(!isOn ? '充电分离已开启' : '充电分离已关闭');
+  });
 }
 
 function saveThreshold() {
-  var v = document.getElementById('thresholdVal').value;
-  if (!v || v < 20 || v > 100) { showToast('阈值需在 20-100 之间', true); return; }
-  execWebUI('threshold', v);
-  editingThreshold = true;
-  thresholdSaveTime = Date.now() + 4000;
-  showToast('阈值已保存: ' + v + '%');
+  debounce('thresh', function(){
+    var v = document.getElementById('thresholdVal').value;
+    if (!v || v < 20 || v > 100) { showToast('阈值需在 20-100 之间', true); return; }
+    execWebUI('threshold', v);
+    editingThreshold = true;
+    thresholdSaveTime = Date.now() + 4000;
+    showToast('阈值已保存: ' + v + '%');
+  });
 }
 
 function refresh() {
@@ -206,25 +299,25 @@ function refresh() {
   try {
     var s = JSON.parse(raw);
 
-    // Stats
     if (s.battery) document.getElementById('batteryPct').textContent = s.battery + '%';
     if (s.temp_deg) document.getElementById('batteryTemp').textContent = s.temp_deg + '°C';
     document.getElementById('chargePower').textContent = s.power ? s.power + 'W' : '未充电';
 
-    // ---- 风扇 ----
+    // ---- fan ----
     var fanCard = document.getElementById('card-fan');
     var fanBtn = document.getElementById('fanToggle');
     var fanRow = document.getElementById('fanRow');
     var fanStatus = document.getElementById('fanStatus');
     var fanInfo = document.getElementById('fanInfo');
-    var fanLevelInput = document.getElementById('fanLevel');
-    var fanLevelVal = document.getElementById('fanLevelVal');
 
     if (s.fan_enabled === 1) {
       fanCard.style.opacity = ''; fanCard.style.pointerEvents = '';
       fanBtn.style.display = '';
       var fanOn = s.auto_fan === 1;
-      setToggle(fanBtn, fanOn);
+      if (Date.now() < toggleLocks.fan && toggleExpected.fan !== null) {
+        if (fanOn === toggleExpected.fan) { toggleLocks.fan = 0; toggleExpected.fan = null; }
+      }
+      if (Date.now() >= toggleLocks.fan) setToggle(fanBtn, fanOn);
       fanRow.className = 'setting-row ' + (fanOn ? 'on' : 'off');
       fanStatus.textContent = s.fan_level ? '挡位 ' + s.fan_level : '-';
       fanStatus.className = fanOn ? 'sep-badge active' : 'sep-badge inactive';
@@ -249,7 +342,7 @@ function refresh() {
       fanRow.className = 'setting-row off';
     }
 
-    // ---- 触控优化 ----
+    // ---- touch ----
     var touchCard = document.getElementById('card-touch');
     var touchBtn = document.getElementById('touchToggle');
     var touchStatus = document.getElementById('touchStatus');
@@ -259,7 +352,10 @@ function refresh() {
       touchCard.style.opacity = ''; touchCard.style.pointerEvents = '';
       touchBtn.style.display = '';
       var touchOn = s.touch_boost === 1;
-      setToggle(touchBtn, touchOn);
+      if (Date.now() < toggleLocks.touch && toggleExpected.touch !== null) {
+        if (touchOn === toggleExpected.touch) { toggleLocks.touch = 0; toggleExpected.touch = null; }
+      }
+      if (Date.now() >= toggleLocks.touch) setToggle(touchBtn, touchOn);
       touchStatus.textContent = touchOn ? '已优化' : '未优化';
       touchStatus.className = touchOn ? 'sep-badge active' : 'sep-badge inactive';
       touchInfo.textContent = touchOn ? '采样率已拉满，触控响应最大化' : '触控优化已关闭，使用系统默认';
@@ -271,19 +367,21 @@ function refresh() {
       touchInfo.textContent = '请在config.txt内将触控优化设为1后重启';
     }
 
-    // ---- 充电分离 ----
+    // ---- charge ----
     var chargeCard = document.getElementById('card-charge');
     var chargeBtn = document.getElementById('chargeToggle');
     var chargeRow = document.getElementById('thresholdRow');
     var sepStatus = document.getElementById('sepStatus');
     var chargeInfo = document.getElementById('chargeInfo');
-    var thresholdVal = document.getElementById('thresholdVal');
 
     if (s.charge_enabled === 1) {
       chargeCard.style.opacity = ''; chargeCard.style.pointerEvents = '';
       chargeBtn.style.display = '';
       var autoOn = s.auto_charge === 1;
-      setToggle(chargeBtn, autoOn);
+      if (Date.now() < toggleLocks.charge && toggleExpected.charge !== null) {
+        if (autoOn === toggleExpected.charge) { toggleLocks.charge = 0; toggleExpected.charge = null; }
+      }
+      if (Date.now() >= toggleLocks.charge) setToggle(chargeBtn, autoOn);
       var sepOn = s.cs === '1' || s.cs === 1;
       sepStatus.textContent = sepOn ? '已分离' : '未分离';
       sepStatus.className = 'sep-badge ' + (sepOn ? 'active' : 'inactive');
@@ -315,17 +413,18 @@ function refresh() {
 }
 
 document.getElementById('thresholdVal').addEventListener('focus', function(){ editingThreshold = true; });
+document.getElementById('thresholdVal').addEventListener('blur', function(){ editingThreshold = false; });
 document.getElementById('fanLevel').addEventListener('touchstart', function(){ editingFan = true; });
 document.getElementById('fanLevel').addEventListener('mousedown', function(){ editingFan = true; });
-document.addEventListener('click', function(e){ if (e.target.id !== 'fanLevel') editingFan = false; });
-document.addEventListener('click', function(e){ if (e.target.id !== 'thresholdVal') editingThreshold = false; });
+document.getElementById('fanLevel').addEventListener('blur', function(){ editingFan = false; });
 
 refresh();
-setInterval(refresh, 2000);
+setInterval(refresh, 1000);
 
 function genLog() {
-  var LOG = '/sdcard/Download/FanExtreme_debug.log';
-  ksuExec('echo "=== FanExtreme v2.1.0 调试日志 ===" > ' + LOG);
+  debounce('log', function(){
+    var LOG = '/sdcard/Download/FanExtreme_debug.log';
+  ksuExec('echo "=== FanExtreme v2.1.1 调试日志 ===" > ' + LOG);
   ksuExec('echo "时间: $(date)" >> ' + LOG);
   ksuExec('echo "" >> ' + LOG);
   ksuExec('echo "[module.prop]" >> ' + LOG);
@@ -344,7 +443,7 @@ function genLog() {
   ksuExec('cat /sys/class/qcom-battery/restrict_cur /sys/class/qcom-battery/restrict_chg /sys/class/qcom-battery/charging_enabled /sys/class/qcom-battery/charge_mode >> ' + LOG);
   ksuExec('echo "" >> ' + LOG);
   ksuExec('echo "[充电分离状态]" >> ' + LOG);
-  ksuExec('settings get global charge_separation_switch >> ' + LOG);
+  ksuExec('cat /data/adb/modules/FanExtreme/.cs_cache 2>/dev/null >> ' + LOG);
   ksuExec('echo "" >> ' + LOG);
   ksuExec('echo "[GPU]" >> ' + LOG);
   ksuExec('cat /sys/kernel/gpu/gpu_model /sys/kernel/gpu/gpu_clock /sys/kernel/gpu/gpu_max_clock /sys/kernel/gpu/gpu_min_clock /sys/kernel/gpu/gpu_busy >> ' + LOG);
@@ -362,12 +461,26 @@ function genLog() {
   ksuExec('echo "[CPU]" >> ' + LOG);
   ksuExec('echo "governor: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)" >> ' + LOG);
   ksuExec('for c in /sys/devices/system/cpu/cpu*/cpufreq; do echo "$(basename $(dirname $c)): cur=$(cat $c/scaling_cur_freq 2>/dev/null) min=$(cat $c/scaling_min_freq 2>/dev/null) max=$(cat $c/scaling_max_freq 2>/dev/null)"; done >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[模块错误日志]" >> ' + LOG);
+  ksuExec('cat /data/adb/modules/FanExtreme/.last_error 2>/dev/null >> ' + LOG);
+  ksuExec('echo "" >> ' + LOG);
+  ksuExec('echo "[模块节点状态]" >> ' + LOG);
+  ksuExec('echo fan_enable=$(cat /sys/kernel/fan/fan_enable 2>/dev/null) fan_level=$(cat /sys/kernel/fan/fan_speed_level 2>/dev/null) >> ' + LOG);
+  ksuExec('echo restrict_cur=$(cat /sys/class/qcom-battery/restrict_cur 2>/dev/null) restrict_chg=$(cat /sys/class/qcom-battery/restrict_chg 2>/dev/null) >> ' + LOG);
+  ksuExec('echo tp_report_rate=$(cat /proc/touchscreen/tp_report_rate 2>/dev/null) touch_sampling=$(settings get system touch_sampling_rate 2>/dev/null) >> ' + LOG);
+  ksuExec('echo vibe_gain=$(cat /sys/class/leds/vibrator/gain 2>/dev/null) vibe_dur=$(cat /sys/class/leds/vibrator/duration_aw 2>/dev/null) vibe_vmax=$(cat /sys/class/leds/vibrator/vmax 2>/dev/null) >> ' + LOG);
+  ksuExec('echo gpu_clock=$(cat /sys/kernel/gpu/gpu_clock 2>/dev/null) gpu_min=$(cat /sys/kernel/gpu/gpu_min_clock 2>/dev/null) gpu_max=$(cat /sys/kernel/gpu/gpu_max_clock 2>/dev/null) >> ' + LOG);
+  ksuExec('echo charge_sep=$(cat /data/adb/modules/FanExtreme/.cs_cache 2>/dev/null) cube_dir=$(ls /data/system/cube/* 2>/dev/null | wc -l) >> ' + LOG);
   showToast('已输出到Download文件夹下');
+  }, 1000);
 }
 
 function joinQQ() {
-  ksuExec('am start -a android.intent.action.VIEW -d https://qm.qq.com/q/QCBSaor22k');
-  showToast('正在打开浏览器...');
+  debounce('qq', function(){
+    ksuExec('am start -a android.intent.action.VIEW -d https://qm.qq.com/q/QCBSaor22k');
+    showToast('正在打开浏览器...');
+  });
 }
 </script>
 </body>

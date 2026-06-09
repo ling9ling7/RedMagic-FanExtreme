@@ -2,6 +2,9 @@
 
 MODDIR=${0%/*}
 CONFIG="$MODDIR/config.txt"
+ERRLOG="$MODDIR/.last_error"
+
+:> "$ERRLOG"
 
 cfg() {
     grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tail -1
@@ -13,8 +16,8 @@ fan_extreme() {
         sleep 2
     done
     if [ -e /sys/kernel/fan/fan_speed_level ]; then
-        su system -c "echo 5 > /sys/kernel/fan/fan_speed_level" 2>/dev/null
-        chmod 444 /sys/kernel/fan/fan_speed_level 2>/dev/null
+        su system -c "echo 5 > /sys/kernel/fan/fan_speed_level" 2>>"$ERRLOG" || echo "[FAIL] fan_speed_level=$?" >>"$ERRLOG"
+        chmod 444 /sys/kernel/fan/fan_speed_level 2>>"$ERRLOG"
     fi
 }
 
@@ -27,8 +30,8 @@ if [ "$(cfg '充电加速')" = "1" ]; then
         [ -e /sys/class/qcom-battery/restrict_cur ] && break
         sleep 1
     done
-    echo 0 > /sys/class/qcom-battery/restrict_cur 2>/dev/null
-    echo 0 > /sys/class/qcom-battery/restrict_chg 2>/dev/null
+    echo 0 > /sys/class/qcom-battery/restrict_cur 2>>"$ERRLOG" || echo "[FAIL] restrict_cur=$?" >>"$ERRLOG"
+    echo 0 > /sys/class/qcom-battery/restrict_chg 2>>"$ERRLOG" || echo "[FAIL] restrict_chg=$?" >>"$ERRLOG"
 fi
 
 block_cloud_control() {
@@ -68,11 +71,11 @@ vibe_boost() {
         sleep 1
     done
     if [ -e "$VIBE/gain" ]; then
-        printf 0x%x "$gain" > $VIBE/gain
-        printf 0x%x "$dur" > $VIBE/duration_aw
-        printf 0x%x "$vmax" > $VIBE/vmax
-        echo 0x01 > $VIBE/cont_brk_time
-        echo 0x03 > $VIBE/cont_wait_num
+        printf 0x%x "$gain" > $VIBE/gain 2>>"$ERRLOG" || echo "[FAIL] vibe_gain=$?" >>"$ERRLOG"
+        printf 0x%x "$dur" > $VIBE/duration_aw 2>>"$ERRLOG" || echo "[FAIL] vibe_dur=$?" >>"$ERRLOG"
+        printf 0x%x "$vmax" > $VIBE/vmax 2>>"$ERRLOG" || echo "[FAIL] vibe_vmax=$?" >>"$ERRLOG"
+        echo 0x01 > $VIBE/cont_brk_time 2>>"$ERRLOG"
+        echo 0x03 > $VIBE/cont_wait_num 2>>"$ERRLOG"
     fi
 }
 
@@ -85,8 +88,8 @@ touch_firmware() {
         [ -d /vendor/firmware ] && break
         sleep 2
     done
-    if [ -d /vendor/firmware ]; then
-        mount --bind "$MODDIR/vendor/firmware/goodix_cfg_group_9916r.bin" /vendor/firmware/goodix_cfg_group_9916r.bin
+    if [ -d /vendor/firmware ] && [ -f "$MODDIR/vendor/firmware/goodix_cfg_group_9916r.bin" ] && [ -f /vendor/firmware/goodix_cfg_group_9916r.bin ]; then
+        mount --bind "$MODDIR/vendor/firmware/goodix_cfg_group_9916r.bin" /vendor/firmware/goodix_cfg_group_9916r.bin 2>>"$ERRLOG" || echo "[FAIL] touch_firmware=$?" >>"$ERRLOG"
     fi
 }
 
@@ -103,12 +106,14 @@ touch_boost() {
         sleep 1
     done
     if [ -e "$TP/tp_report_rate" ]; then
-        echo 4 > $TP/tp_report_rate
-        echo 1 > $TP/play_game
-        echo 4 > $TP/follow_hand_level
+        echo 4 > $TP/tp_report_rate 2>>"$ERRLOG" || echo "[FAIL] tp_report_rate=$?" >>"$ERRLOG"
+        echo 1 > $TP/play_game 2>>"$ERRLOG"
+        echo 4 > $TP/follow_hand_level 2>>"$ERRLOG"
     fi
     settings put system touch_sampling_rate 960 2>/dev/null
 }
+
+AUTO_TOUCH_FILE="$MODDIR/auto_touch"
 
 if [ "$(cfg '触控优化')" = "1" ]; then
     touch_boost
@@ -230,7 +235,7 @@ webui_loop() {
       fi
     fi
     webui_status
-    sleep 2
+    sleep 1
   done
 }
 
