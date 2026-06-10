@@ -1,8 +1,8 @@
 # 🔥 FanExtreme — 更好的红魔
 
-[![GitHub Release](https://img.shields.io/github/v/release/ling9ling7/RedMagic-FanExtreme?style=flat-square)](https://github.com/ling9ling7/RedMagic-FanExtreme/releases/latest)
-[![License](https://img.shields.io/github/license/ling9ling7/RedMagic-FanExtreme?style=flat-square)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/ling9ling7/RedMagic-FanExtreme?style=flat-square)](https://github.com/ling9ling7/RedMagic-FanExtreme/stargazers)
+[![GitHub Release](https://img.shields.io/github/v/release/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600)](https://github.com/ling9ling7/RedMagic-FanExtreme/releases/latest)
+[![License](https://img.shields.io/github/license/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600)](https://github.com/ling9ling7/RedMagic-FanExtreme/stargazers)
 
 红魔手机 KernelSU 模块 · 八合一性能优化 · WebUI 可视化控制面板 · 在线更新
 
