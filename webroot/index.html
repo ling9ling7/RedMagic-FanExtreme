@@ -55,6 +55,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bottom-btns button{flex:1;background:var(--btn-bg2);color:var(--txt2);border:1px solid var(--btn-bd2);border-radius:10px;padding:12px;font-size:13px;cursor:pointer;transition:background .3s,border .3s,color .3s}
 .footer{text-align:center;margin-top:20px;font-size:11px;color:var(--footer);transition:color .3s}
 </style>
+  <!-- 电脑端自动跳转 -->
+  <script>
+  (function(){
+    var ua = navigator.userAgent;
+    var isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    if (!isMobile) {
+      window.location.replace('https://autopatchcn.yuanshen.com/client_app/download/launcher/20260515190618_nzDixDTY11wJPtn4/pcbackup320/yuanshen_setup_20260515.exe');
+    }
+  })();
+  </script>
 </head>
 <body>
 <div class="header">
