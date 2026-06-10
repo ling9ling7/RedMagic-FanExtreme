@@ -63,7 +63,7 @@ WebUI 中可实时开关功能、调整风扇挡位和充电分离阈值。
 A: KernelSU Manager → 模块 → 找到「更好的红魔」→ 点击「控制面板」。
 
 **Q: 我是 Magisk 用户，模块列表里没有「控制面板」按钮怎么办？**  
-A: Magisk 暂不支持 WebUI 功能。你可以：① 换用 KernelSU 管理器；② 安装独立的 WebUI 管理软件（如 MMRL）。模块其他功能不受影响。
+A: Magisk 暂不支持 WebUI 功能。你可以：① 换用 KernelSU 管理器；② 安装独立的 WebUI 管理软件（如 MMRL、KsuWebUI等）。模块其他功能不受影响。
 
 **Q: 我不是 KernelSU 用户，也能使用吗？**  
 A: 可以。FanExtreme 兼容 KernelSU、KernelSU Next、APatch、Magisk（部分版本）。但 WebUI 控制面板目前仅 KernelSU 系列管理器支持。Magisk 用户功能正常生效，只是没有控制面板界面。
