@@ -1,0 +1,27 @@
+name: Update Stars
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-stars:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch star count
+        run: |
+          STARS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/ling9ling7/RedMagic-FanExtreme | jq '.stargazers_count')
+          FORKS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/ling9ling7/RedMagic-FanExtreme | jq '.forks_count')
+          echo "{\"stars\": $STARS, \"forks\": $FORKS}" > docs/star-count.json
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/star-count.json
+          git diff --staged --quiet || (git commit -m "update star count" && git push)

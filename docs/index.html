@@ -745,29 +745,26 @@
   }
 
   // Step 3: hardcoded
-  if (!version) version = '2.0.2';
+  if (!version) version = '2.1.1';
 
   versionEl.textContent = 'v' + version;
   syncDot.style.display = 'inline-block';
 
-  // Repo stats (may fail)
+  // Repo stats (from cached JSON, updated by GitHub Actions)
   try {
-    const res = await fetch('https://api.github.com/repos/' + REPO);
+    const res = await fetch('star-count.json');
     if (res.ok) {
-      const repo = await res.json();
-      starsEl.textContent = '\u2b50 ' + fmt(repo.stargazers_count);
-      forksEl.textContent = fmt(repo.forks_count);
-      if (repo.description) {
-        document.getElementById('heroDesc').textContent = repo.description;
-      }
-      syncInfo.textContent = '数据最后更新: ' + new Date().toLocaleString('zh-CN');
+      const stats = await res.json();
+      starsEl.textContent = '\u2b50 ' + fmt(stats.stars || 7);
+      forksEl.textContent = fmt(stats.forks || 0);
+      syncInfo.textContent = '数据每6小时自动更新';
     } else {
       throw new Error('not ok');
     }
   } catch (e) {
     starsEl.textContent = '\u2b50 7';
     forksEl.textContent = '0';
-    syncInfo.textContent = 'GitHub API 不可用，显示缓存数据';
+    syncInfo.textContent = '数据加载失败，显示默认值';
   }
 })();
 </script>
