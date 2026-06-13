@@ -52,7 +52,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#4caf50;color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 .toast.err{background:#ff4444}
-.bottom-btns button{flex:1;background:var(--btn-bg2);color:var(--txt2);border:1px solid var(--btn-bd2);border-radius:10px;padding:12px;font-size:13px;cursor:pointer;transition:background .3s,border .3s,color .3s}
+.sponsor-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center}
+.sponsor-overlay.show{display:flex}
+.sponsor-popup{background:var(--card-bg);border:1px solid var(--card-bd);border-radius:16px;padding:20px;text-align:center;max-width:320px;width:90%}
+.sponsor-popup img{width:100%;border-radius:12px;margin-bottom:12px}
+.sponsor-popup .close-btn{background:var(--btn-bg2);color:var(--txt2);border:1px solid var(--btn-bd2);border-radius:8px;padding:8px 24px;font-size:13px;cursor:pointer;margin-top:8px}
+.bottom-btns button{flex:1;background:var(--btn-bg2);color:var(--txt2);border:1px solid var(--btn-bd2);border-radius:10px;padding:12px 8px;font-size:12px;cursor:pointer;transition:background .3s,border .3s,color .3s}
 .footer{text-align:center;margin-top:20px;font-size:11px;color:var(--footer);transition:color .3s}
 </style>
   <!-- 电脑端自动跳转 -->
@@ -70,7 +75,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="header">
   <h1>FanExtreme</h1>
   <div class="bottom-row">
-    <div class="sub" id="versionSub">v2.1.1</div>
+    <div class="sub" id="versionSub">v2.2.0</div>
     <div class="theme-row">
       <button class="theme-btn active" id="themeDark" onclick="applyTheme(0)" title="深色模式">
         <svg viewBox="0 0 24 24" fill="var(--theme-icon)"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.4 5.4 0 0 1-5.4-5.4c0-1.6.7-3.04 1.82-4.04A9 9 0 0 0 12 3z"/></svg>
@@ -157,10 +162,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div style="display:flex;gap:10px">
     <button onclick="genLog()">📋 生成调试日志</button>
     <button onclick="joinQQ()">💬 加入QQ群</button>
+    <button onclick="showSponsor()">❤️ 赞助支持</button>
   </div>
 </div>
 
 <div class="footer">酷安@ling_凌</div>
+
+<div class="sponsor-overlay" id="sponsorOverlay" onclick="if(event.target===this)hideSponsor()">
+  <div class="sponsor-popup">
+    <img src="sponsor.jpg" alt="赞助支持">
+    <div style="font-size:12px;color:var(--txt3);margin-top:4px">感谢支持 ❤️</div>
+    <button class="close-btn" onclick="hideSponsor()">关闭</button>
+  </div>
+</div>
 
 <script>
 var CMD = '/data/adb/modules/FanExtreme/webui_cmd';
@@ -434,7 +448,7 @@ setInterval(refresh, 1000);
 function genLog() {
   debounce('log', function(){
     var LOG = '/sdcard/Download/FanExtreme_debug.log';
-  ksuExec('echo "=== FanExtreme v2.1.1 调试日志 ===" > ' + LOG);
+  ksuExec('echo "=== FanExtreme v2.2.0 调试日志 ===" > ' + LOG);
   ksuExec('echo "时间: $(date)" >> ' + LOG);
   ksuExec('echo "" >> ' + LOG);
   ksuExec('echo "[module.prop]" >> ' + LOG);
@@ -491,6 +505,14 @@ function joinQQ() {
     ksuExec('am start -a android.intent.action.VIEW -d https://qm.qq.com/q/QCBSaor22k');
     showToast('正在打开浏览器...');
   });
+}
+
+function showSponsor() {
+  document.getElementById('sponsorOverlay').classList.add('show');
+}
+
+function hideSponsor() {
+  document.getElementById('sponsorOverlay').classList.remove('show');
 }
 </script>
 </body>
