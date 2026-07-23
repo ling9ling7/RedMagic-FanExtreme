@@ -1,7 +1,7 @@
 id=FanExtreme
 name=更好的红魔
-version=v2.2.0
-versionCode=19
+version=v3.0.0
+versionCode=21
 author=酷安@ling_凌
-description=
 updateJson=https://raw.githubusercontent.com/ling9ling7/FanExtreme/main/update.json
+description=风扇极速 充电分离(100%%) 云控屏蔽 温控移除 振动增强(168/18ms/128) 触控优化 充电加速

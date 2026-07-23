@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 ui_print "===================================="
-ui_print "  FanExtreme v2.2.0"
+ui_print "  FanExtreme v3.0.0"
 ui_print "===================================="
 
 INSTALLED_CONFIG="/data/adb/modules/FanExtreme/config.txt"
@@ -14,7 +14,7 @@ else
     ui_print "  📋 全新安装，使用默认配置"
 fi
 
-cfg() { grep -o "^$1=.*" "$NEW_CONFIG" 2>/dev/null | cut -d= -f2 | tail -1; }
+cfg() { grep -o "^$1=.*" "$NEW_CONFIG" 2>/dev/null | cut -d= -f2 | tr -d '\r' | tail -1; }
 
 DESC=""
 
@@ -39,9 +39,19 @@ if [ "$(cfg '云控屏蔽')" = "1" ]; then
 fi
 
 if [ "$(cfg '温控移除')" = "1" ]; then
-    ui_print "  ✅ 温控移除"
-    touch "$MODPATH/.thermal"
-    DESC="$DESC 温控移除"
+    PLAT=$(getprop ro.board.platform 2>/dev/null)
+    THERMAL_PLATS="pineapple"
+    case " $THERMAL_PLATS " in
+        *" $PLAT "*)
+            ui_print "  ✅ 温控移除 ($PLAT)"
+            touch "$MODPATH/.thermal"
+            DESC="$DESC 温控移除"
+            ;;
+        *)
+            ui_print "  ⚠️ 温控移除：当前平台($PLAT)无专用配置，已跳过"
+            rm -f "$MODPATH/vendor/etc/thermal-engine.conf"
+            ;;
+    esac
 else
     rm -f "$MODPATH/vendor/etc/thermal-engine.conf"
 fi
@@ -71,6 +81,7 @@ if [ "$(cfg '充电加速')" = "1" ]; then
     DESC="$DESC 充电加速"
 fi
 
+sed -i '/^description=/d' "$MODPATH/module.prop"
 echo "description=${DESC# }" >> "$MODPATH/module.prop"
 
 ui_print "===================================="

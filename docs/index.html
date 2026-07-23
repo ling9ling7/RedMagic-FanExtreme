@@ -441,7 +441,7 @@
     </div>
     <h1>更好的<span class="hl">红魔</span></h1>
     <p class="hero-desc" id="heroDesc">
-      FanExtreme 是一款面向红魔游戏手机的 KernelSU 模块，将八项内核级性能优化集成于一个模块中，通过配置文件灵活开关，带来更纯粹的玩机体验。
+      FanExtreme 是一款面向红魔游戏手机的 KernelSU 模块，将多项内核级性能优化集成于一个模块中，通过配置文件灵活开关，带来更纯粹的玩机体验。
     </p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="https://github.com/ling9ling7/RedMagic-FanExtreme" target="_blank">
@@ -481,7 +481,7 @@
 <section id="features">
   <div class="container">
     <div class="section-label">Features</div>
-    <h2 class="section-title">八项核心优化</h2>
+    <h2 class="section-title">九项核心优化</h2>
     <p class="section-desc">每一项都针对红魔手机的痛点，通过 sysfs 节点直接调优内核参数，配置文件一键开关。</p>
     <div class="features-grid">
 
@@ -532,6 +532,13 @@
         <h3>充电加速</h3>
         <p>移除充电电流软限制，让快充以最大支持功率运行。</p>
         <span class="feature-tag">Fast Charge</span>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon fi-red">📊</div>
+        <h3>频率控制</h3>
+        <p>自定义 CPU 各核心与 GPU 最高频率，支持频率挡位选择与调度器切换，精细掌控性能与功耗。</p>
+        <span class="feature-tag">CPU / GPU</span>
       </div>
 
       <div class="feature-card">
@@ -750,14 +757,14 @@
   versionEl.textContent = 'v' + version;
   syncDot.style.display = 'inline-block';
 
-  // Repo stats (from cached JSON, updated by GitHub Actions)
+  // Repo stats (GitHub API)
   try {
-    const res = await fetch('star-count.json');
+    const res = await fetch('https://api.github.com/repos/' + REPO);
     if (res.ok) {
-      const stats = await res.json();
-      starsEl.textContent = '\u2b50 ' + fmt(stats.stars || 7);
-      forksEl.textContent = fmt(stats.forks || 0);
-      syncInfo.textContent = '数据每6小时自动更新';
+      const repo = await res.json();
+      starsEl.textContent = '\u2b50 ' + fmt(repo.stargazers_count || 7);
+      forksEl.textContent = fmt(repo.forks_count || 0);
+      syncInfo.textContent = '数据通过 GitHub API 实时获取';
     } else {
       throw new Error('not ok');
     }
