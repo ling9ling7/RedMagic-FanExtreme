@@ -735,7 +735,7 @@
 
                 
                         <div style="margin:8px 16px;padding:12px 14px;background:var(--bg2);border-radius:10px;font-size:11px;color:var(--txt2);line-height:1.7">
-                            <b style="color:var(--blue)">💡 关于 CPU 调度器</b><br>
+                            <b style="color:var(--blue)">关于 CPU 调度器</b><br>
                             CPU 调度器决定处理器频率如何根据负载自动升降，不同的调度策略会影响手机的流畅度和耗电。<br>
                             <b>schedutil</b>（推荐）：根据实时负载智能调节，兼顾省电与流畅<br>
                             <b>performance</b>：始终锁定最高频率，性能最强但明显费电发热<br>
@@ -793,7 +793,7 @@
 
         <div class="overlay-box" style="max-width:420px">
 
-            <div style="font-family:var(--mono);font-size:18px;margin-bottom:6px;color:var(--red)">⚠️ 危险操作警告</div>
+            <div style="font-family:var(--mono);font-size:18px;margin-bottom:6px;color:var(--red)">危险操作警告</div>
 
             <div style="font-size:12px;color:var(--txt2);margin-bottom:12px;line-height:1.8;text-align:left" id="perfOvBody">
                 
@@ -2028,6 +2028,8 @@
 
         var perfInputsSet = false;
 
+        var perfRetry = 0;
+
         function loadPerfStatus(){
 
             if (perfInitialized) return;
@@ -2041,8 +2043,6 @@
                 var s = JSON.parse(raw);
 
                 if (typeof s.perf_enabled === 'undefined') return;
-
-                perfInitialized = true;
 
                 if (typeof s.cluster_count !== 'undefined') {
 
@@ -2176,13 +2176,16 @@
 
                     document.getElementById('gpuMax').value = gpu;
 
-                    perfInputsSet = true;
-
                 }
 
-                document.getElementById('cpuGov').value = s.cpu_gov || 'schedutil';
+                if (perfRetry < 3) {
+                    document.getElementById('cpuGov').value = s.cpu_gov || 'schedutil';
+                }
 
 
+
+                if (perfRetry > 0) { perfRetry--; if (perfRetry === 0) { perfInputsSet = true; perfInitialized = true; } }
+                else { perfInputsSet = true; perfInitialized = true; }
 
                 updatePerfGauges(cpuMax, cpuCur, gpuMax, gpuCur, perfOn);
 
@@ -2397,6 +2400,8 @@
             clearInterval(perfCountdownId);
             perfCountdownId = null;
             perfInitialized = false;
+            perfInputsSet = false;
+            perfRetry = 3;
 
             cmd('perf_apply', perfPendingPayload);
 
@@ -2407,7 +2412,7 @@
 
 
 
-        function resetPerf(e){ e.stopPropagation(); cmd('perf_reset'); perfInitialized=false; perfInputsSet=false; perfActiveProfile=''; updatePerfPresetBtns(''); toast('已恢复系统默认调度'); triggerCardJelly(e.currentTarget,e); }
+        function resetPerf(e){ e.stopPropagation(); cmd('perf_reset'); perfInitialized=false; perfInputsSet=false; perfRetry=3; perfActiveProfile=''; updatePerfPresetBtns(''); toast('已恢复系统默认调度'); triggerCardJelly(e.currentTarget,e); }
 
         function cancelPerf(){
 
@@ -2415,6 +2420,7 @@
             perfCountdownId = null;
             perfInitialized = false;
             perfInputsSet = false;
+            perfRetry = 3;
 
             document.getElementById('perfOv').classList.remove('show');
             toast('已取消，未修改调度');
