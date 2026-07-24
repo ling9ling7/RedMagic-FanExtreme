@@ -312,22 +312,18 @@ perf_apply_internal() {
     [ -n "$cpu4" ] && echo "$cpu4" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null
     [ -n "$cpu7" ] && echo "$cpu7" > /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null
     [ -n "$gpu" ] && echo "$gpu" > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null
-    if [ "$name" = "performance" ]; then
-      perf_start_kill
-      echo "$cpu0" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null
-      echo "$cpu0" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 2>/dev/null
-      echo "$cpu4" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null
-      echo "$cpu4" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 2>/dev/null
-      echo "$cpu7" > /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null
-      echo "$cpu7" > /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq 2>/dev/null
-      echo "$gpu" > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null && chmod 444 /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null
-      echo "$gpu" > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 2>/dev/null && chmod 444 /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 2>/dev/null
-    else
-      perf_stop_kill
-      for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq; do
-        chmod 644 "$f" 2>/dev/null
-      done
-    fi
+    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq; do
+      chmod 644 "$f" 2>/dev/null
+    done
+    perf_start_kill
+    [ -n "$cpu0" ] && echo "$cpu0" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null
+    [ -n "$cpu0" ] && echo "$cpu0" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 2>/dev/null
+    [ -n "$cpu4" ] && echo "$cpu4" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null
+    [ -n "$cpu4" ] && echo "$cpu4" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 2>/dev/null
+    [ -n "$cpu7" ] && echo "$cpu7" > /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null
+    [ -n "$cpu7" ] && echo "$cpu7" > /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq 2>/dev/null && chmod 444 /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq 2>/dev/null
+    [ -n "$gpu" ] && echo "$gpu" > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null && chmod 444 /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null
+    [ -n "$gpu" ] && echo "$gpu" > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 2>/dev/null && chmod 444 /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 2>/dev/null
     if [ -n "$gov" ]; then
         for c in /sys/devices/system/cpu/cpu*/cpufreq; do
             echo "$gov" > "$c/scaling_governor" 2>/dev/null
@@ -518,13 +514,9 @@ webui_loop() {
             local p_gov=$(echo "$value" | cut -d'|' -f5)
             local p_name=$(echo "$value" | cut -d'|' -f6)
             [ -z "$p_name" ] && p_name="custom"
-            perf_apply_internal "$p_cpu0" "$p_cpu4" "$p_cpu7" "$p_gpu" "$p_gov" "$p_name"
-            rm -f "$PERF_PENDING" "$PERF_BACKUP"
-            ;;
-          perf_confirm)
-            rm -f "$PERF_PENDING" "$PERF_BACKUP"
-            ;;
-          perf_restore)
+             perf_apply_internal "$p_cpu0" "$p_cpu4" "$p_cpu7" "$p_gpu" "$p_gov" "$p_name"
+             ;;
+           perf_restore)
             perf_restore_now
             ;;
           perf_reset)
@@ -540,13 +532,6 @@ webui_loop() {
             ;;
         esac
         rm -f "$WEBUI_CMD"
-      fi
-    fi
-    if [ -f "$PERF_PENDING" ]; then
-      local ptime=$(cat "$PERF_PENDING" | head -1 | awk '{print $1}')
-      local now=$(date +%s)
-      if [ $((now - ptime)) -ge 30 ]; then
-        perf_restore_now
       fi
     fi
     webui_status
