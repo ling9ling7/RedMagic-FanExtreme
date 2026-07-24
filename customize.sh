@@ -29,7 +29,7 @@ if [ "$(cfg '充电分离')" = "1" ]; then
     [ -z "$threshold" ] && threshold=100
     ui_print "  ✅ 充电分离 ($threshold%)"
     touch "$MODPATH/.charge"
-    DESC="$DESC 充电分离($threshold%%)"
+    DESC="$DESC 充电分离($threshold%)"
 fi
 
 if [ "$(cfg '云控屏蔽')" = "1" ]; then
