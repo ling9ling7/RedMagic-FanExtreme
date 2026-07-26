@@ -88,6 +88,7 @@ A: 请确认：① config.txt 中 `充电分离=1` 并重启；② WebUI 中充�
 
 - [酷安 @ling_凌](https://www.coolapk.com/)
 - [QQ 群 777533513](https://qm.qq.com/q/QCBSaor22k)
+- [TG频道](https://t.me/FanExtreme)
 - 控制面板内置调试日志，遇到问题一键导出反馈
 
 ## 📄 License
