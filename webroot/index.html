@@ -357,7 +357,7 @@
 
                                 <div class="brand-name">FanExtreme</div>
 
-                                <div class="brand-sub">v3.1.0 · NUbia RedMagic</div>
+                                <div class="brand-sub">v3.1.1 · NUbia RedMagic</div>
 
                             </div>
 
@@ -850,7 +850,7 @@
 
                         <div class="about-divider"></div>
 
-                        <div class="about-item">版本：v3.1.0</div>
+                        <div class="about-item">版本：v3.1.1</div>
 
                         <div class="about-item">内核模块 · 仅限红魔设备</div>
                         <div class="about-divider"></div>
@@ -1381,6 +1381,38 @@
 
 
 
+        function sh(s) { ksu.exec('{ ' + s + '; } 2>/dev/null'); }
+
+        var MDIR = '/data/adb/modules/FanExtreme';
+
+        var FAN_SYS = '/sys/kernel/fan';
+
+        var AF  = MDIR + '/auto_fan';
+
+        var AFS = MDIR + '/auto_fan_screen_off';
+
+        var ATC = MDIR + '/auto_temp_control';
+
+        var ATCM = MDIR + '/temp_control_mode';
+
+        var ATCT = MDIR + '/temp_control_threshold';
+
+        var ACH = MDIR + '/auto_charge';
+
+        var AT  = MDIR + '/auto_touch';
+
+        var AV  = MDIR + '/auto_vibe';
+
+        var AP  = MDIR + '/auto_pump';
+
+        var VG  = MDIR + '/vibe_gain';
+
+        var VD  = MDIR + '/vibe_duration';
+
+        var VV  = MDIR + '/vibe_vmax';
+
+        var VBE = '/sys/class/leds/vibrator';
+
         function cmd(a, v) {
 
             var d = JSON.stringify({ action: a, value: v || '' });
@@ -1425,9 +1457,15 @@
 
             var el = document.getElementById('fanSw'); 
 
-            var on = el.classList.contains('on');
+            var on = el.classList.contains('on'),
+                nxt = !on;
 
-            expect.fan = !on; sw(el, !on); locks.fan = Date.now() + 4000;
+            expect.fan = nxt; sw(el, nxt);
+
+            if (nxt) sh('touch ' + AF + '; su system -c "chmod 644 ' + FAN_SYS + '/fan_speed_level ' + FAN_SYS + '/fan_enable; echo 1 > ' + FAN_SYS + '/fan_enable; echo 5 > ' + FAN_SYS + '/fan_speed_level; chmod 444 ' + FAN_SYS + '/fan_speed_level"');
+            else sh('rm -f ' + AF + '; su system -c "chmod 644 ' + FAN_SYS + '/fan_enable; echo 0 > ' + FAN_SYS + '/fan_enable"');
+
+            locks.fan = Date.now() + 1000;
 
             cmd('auto_fan', on ? 'off' : 'on'); 
 
@@ -1444,9 +1482,14 @@
 
             var el = document.getElementById('fanScreenOffSw');
 
-            var on = el.classList.contains('on');
+            var on = el.classList.contains('on'),
+                nxt = !on;
 
-            expect.fanScreenOff = !on; sw(el, !on); locks.fanScreenOff = Date.now() + 4000;
+            expect.fanScreenOff = nxt; sw(el, nxt);
+
+            sh(nxt ? 'touch ' + AFS : 'rm -f ' + AFS);
+
+            locks.fanScreenOff = Date.now() + 4000;
 
             cmd('auto_fan_screen_off', on ? 'off' : 'on');
 
@@ -1459,19 +1502,25 @@
         function handleTempCtrlToggle(e) {
             e.stopPropagation();
             var el = document.getElementById('tempCtrlSw');
-            var on = el.classList.contains('on');
-            sw(el, !on); locks.tempCtl = Date.now() + 4000;
+            var on = el.classList.contains('on'),
+                nxt = !on;
+            sw(el, nxt);
             if (on) {
+                sh('rm -f ' + ATC + ' ' + ATCM + ' ' + ATCT + '; su system -c "chmod 644 ' + FAN_SYS + '/fan_enable; echo 0 > ' + FAN_SYS + '/fan_enable"');
+                locks.tempCtl = Date.now() + 4000;
                 cmd('temp_control', 'off');
                 document.getElementById('tempCtrlOpts').style.display = 'none';
                 document.getElementById('tempApplyBtn').style.display = 'none';
                 uiState.tempControl.pending = false;
+                expect.tempCtl = false;
                 toast('温度联动已关闭');
             } else {
+                locks.tempCtl = Date.now() + 4000;
                 document.getElementById('tempCtrlOpts').style.display = 'block';
                 applyTempCtrlUI(uiState.tempControl.mode);
                 uiState.tempControl.pending = true;
                 document.getElementById('tempApplyBtn').style.display = 'inline-block';
+                expect.tempCtl = true;
                 toast('温度联动待配置 · 请选择模式后应用');
             }
             triggerCardJelly(e.currentTarget, e);
@@ -1502,13 +1551,16 @@
             var mode = uiState.tempControl.mode;
             var thr = document.getElementById('tempCtrlThr').value || '40';
             if (mode === 'auto') {
+                sh('touch ' + ATC + '; echo auto > ' + ATCM);
                 cmd('temp_control', 'auto');
                 toast('自动温度联动已应用');
             } else {
                 uiState.tempControl.threshold = thr;
+                sh('touch ' + ATC + '; echo custom > ' + ATCM + '; echo ' + thr + ' > ' + ATCT);
                 cmd('temp_control', 'custom|' + thr);
                 toast('触发温度已设为 ' + thr + '°C');
             }
+            locks.tempCtl = Date.now() + 4000;
             document.getElementById('tempApplyBtn').style.display = 'none';
             uiState.tempControl.pending = false;
             uiState.tempControl.applying = true;
@@ -1562,9 +1614,15 @@
 
             var el = document.getElementById('chargeSw'); 
 
-            var on = el.classList.contains('on');
+            var on = el.classList.contains('on'),
+                nxt = !on;
 
-            expect.charge = !on; sw(el, !on); locks.charge = Date.now() + 4000;
+            expect.charge = nxt; sw(el, nxt);
+
+            if (nxt) sh('touch ' + ACH);
+            else sh('rm -f ' + ACH + '; settings put global charge_separation_switch 0');
+
+            locks.charge = Date.now() + 1000;
 
             cmd('auto_charge', on ? 'off' : 'on'); 
 
@@ -1620,9 +1678,14 @@
 
             var el = document.getElementById('vibeSw'); 
 
-            var on = el.classList.contains('on');
+            var on = el.classList.contains('on'),
+                nxt = !on;
 
-            expect.vibe = !on; sw(el, !on); locks.vibe = Date.now() + 4000;
+            expect.vibe = nxt; sw(el, nxt);
+
+            sh(nxt ? 'touch ' + AV : 'rm -f ' + AV);
+
+            locks.vibe = Date.now() + 1000;
 
             cmd('vibe_boost', on ? 'off' : 'on'); 
 
@@ -1652,21 +1715,23 @@
 
             e.stopPropagation();
 
-            var g = document.getElementById('vibeGain').value;
+            var g = document.getElementById('vibeGain').value || '168';
 
-            var d = document.getElementById('vibeDur').value;
+            var d = document.getElementById('vibeDur').value || '18';
 
-            var v = document.getElementById('vibeVmax').value;
+            var v = document.getElementById('vibeVmax').value || '128';
 
-            
 
-            if (g) { uiState.vibeGain.applying = g; uiState.vibeGain.pending = null; cmd('vibe_gain', g); }
+            sh('echo ' + g + ' > ' + VG + '; echo ' + d + ' > ' + VD + '; echo ' + v + ' > ' + VV + '; printf 0x%x ' + g + ' > ' + VBE + '/gain; printf 0x%x ' + d + ' > ' + VBE + '/duration_aw; printf 0x%x ' + v + ' > ' + VBE + '/vmax');
 
-            if (d) { uiState.vibeDur.applying = d; uiState.vibeDur.pending = null; cmd('vibe_duration', d); }
+            uiState.vibeGain.applying = g; uiState.vibeGain.pending = null;
 
-            if (v) { uiState.vibeVmax.applying = v; uiState.vibeVmax.pending = null; cmd('vibe_vmax', v); }
+            uiState.vibeDur.applying = d; uiState.vibeDur.pending = null;
 
-            
+            uiState.vibeVmax.applying = v; uiState.vibeVmax.pending = null;
+
+            cmd('vibe_gain', g);
+
 
             document.getElementById('vibeDesc').textContent = '正在同步振动参数...';
 
@@ -1679,8 +1744,12 @@
         function handlePumpToggle(e) {
             e.stopPropagation();
             var el = document.getElementById('pumpSw');
-            var on = el.classList.contains('on');
-            expect.pump = !on; sw(el, !on); locks.pump = Date.now() + 4000;
+            var on = el.classList.contains('on'),
+                nxt = !on;
+            expect.pump = nxt; sw(el, nxt);
+            if (nxt) sh('touch ' + AP);
+            else sh('rm -f ' + AP + '; echo 0 > /proc/driver/micropump/enable');
+            locks.pump = Date.now() + 1000;
             cmd('auto_pump', on ? 'off' : 'on');
             toast(on ? '液冷控制已关闭' : '液冷控制已开启');
             triggerCardJelly(e.currentTarget, e);
@@ -1755,9 +1824,15 @@
 
             var el = document.getElementById('touchSw'); 
 
-            var on = el.classList.contains('on');
+            var on = el.classList.contains('on'),
+                nxt = !on;
 
-            expect.touch = !on; sw(el, !on); locks.touch = Date.now() + 4000;
+            expect.touch = nxt; sw(el, nxt);
+
+            if (nxt) sh('touch ' + AT + '; [ -e /proc/touchscreen/tp_report_rate ] && { echo 4 > /proc/touchscreen/tp_report_rate; echo 1 > /proc/touchscreen/play_game; echo 4 > /proc/touchscreen/follow_hand_level; }; settings put system touch_sampling_rate 960');
+            else sh('rm -f ' + AT + '; [ -e /proc/touchscreen/tp_report_rate ] && { echo 1 > /proc/touchscreen/tp_report_rate; echo 0 > /proc/touchscreen/play_game; echo 1 > /proc/touchscreen/follow_hand_level; }; settings delete system touch_sampling_rate');
+
+            locks.touch = Date.now() + 1000;
 
             cmd('touch_boost', on ? 'off' : 'on'); 
 
@@ -1877,21 +1952,24 @@
                     if (Date.now() >= locks.fanScreenOff) sw(document.getElementById('fanScreenOffSw'), fanScreenOffOn);
 
                     var tempCtrlOn = s.temp_control === 1;
+                    if (Date.now() < locks.tempCtl && expect.tempCtl !== null && tempCtrlOn === expect.tempCtl) { expect.tempCtl = null; }
                     if (uiState.tempControl.pending) {
                         document.getElementById('tempApplyBtn').style.display = 'inline-block';
                     } else {
-                        if (Date.now() >= locks.tempCtl) sw(document.getElementById('tempCtrlSw'), tempCtrlOn);
-                        document.getElementById('tempCtrlOpts').style.display = tempCtrlOn ? 'block' : 'none';
-                        if (tempCtrlOn) {
-                            var tcm = s.temp_ctrl_mode || 'auto';
-                            document.getElementById('tempCtrlAuto').classList.toggle('active', tcm === 'auto');
-                            document.getElementById('tempCtrlCustom').classList.toggle('active', tcm === 'custom');
-                            document.getElementById('tempCtrlCustomWrap').style.display = tcm === 'custom' ? 'block' : 'none';
-                            document.getElementById('tempCtrlThr').value = s.temp_ctrl_threshold || '40';
-                            uiState.tempControl.mode = tcm;
-                            uiState.tempControl.threshold = s.temp_ctrl_threshold || '40';
+                        if (Date.now() >= locks.tempCtl) {
+                            sw(document.getElementById('tempCtrlSw'), tempCtrlOn);
+                            document.getElementById('tempCtrlOpts').style.display = tempCtrlOn ? 'block' : 'none';
+                            if (tempCtrlOn) {
+                                var tcm = s.temp_ctrl_mode || 'auto';
+                                document.getElementById('tempCtrlAuto').classList.toggle('active', tcm === 'auto');
+                                document.getElementById('tempCtrlCustom').classList.toggle('active', tcm === 'custom');
+                                document.getElementById('tempCtrlCustomWrap').style.display = tcm === 'custom' ? 'block' : 'none';
+                                document.getElementById('tempCtrlThr').value = s.temp_ctrl_threshold || '40';
+                                uiState.tempControl.mode = tcm;
+                                uiState.tempControl.threshold = s.temp_ctrl_threshold || '40';
+                            }
+                            document.getElementById('tempApplyBtn').style.display = 'none';
                         }
-                        document.getElementById('tempApplyBtn').style.display = 'none';
                     }
                     if (uiState.tempControl.applying && !uiState.tempControl.pending) {
                         uiState.tempControl.applying = false;
@@ -2558,9 +2636,10 @@
 
             var on = el.classList.contains('on');
 
-            perfExpect.master = !on; sw(el, !on); perfLocks.master = Date.now() + 4000;
+            perfExpect.master = !on; sw(el, !on);
 
             cmd('perf_enabled', on ? 'off' : 'on');
+            perfLocks.master = Date.now() + 1000;
 
             toast(on ? '频率控制已关闭' : '频率控制已开启');
 
@@ -2645,14 +2724,17 @@
 
             clearInterval(perfCountdownId);
             perfCountdownId = null;
-            perfInitialized = false;
-            perfInputsSet = false;
-            perfRetry = 3;
 
             cmd('perf_apply', perfPendingPayload);
 
             document.getElementById('perfOv').classList.remove('show');
             toast('调度已确认，已生效');
+
+            setTimeout(function() {
+                perfInitialized = false;
+                perfInputsSet = false;
+                perfRetry = 3;
+            }, 3000);
 
         }
 
@@ -2740,7 +2822,7 @@
 
                     var log=LOG_PATH;
 
-                    ksu.exec('echo "=== FanExtreme v3.1.0 调试日志 ===" > '+log);
+                    ksu.exec('echo "=== FanExtreme v3.1.1 调试日志 ===" > '+log);
 
                     ksu.exec('echo "时间: $(date)" >> '+log);
 

@@ -187,7 +187,11 @@ rm -f "$PERF_PENDING" "$PERF_BACKUP" 2>/dev/null
 [ "$(cfg '风扇极速')" = "1" ] && touch "$AUTO_FAN_FILE" 2>/dev/null
 [ "$(cfg '触控优化')" = "1" ] && touch "$AUTO_TOUCH_FILE" 2>/dev/null
 [ "$(cfg '振动增强')" = "1" ] && touch "$MODDIR/auto_vibe" 2>/dev/null
-[ -e /proc/driver/micropump/speed ] && touch "$MODDIR/auto_pump" 2>/dev/null
+if [ -e /proc/driver/micropump/speed ]; then
+  touch "$MODDIR/auto_pump" 2>/dev/null
+else
+  case "$(getprop ro.product.model)" in NX[89]*) touch "$MODDIR/auto_pump" 2>/dev/null;; esac
+fi
 tcfg=$(cfg "充电分离阈值")
 [ -s "$THRESHOLD_FILE" ] || { [ -n "$tcfg" ] && echo "$tcfg" > "$THRESHOLD_FILE" 2>/dev/null; }
 
@@ -302,7 +306,11 @@ webui_status() {
   local thermal_enabled=0
   [ "$(cfg '温控移除')" = "1" ] && thermal_enabled=1
   local pump_available=0
-  [ -e /proc/driver/micropump/speed ] && pump_available=1
+  if [ -e /proc/driver/micropump/speed ]; then
+    pump_available=1
+  else
+    case "$(getprop ro.product.model)" in NX[89]*) pump_available=1;; esac
+  fi
   local pump_level=""
   if [ -e /proc/driver/micropump/speed ]; then
     local pump_speed=$(cat /proc/driver/micropump/speed 2>/dev/null)
@@ -584,9 +592,7 @@ webui_loop() {
               case "$value" in
                 1) pump_speed_val=40;; 2) pump_speed_val=60;; 3) pump_speed_val=80;; 4) pump_speed_val=90;;
               esac
-              echo 1 > /proc/driver/micropump/enable 2>/dev/null
-              echo 4 > /proc/driver/micropump/freq 2>/dev/null
-              echo $pump_speed_val > /proc/driver/micropump/speed 2>/dev/null
+              su system -c "chmod 644 /proc/driver/micropump/enable /proc/driver/micropump/freq /proc/driver/micropump/speed 2>/dev/null; echo 1 > /proc/driver/micropump/enable; echo 4 > /proc/driver/micropump/freq; echo $pump_speed_val > /proc/driver/micropump/speed; chmod 444 /proc/driver/micropump/speed" 2>/dev/null
             fi
             ;;
           perf_apply)
