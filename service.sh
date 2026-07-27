@@ -173,6 +173,11 @@ WEBUI_STATUS="$MODDIR/webui_status"
 THRESHOLD_FILE="/sdcard/FanExtreme/threshold"
 AUTO_CHARGE_FILE="$MODDIR/auto_charge"
 AUTO_FAN_FILE="$MODDIR/auto_fan"
+FAN_SCREEN_OFF_FILE="$MODDIR/auto_fan_screen_off"
+FAN_WAS_ON_FILE="$MODDIR/.fan_was_on"
+TEMP_CTRL_FILE="$MODDIR/auto_temp_control"
+TEMP_CTRL_MODE_FILE="$MODDIR/temp_control_mode"
+TEMP_CTRL_THRESHOLD_FILE="$MODDIR/temp_control_threshold"
 AUTO_PERF_FILE="$MODDIR/perf_enabled"
 PERF_BACKUP="$MODDIR/perf_backup"
 PERF_PENDING="$MODDIR/perf_pending"
@@ -182,6 +187,7 @@ rm -f "$PERF_PENDING" "$PERF_BACKUP" 2>/dev/null
 [ "$(cfg '风扇极速')" = "1" ] && touch "$AUTO_FAN_FILE" 2>/dev/null
 [ "$(cfg '触控优化')" = "1" ] && touch "$AUTO_TOUCH_FILE" 2>/dev/null
 [ "$(cfg '振动增强')" = "1" ] && touch "$MODDIR/auto_vibe" 2>/dev/null
+[ "$(getprop ro.product.board)" = "NX809J" ] && touch "$MODDIR/auto_pump" 2>/dev/null
 tcfg=$(cfg "充电分离阈值")
 [ -s "$THRESHOLD_FILE" ] || { [ -n "$tcfg" ] && echo "$tcfg" > "$THRESHOLD_FILE" 2>/dev/null; }
 
@@ -211,6 +217,14 @@ webui_status() {
   [ -e /sys/kernel/fan/fan_speed_level ] && fan_level=$(cat /sys/kernel/fan/fan_speed_level 2>/dev/null)
   local auto_fan=0
   [ -f "$AUTO_FAN_FILE" ] && auto_fan=1
+  local auto_fan_screen_off=0
+  [ -f "$FAN_SCREEN_OFF_FILE" ] && auto_fan_screen_off=1
+  local temp_ctrl=0
+  [ -f "$TEMP_CTRL_FILE" ] && temp_ctrl=1
+  local temp_ctrl_mode="auto"
+  [ -f "$TEMP_CTRL_MODE_FILE" ] && temp_ctrl_mode=$(cat "$TEMP_CTRL_MODE_FILE")
+  local temp_ctrl_threshold="40"
+  [ -f "$TEMP_CTRL_THRESHOLD_FILE" ] && temp_ctrl_threshold=$(cat "$TEMP_CTRL_THRESHOLD_FILE")
   local fan_enabled=0
   [ "$(cfg '风扇极速')" = "1" ] && fan_enabled=1
   local touch_enabled=0
@@ -253,6 +267,10 @@ webui_status() {
   [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ] && cpu_gov=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
   local cpu0_hw_max="" cpu4_hw_max="" cpu7_hw_max="" gpu_hw_max=""
   local cpu0_hw_min="" cpu4_hw_min="" cpu7_hw_min="" gpu_hw_min=""
+  local cluster_count=0
+  for d in /sys/devices/system/cpu/cpufreq/policy*; do
+    [ -d "$d" ] && cluster_count=$((cluster_count + 1))
+  done
   local a=""
   a=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies 2>/dev/null)
   [ -n "$a" ] && { cpu0_hw_min=$(echo $a | awk '{print $1}'); cpu0_hw_max=$(echo $a | awk '{print $NF}'); cpu0_steps=$(echo $a | tr " " ","); }
@@ -261,9 +279,20 @@ webui_status() {
   a=$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_available_frequencies 2>/dev/null)
   [ -n "$a" ] && { cpu7_hw_min=$(echo $a | awk '{print $1}'); cpu7_hw_max=$(echo $a | awk '{print $NF}'); cpu7_steps=$(echo $a | tr " " ","); }
   a=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies 2>/dev/null)
-  [ -n "$a" ] && { gpu_hw_min=$(echo $a | tr ' ' '
-' | sort -n | head -1); gpu_hw_max=$(echo $a | tr ' ' '
-' | sort -n | tail -1); gpu_steps=$(echo $a | tr ' ' ','); }
+  if [ -n "$a" ]; then
+    gpu_hw_min=$(echo $a | tr ' ' '\n' | sort -n | head -1); gpu_hw_max=$(echo $a | tr ' ' '\n' | sort -n | tail -1); gpu_steps=$(echo $a | tr ' ' '\n' | sort -n | tr '\n' ',' | sed 's/,$//')
+  else
+    gpu_hw_min=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 2>/dev/null)
+    gpu_hw_max=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null)
+    if [ -n "$gpu_hw_min" ] && [ -n "$gpu_hw_max" ] && [ "$gpu_hw_min" -gt 0 ]; then
+      gpu_steps="" ; step=$gpu_hw_min
+      while [ "$step" -le "$gpu_hw_max" ]; do
+        gpu_steps="${gpu_steps}${step},"
+        step=$((step + 100000000))
+      done
+      gpu_steps="${gpu_steps%,}"
+    fi
+  fi
   local cpu_cur=""
   [ -e /sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq ] && cpu_cur=$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq)
   local gpu_cur=""
@@ -272,7 +301,18 @@ webui_status() {
   [ -f "$AUTO_PERF_FILE" ] && perf_enabled=1
   local thermal_enabled=0
   [ "$(cfg '温控移除')" = "1" ] && thermal_enabled=1
-  echo "{\"battery\":\"${bat}\",\"temp_deg\":\"${temp_deg}\",\"power\":\"${power}\",\"cs\":\"${cs}\",\"threshold\":\"${threshold}\",\"auto_charge\":${auto_charge},\"charge_enabled\":${charge_enabled},\"fan_level\":\"${fan_level}\",\"auto_fan\":${auto_fan},\"fan_enabled\":${fan_enabled},\"touch_enabled\":${touch_enabled},\"touch_boost\":${touch_boost},\"touch_mode\":\"${touch_mode}\",\"touch_apps\":\"${touch_apps}\",\"vibe_enabled\":${vibe_enabled},\"auto_vibe\":${auto_vibe},\"vibe_gain\":\"${vibe_gain}\",\"vibe_duration\":\"${vibe_duration}\",\"vibe_vmax\":\"${vibe_vmax}\",\"vibe_gain_def\":\"${vibe_gain_def}\",\"vibe_dur_def\":\"${vibe_dur_def}\",\"vibe_vmax_def\":\"${vibe_vmax_def}\",\"perf_pending\":${perf_pending},\"perf_profile\":\"${perf_profile}\",\"perf_enabled\":${perf_enabled},\"thermal_enabled\":${thermal_enabled},\"cpu0_max\":\"${cpu0_max}\",\"cpu4_max\":\"${cpu4_max}\",\"cpu7_max\":\"${cpu7_max}\",\"gpu_max\":\"${gpu_max}\",\"cpu_cur\":\"${cpu_cur}\",\"gpu_cur\":\"${gpu_cur}\",\"cpu_gov\":\"${cpu_gov}\",\"cpu0_hw_min\":\"${cpu0_hw_min}\",\"cpu0_hw_max\":\"${cpu0_hw_max}\",\"cpu4_hw_min\":\"${cpu4_hw_min}\",\"cpu4_hw_max\":\"${cpu4_hw_max}\",\"cpu7_hw_min\":\"${cpu7_hw_min}\",\"cpu7_hw_max\":\"${cpu7_hw_max}\",\"gpu_hw_min\":\"${gpu_hw_min}\",\"gpu_hw_max\":\"${gpu_hw_max}\",\"cpu0_steps\":\"${cpu0_steps}\",\"cpu4_steps\":\"${cpu4_steps}\",\"cpu7_steps\":\"${cpu7_steps}\",\"gpu_steps\":\"${gpu_steps}\"}" > "$WEBUI_STATUS"
+  local pump_available=0
+  [ "$(getprop ro.product.board)" = "NX809J" ] && pump_available=1
+  local pump_level=""
+  if [ -e /proc/driver/micropump/speed ]; then
+    local pump_speed=$(cat /proc/driver/micropump/speed 2>/dev/null)
+    case "$pump_speed" in
+      40) pump_level=1;; 60) pump_level=2;; 80) pump_level=3;; 90) pump_level=4;;
+    esac
+  fi
+  local auto_pump=0
+  [ -f "$MODDIR/auto_pump" ] && auto_pump=1
+  echo "{\"battery\":\"${bat}\",\"temp_deg\":\"${temp_deg}\",\"power\":\"${power}\",\"cs\":\"${cs}\",\"threshold\":\"${threshold}\",\"auto_charge\":${auto_charge},\"charge_enabled\":${charge_enabled},\"fan_level\":\"${fan_level}\",\"auto_fan\":${auto_fan},\"auto_fan_screen_off\":${auto_fan_screen_off},\"temp_control\":${temp_ctrl},\"temp_ctrl_mode\":\"${temp_ctrl_mode}\",\"temp_ctrl_threshold\":\"${temp_ctrl_threshold}\",\"fan_enabled\":${fan_enabled},\"touch_enabled\":${touch_enabled},\"touch_boost\":${touch_boost},\"touch_mode\":\"${touch_mode}\",\"touch_apps\":\"${touch_apps}\",\"vibe_enabled\":${vibe_enabled},\"auto_vibe\":${auto_vibe},\"vibe_gain\":\"${vibe_gain}\",\"vibe_duration\":\"${vibe_duration}\",\"vibe_vmax\":\"${vibe_vmax}\",\"vibe_gain_def\":\"${vibe_gain_def}\",\"vibe_dur_def\":\"${vibe_dur_def}\",\"vibe_vmax_def\":\"${vibe_vmax_def}\",\"pump_available\":${pump_available},\"pump_level\":\"${pump_level}\",\"auto_pump\":${auto_pump},\"perf_pending\":${perf_pending},\"perf_profile\":\"${perf_profile}\",\"perf_enabled\":${perf_enabled},\"thermal_enabled\":${thermal_enabled},\"cluster_count\":${cluster_count},\"cpu0_max\":\"${cpu0_max}\",\"cpu4_max\":\"${cpu4_max}\",\"cpu7_max\":\"${cpu7_max}\",\"gpu_max\":\"${gpu_max}\",\"cpu_cur\":\"${cpu_cur}\",\"gpu_cur\":\"${gpu_cur}\",\"cpu_gov\":\"${cpu_gov}\",\"cpu0_hw_min\":\"${cpu0_hw_min}\",\"cpu0_hw_max\":\"${cpu0_hw_max}\",\"cpu4_hw_min\":\"${cpu4_hw_min}\",\"cpu4_hw_max\":\"${cpu4_hw_max}\",\"cpu7_hw_min\":\"${cpu7_hw_min}\",\"cpu7_hw_max\":\"${cpu7_hw_max}\",\"gpu_hw_min\":\"${gpu_hw_min}\",\"gpu_hw_max\":\"${gpu_hw_max}\",\"cpu0_steps\":\"${cpu0_steps}\",\"cpu4_steps\":\"${cpu4_steps}\",\"cpu7_steps\":\"${cpu7_steps}\",\"gpu_steps\":\"${gpu_steps}\"}" > "$WEBUI_STATUS"
 }
 
 PERF_KILL_PID=""
@@ -380,6 +420,7 @@ perf_reset_now() {
 }
 
 webui_loop() {
+    local TC_COUNT=0
     while true; do
     if [ -f "$WEBUI_CMD" ]; then
       local cmd=$(cat "$WEBUI_CMD" 2>/dev/null)
@@ -392,16 +433,39 @@ webui_loop() {
           auto_fan)
             if [ "$value" = "on" ]; then
               touch "$AUTO_FAN_FILE"
-              [ -e /sys/kernel/fan/fan_speed_level ] && chmod 644 /sys/kernel/fan/fan_speed_level 2>/dev/null && chmod 644 /sys/kernel/fan/fan_enable 2>/dev/null && echo 1 > /sys/kernel/fan/fan_enable && echo 5 > /sys/kernel/fan/fan_speed_level && chmod 444 /sys/kernel/fan/fan_speed_level 2>/dev/null
+              su system -c "chmod 644 /sys/kernel/fan/fan_speed_level /sys/kernel/fan/fan_enable 2>/dev/null; echo 1 > /sys/kernel/fan/fan_enable; echo 5 > /sys/kernel/fan/fan_speed_level; chmod 444 /sys/kernel/fan/fan_speed_level" 2>/dev/null
             else
               rm -f "$AUTO_FAN_FILE"
+              su system -c "chmod 644 /sys/kernel/fan/fan_enable 2>/dev/null; echo 0 > /sys/kernel/fan/fan_enable" 2>/dev/null
+            fi
+            ;;
+          auto_fan_screen_off)
+            if [ "$value" = "on" ]; then
+              touch "$FAN_SCREEN_OFF_FILE"
+            else
+              rm -f "$FAN_SCREEN_OFF_FILE"
+            fi
+            ;;
+          temp_control)
+            if [ "$value" = "off" ]; then
+              rm -f "$TEMP_CTRL_FILE" "$TEMP_CTRL_MODE_FILE" "$TEMP_CTRL_THRESHOLD_FILE"
+              su system -c "chmod 644 /sys/kernel/fan/fan_enable 2>/dev/null; echo 0 > /sys/kernel/fan/fan_enable" 2>/dev/null
+            elif [ "$value" = "auto" ]; then
+              touch "$TEMP_CTRL_FILE"
+              echo "auto" > "$TEMP_CTRL_MODE_FILE"
+            else
+              tc_mode=$(echo "$value" | cut -d'|' -f1)
+              tc_thr=$(echo "$value" | cut -d'|' -f2)
+              if [ "$tc_mode" = "custom" ] && [ -n "$tc_thr" ]; then
+                touch "$TEMP_CTRL_FILE"
+                echo "custom" > "$TEMP_CTRL_MODE_FILE"
+                echo "$tc_thr" > "$TEMP_CTRL_THRESHOLD_FILE"
+              fi
             fi
             ;;
           fan_level)
             if [ -n "$value" ] && [ -e /sys/kernel/fan/fan_speed_level ]; then
-              chmod 644 /sys/kernel/fan/fan_speed_level 2>/dev/null
-              echo "$value" > /sys/kernel/fan/fan_speed_level 2>/dev/null
-              chmod 444 /sys/kernel/fan/fan_speed_level 2>/dev/null
+              su system -c "chmod 644 /sys/kernel/fan/fan_speed_level 2>/dev/null; echo $value > /sys/kernel/fan/fan_speed_level; chmod 444 /sys/kernel/fan/fan_speed_level" 2>/dev/null
             fi
             ;;
 
@@ -506,6 +570,25 @@ webui_loop() {
             [ -e "$VIBE/duration_aw" ] && printf 0x%x "$cur_dur" > $VIBE/duration_aw 2>>"$ERRLOG"
             [ -e "$VIBE/vmax" ] && printf 0x%x "$cur_vmax" > $VIBE/vmax 2>>"$ERRLOG"
             ;;
+          auto_pump)
+            if [ "$value" = "on" ]; then
+              touch "$MODDIR/auto_pump"
+            else
+              rm -f "$MODDIR/auto_pump"
+              echo 0 > /proc/driver/micropump/enable 2>/dev/null
+            fi
+            ;;
+          pump_level)
+            if [ -n "$value" ] && [ "$value" -ge 1 ] && [ "$value" -le 4 ]; then
+              local pump_speed_val
+              case "$value" in
+                1) pump_speed_val=40;; 2) pump_speed_val=60;; 3) pump_speed_val=80;; 4) pump_speed_val=90;;
+              esac
+              echo 1 > /proc/driver/micropump/enable 2>/dev/null
+              echo 4 > /proc/driver/micropump/freq 2>/dev/null
+              echo $pump_speed_val > /proc/driver/micropump/speed 2>/dev/null
+            fi
+            ;;
           perf_apply)
             local p_cpu0=$(echo "$value" | cut -d'|' -f1)
             local p_cpu4=$(echo "$value" | cut -d'|' -f2)
@@ -532,6 +615,57 @@ webui_loop() {
             ;;
         esac
         rm -f "$WEBUI_CMD"
+      fi
+    fi
+    if [ -f "$FAN_SCREEN_OFF_FILE" ] && [ -e /sys/kernel/fan/fan_enable ]; then
+      if dumpsys power 2>/dev/null | grep -q 'mWakefulness=Awake'; then
+        fe=$(cat /sys/kernel/fan/fan_enable 2>/dev/null)
+        if [ "$fe" = "1" ]; then
+          touch "$FAN_WAS_ON_FILE" 2>/dev/null
+        else
+          rm -f "$FAN_WAS_ON_FILE" 2>/dev/null
+        fi
+      else
+        if [ -f "$FAN_WAS_ON_FILE" ]; then
+          fe=$(cat /sys/kernel/fan/fan_enable 2>/dev/null)
+          if [ "$fe" != "1" ]; then
+            fan_lvl=$(cat /sys/kernel/fan/fan_speed_level 2>/dev/null)
+            [ -z "$fan_lvl" ] && fan_lvl=5
+            [ "$fan_lvl" -le 0 ] && fan_lvl=5
+            su system -c "chmod 644 /sys/kernel/fan/fan_enable /sys/kernel/fan/fan_speed_level 2>/dev/null; echo 1 > /sys/kernel/fan/fan_enable; echo $fan_lvl > /sys/kernel/fan/fan_speed_level; chmod 444 /sys/kernel/fan/fan_speed_level" 2>/dev/null
+          fi
+        fi
+      fi
+    fi
+    TC_COUNT=$((TC_COUNT + 1))
+    if [ $((TC_COUNT % 5)) -eq 0 ] && [ -f "$TEMP_CTRL_FILE" ] && [ -e /sys/kernel/fan/fan_enable ]; then
+      temp_raw=$(cat /sys/class/power_supply/battery/temp 2>/dev/null)
+      if [ -n "$temp_raw" ]; then
+        current_temp=$(awk "BEGIN{printf \"%d\", $temp_raw/10}")
+        ctrl_mode="auto"
+        [ -f "$TEMP_CTRL_MODE_FILE" ] && ctrl_mode=$(cat "$TEMP_CTRL_MODE_FILE")
+        target_level=0
+        if [ "$ctrl_mode" = "auto" ]; then
+          if [ "$current_temp" -ge 40 ]; then target_level=5
+          elif [ "$current_temp" -ge 35 ]; then target_level=4
+          elif [ "$current_temp" -ge 30 ]; then target_level=3
+          fi
+        else
+          ctrl_thr=40
+          [ -f "$TEMP_CTRL_THRESHOLD_FILE" ] && ctrl_thr=$(cat "$TEMP_CTRL_THRESHOLD_FILE")
+          if [ "$current_temp" -ge "$ctrl_thr" ]; then target_level=5; fi
+        fi
+        fe=$(cat /sys/kernel/fan/fan_enable 2>/dev/null)
+        fl=$(cat /sys/kernel/fan/fan_speed_level 2>/dev/null)
+        if [ "$target_level" -gt 0 ]; then
+          if [ "$fe" != "1" ] || [ "$fl" != "$target_level" ]; then
+            su system -c "chmod 644 /sys/kernel/fan/fan_enable /sys/kernel/fan/fan_speed_level 2>/dev/null; echo 1 > /sys/kernel/fan/fan_enable; echo $target_level > /sys/kernel/fan/fan_speed_level; chmod 444 /sys/kernel/fan/fan_speed_level" 2>/dev/null
+          fi
+        else
+          if [ ! -f "$AUTO_FAN_FILE" ] && [ "$fe" = "1" ]; then
+            su system -c "chmod 644 /sys/kernel/fan/fan_enable 2>/dev/null; echo 0 > /sys/kernel/fan/fan_enable" 2>/dev/null
+          fi
+        fi
       fi
     fi
     webui_status

@@ -281,7 +281,7 @@
 
         .perf-ring-track{fill:none;stroke:rgba(0,0,0,.05);stroke-width:8}
 
-        .perf-ring-fill{fill:none;stroke:var(--accent-on);stroke-width:8;stroke-linecap:round}
+        .perf-ring-fill{fill:none;stroke:var(--accent-on);stroke-width:8;stroke-linecap:round;stroke-dasharray:264;stroke-dashoffset:264}
 
         .perf-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 
@@ -357,7 +357,7 @@
 
                                 <div class="brand-name">FanExtreme</div>
 
-                                <div class="brand-sub">v3.0.0 · NUbia RedMagic</div>
+                                <div class="brand-sub">v3.1.0 · NUbia RedMagic</div>
 
                             </div>
 
@@ -437,6 +437,54 @@
 
                                     </div>
 
+                                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+
+                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)">熄屏保持开启</span>
+
+                                        <button class="ctrl-toggle" id="fanScreenOffSw" onclick="handleFanScreenOffToggle(event)"></button>
+
+                                    </div>
+
+                                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+
+                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)">温度联动</span>
+
+                                        <div style="display:flex;align-items:center;gap:8px">
+
+                                            <button class="action-btn primary compact" id="tempApplyBtn" onclick="handleTempApply(event)" style="display:none">应用</button>
+
+                                            <button class="ctrl-toggle" id="tempCtrlSw" onclick="handleTempCtrlToggle(event)"></button>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div id="tempCtrlOpts" style="display:none;margin-top:8px">
+
+                                        <div style="display:flex;gap:8px;margin-bottom:8px">
+
+                                            <button class="mode-btn" id="tempCtrlAuto" onclick="setTempCtrlMode('auto')">自动开启</button>
+
+                                            <button class="mode-btn" id="tempCtrlCustom" onclick="setTempCtrlMode('custom')">自定义开启</button>
+
+                                        </div>
+
+                                        <div id="tempCtrlCustomWrap" style="display:none">
+
+                                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+
+                                                <span style="font-size:11px;color:var(--txt2);font-family:var(--mono);white-space:nowrap">触发温度</span>
+
+                                                <input class="input-field" id="tempCtrlThr" type="number" value="40" min="20" max="70" style="min-width:0;width:80px;text-align:center;padding:8px" oninput="onTempThrInput()">
+
+                                                <span style="font-size:11px;color:var(--txt2);font-family:var(--mono);white-space:nowrap">°C</span>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -511,9 +559,45 @@
 
                                         <div style="text-align:right">
 
-                                            <button class="action-btn primary compact" onclick="saveTouchApps(event)">保存</button>
+                                             <button class="action-btn primary compact" onclick="saveTouchApps(event)">保存</button>
 
                                         </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="ctrl-card" id="cPump">
+
+                                <div class="ctrl-top">
+
+                                    <div class="ctrl-dot" id="pumpDot" style="background:var(--txt3);color:var(--txt3)"></div>
+
+                                    <div class="ctrl-main">
+
+                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><circle cx="12" cy="12" r="4"/></svg> 液冷控制</div>
+
+                                        <div class="ctrl-desc" id="pumpDesc">STANDBY</div>
+
+                                    </div>
+
+                                    <button class="ctrl-toggle" id="pumpSw" onclick="handlePumpToggle(event)"></button>
+
+                                </div>
+
+                                <div class="ctrl-expand-inner">
+
+                                    <div class="slider-wrap">
+
+                                        <span class="slider-label">挡位</span>
+
+                                        <input type="range" class="slider-track" id="pumpRange" min="1" max="4" value="4" oninput="onPumpRangeInput()">
+
+                                        <span class="slider-val" id="pumpRv">4</span>
+
+                                        <button class="action-btn primary compact" onclick="handlePumpApply(event)">应用</button>
 
                                     </div>
 
@@ -762,9 +846,11 @@
 
                         <div class="about-item">官网：<br><span class="about-link" onclick="openInBrowser('https://ling9ling7.github.io/RedMagic-FanExtreme/')">ling9ling7.github.io/RedMagic-FanExtreme</span></div>
 
+                        <div class="about-item">TG频道：<br><span class="about-link" onclick="openInBrowser('https://t.me/FanExtreme')">t.me/FanExtreme</span></div>
+
                         <div class="about-divider"></div>
 
-                        <div class="about-item">版本：v3.0.0</div>
+                        <div class="about-item">版本：v3.1.0</div>
 
                         <div class="about-item">内核模块 · 仅限红魔设备</div>
                         <div class="about-divider"></div>
@@ -781,9 +867,8 @@
 
                     </div>
 
-                </div>
-
-            </div>
+                            </div>
+                        </div>
 
         </div>
 
@@ -1280,15 +1365,17 @@
 
             vibeDur: { pending: null, applying: null },
 
-            vibeVmax: { pending: null, applying: null }
+            vibeVmax: { pending: null, applying: null },
+            pumpLevel: { pending: null, applying: null },
+            tempControl: { pending: false, applying: false, mode: 'auto', threshold: '40' }
 
         };
 
 
 
-        var locks = { fan: 0, charge: 0, touch: 0, vibe: 0, touchMode: 0 };
+        var locks = { fan: 0, fanScreenOff: 0, charge: 0, touch: 0, vibe: 0, touchMode: 0, pump: 0, tempCtl: 0 };
 
-        var expect = { fan: null, charge: null, touch: null, vibe: null, touchMode: null };
+        var expect = { fan: null, fanScreenOff: null, charge: null, touch: null, vibe: null, touchMode: null, pump: null, tempCtl: null };
 
         var logDebounceTimer = null;
 
@@ -1348,6 +1435,85 @@
 
             triggerCardJelly(e.currentTarget, e); 
 
+        }
+
+
+        function handleFanScreenOffToggle(e) {
+
+            e.stopPropagation();
+
+            var el = document.getElementById('fanScreenOffSw');
+
+            var on = el.classList.contains('on');
+
+            expect.fanScreenOff = !on; sw(el, !on); locks.fanScreenOff = Date.now() + 4000;
+
+            cmd('auto_fan_screen_off', on ? 'off' : 'on');
+
+            toast(on ? '熄屏保持已关闭' : '熄屏保持已开启');
+
+            triggerCardJelly(e.currentTarget, e);
+
+        }
+
+        function handleTempCtrlToggle(e) {
+            e.stopPropagation();
+            var el = document.getElementById('tempCtrlSw');
+            var on = el.classList.contains('on');
+            sw(el, !on); locks.tempCtl = Date.now() + 4000;
+            if (on) {
+                cmd('temp_control', 'off');
+                document.getElementById('tempCtrlOpts').style.display = 'none';
+                document.getElementById('tempApplyBtn').style.display = 'none';
+                uiState.tempControl.pending = false;
+                toast('温度联动已关闭');
+            } else {
+                document.getElementById('tempCtrlOpts').style.display = 'block';
+                applyTempCtrlUI(uiState.tempControl.mode);
+                uiState.tempControl.pending = true;
+                document.getElementById('tempApplyBtn').style.display = 'inline-block';
+                toast('温度联动待配置 · 请选择模式后应用');
+            }
+            triggerCardJelly(e.currentTarget, e);
+        }
+
+        function applyTempCtrlUI(mode) {
+            document.getElementById('tempCtrlAuto').classList.toggle('active', mode === 'auto');
+            document.getElementById('tempCtrlCustom').classList.toggle('active', mode === 'custom');
+            document.getElementById('tempCtrlCustomWrap').style.display = mode === 'custom' ? 'block' : 'none';
+        }
+
+        function setTempCtrlMode(mode) {
+            applyTempCtrlUI(mode);
+            document.getElementById('tempApplyBtn').style.display = 'inline-block';
+            uiState.tempControl.mode = mode;
+            uiState.tempControl.pending = true;
+        }
+
+        function onTempThrInput() {
+            var val = document.getElementById('tempCtrlThr').value;
+            document.getElementById('tempApplyBtn').style.display = 'inline-block';
+            uiState.tempControl.threshold = val;
+            uiState.tempControl.pending = true;
+        }
+
+        function handleTempApply(e) {
+            e.stopPropagation();
+            var mode = uiState.tempControl.mode;
+            var thr = document.getElementById('tempCtrlThr').value || '40';
+            if (mode === 'auto') {
+                cmd('temp_control', 'auto');
+                toast('自动温度联动已应用');
+            } else {
+                uiState.tempControl.threshold = thr;
+                cmd('temp_control', 'custom|' + thr);
+                toast('触发温度已设为 ' + thr + '°C');
+            }
+            document.getElementById('tempApplyBtn').style.display = 'none';
+            uiState.tempControl.pending = false;
+            uiState.tempControl.applying = true;
+            document.getElementById('cFan').classList.remove('pending');
+            triggerCardJelly(e.currentTarget, e);
         }
 
 
@@ -1508,6 +1674,35 @@
 
             triggerCardJelly(e.currentTarget, e);
 
+        }
+
+        function handlePumpToggle(e) {
+            e.stopPropagation();
+            var el = document.getElementById('pumpSw');
+            var on = el.classList.contains('on');
+            expect.pump = !on; sw(el, !on); locks.pump = Date.now() + 4000;
+            cmd('auto_pump', on ? 'off' : 'on');
+            toast(on ? '液冷控制已关闭' : '液冷控制已开启');
+            triggerCardJelly(e.currentTarget, e);
+        }
+
+        function onPumpRangeInput() {
+            var val = document.getElementById('pumpRange').value;
+            document.getElementById('pumpRv').textContent = val;
+            uiState.pumpLevel.pending = val;
+            document.getElementById('pumpDesc').textContent = '待应用: LV.' + val;
+            document.getElementById('cPump').classList.add('pending');
+        }
+
+        function handlePumpApply(e) {
+            e.stopPropagation();
+            var v = document.getElementById('pumpRange').value;
+            uiState.pumpLevel.applying = v;
+            uiState.pumpLevel.pending = null;
+            document.getElementById('pumpDesc').textContent = '正在写入内核...';
+            cmd('pump_level', v);
+            toast('液冷控制挡位已设为 LV.' + v);
+            triggerCardJelly(e.currentTarget, e);
         }
 
 
@@ -1677,6 +1872,31 @@
                     if (fanOn) cFan.classList.add('active'); else cFan.classList.remove('active');
 
 
+                    var fanScreenOffOn = s.auto_fan_screen_off === 1;
+                    if (Date.now() < locks.fanScreenOff && expect.fanScreenOff !== null && fanScreenOffOn === expect.fanScreenOff) { expect.fanScreenOff = null; }
+                    if (Date.now() >= locks.fanScreenOff) sw(document.getElementById('fanScreenOffSw'), fanScreenOffOn);
+
+                    var tempCtrlOn = s.temp_control === 1;
+                    if (uiState.tempControl.pending) {
+                        document.getElementById('tempApplyBtn').style.display = 'inline-block';
+                    } else {
+                        if (Date.now() >= locks.tempCtl) sw(document.getElementById('tempCtrlSw'), tempCtrlOn);
+                        document.getElementById('tempCtrlOpts').style.display = tempCtrlOn ? 'block' : 'none';
+                        if (tempCtrlOn) {
+                            var tcm = s.temp_ctrl_mode || 'auto';
+                            document.getElementById('tempCtrlAuto').classList.toggle('active', tcm === 'auto');
+                            document.getElementById('tempCtrlCustom').classList.toggle('active', tcm === 'custom');
+                            document.getElementById('tempCtrlCustomWrap').style.display = tcm === 'custom' ? 'block' : 'none';
+                            document.getElementById('tempCtrlThr').value = s.temp_ctrl_threshold || '40';
+                            uiState.tempControl.mode = tcm;
+                            uiState.tempControl.threshold = s.temp_ctrl_threshold || '40';
+                        }
+                        document.getElementById('tempApplyBtn').style.display = 'none';
+                    }
+                    if (uiState.tempControl.applying && !uiState.tempControl.pending) {
+                        uiState.tempControl.applying = false;
+                    }
+
 
                     // 检查写入是否完成对齐
 
@@ -1708,7 +1928,7 @@
 
                         document.getElementById('fanRange').value = s.fan_level || 5;
 
-                        document.getElementById('fanDesc').textContent = fanOn ? 'LV.' + s.fan_level + ' · 运行中' : '待机';
+                        document.getElementById('fanDesc').textContent = (s.temp_control === 1) ? (s.temp_ctrl_mode === 'auto' ? '温控联动 · 自动' : '温控联动 · ≥' + (s.temp_ctrl_threshold || '40') + '°C 5档') : (fanOn ? 'LV.' + s.fan_level + ' · 运行中' : '待机');
 
                         cFan.classList.remove('pending');
 
@@ -1837,6 +2057,32 @@
                     }
 
                 } else { cVibe.classList.add('disabled'); }
+
+                // ---------------- PUMP 刷新保护 ----------------
+                var cPump = document.getElementById('cPump');
+                if (s.pump_available === 1) {
+                    cPump.classList.remove('disabled');
+                    var pumpOn = s.auto_pump === 1;
+                    if (Date.now() < locks.pump && expect.pump !== null && pumpOn === expect.pump) { expect.pump = null; }
+                    if (Date.now() >= locks.pump) sw(document.getElementById('pumpSw'), pumpOn);
+                    dot(document.getElementById('pumpDot'), pumpOn, 'var(--gauge-green)');
+                    if (pumpOn) cPump.classList.add('active'); else cPump.classList.remove('active');
+                    if (uiState.pumpLevel.applying !== null && String(s.pump_level) === String(uiState.pumpLevel.applying)) {
+                        uiState.pumpLevel.applying = null;
+                    }
+                    if (uiState.pumpLevel.pending !== null) {
+                        document.getElementById('pumpRv').textContent = uiState.pumpLevel.pending;
+                    } else if (uiState.pumpLevel.applying !== null) {
+                        document.getElementById('pumpRv').textContent = uiState.pumpLevel.applying;
+                        document.getElementById('pumpRange').value = uiState.pumpLevel.applying;
+                        document.getElementById('pumpDesc').textContent = '内核对齐中...';
+                    } else {
+                        document.getElementById('pumpRv').textContent = s.pump_level || '--';
+                        document.getElementById('pumpRange').value = s.pump_level || 4;
+                        document.getElementById('pumpDesc').textContent = pumpOn ? 'LV.' + s.pump_level + ' · 运行中' : '待机';
+                        cPump.classList.remove('pending');
+                    }
+                } else { cPump.classList.add('disabled'); }
 
 
 
@@ -2471,13 +2717,10 @@
 
             }
 
-            document.getElementById('cpuPct').textContent = cpuGHz;
-
-            document.getElementById('gpuPct').textContent = gpuMHz || '--';
-
-            document.getElementById('cpuUnit').textContent = 'GHz';
-
-            document.getElementById('gpuUnit').textContent = 'MHz';
+            var ep = document.getElementById('cpuPct'); if (ep) ep.textContent = cpuGHz;
+            var ep2 = document.getElementById('gpuPct'); if (ep2) ep2.textContent = gpuMHz || '--';
+            var eu = document.getElementById('cpuUnit'); if (eu) eu.textContent = 'GHz';
+            var eu2 = document.getElementById('gpuUnit'); if (eu2) eu2.textContent = 'MHz';
 
         }
 
@@ -2497,7 +2740,7 @@
 
                     var log=LOG_PATH;
 
-                    ksu.exec('echo "=== FanExtreme v3.0.0 调试日志 ===" > '+log);
+                    ksu.exec('echo "=== FanExtreme v3.1.0 调试日志 ===" > '+log);
 
                     ksu.exec('echo "时间: $(date)" >> '+log);
 
