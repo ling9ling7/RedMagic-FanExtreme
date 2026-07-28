@@ -31,8 +31,11 @@ if [ "$(cfg '充电加速')" = "1" ]; then
         [ -e /sys/class/qcom-battery/restrict_cur ] && break
         sleep 1
     done
-    echo 0 > /sys/class/qcom-battery/restrict_cur 2>>"$ERRLOG" || echo "[FAIL] restrict_cur=$?" >>"$ERRLOG"
-    echo 0 > /sys/class/qcom-battery/restrict_chg 2>>"$ERRLOG" || echo "[FAIL] restrict_chg=$?" >>"$ERRLOG"
+    echo 0 > /sys/class/qcom-battery/restrict_cur 2>>"$ERRLOG"
+    echo 0 > /sys/class/qcom-battery/restrict_chg 2>>"$ERRLOG"
+    echo 1 > /sys/class/qcom-battery/charging_enabled 2>>"$ERRLOG"
+    echo 1 > /sys/class/qcom-battery/battery_charging_enabled 2>>"$ERRLOG"
+    su system -c "chmod 644 /sys/class/qcom-battery/screen_is_on 2>/dev/null; echo 0 > /sys/class/qcom-battery/screen_is_on; chmod 444 /sys/class/qcom-battery/screen_is_on" 2>/dev/null
 fi
 
 block_cloud_control() {
@@ -269,6 +272,10 @@ webui_status() {
   [ -e /sys/class/kgsl/kgsl-3d0/devfreq/max_freq ] && gpu_max=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/max_freq)
   local cpu_gov=""
   [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ] && cpu_gov=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
+  local cpu_avail_gov=""
+  if [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors ]; then
+    cpu_avail_gov=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors | sed 's/ *$//;s/ /,/g')
+  fi
   local cpu0_hw_max="" cpu4_hw_max="" cpu7_hw_max="" gpu_hw_max=""
   local cpu0_hw_min="" cpu4_hw_min="" cpu7_hw_min="" gpu_hw_min=""
   local cluster_count=0
@@ -276,12 +283,42 @@ webui_status() {
     [ -d "$d" ] && cluster_count=$((cluster_count + 1))
   done
   local a=""
-  a=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies 2>/dev/null)
-  [ -n "$a" ] && { cpu0_hw_min=$(echo $a | awk '{print $1}'); cpu0_hw_max=$(echo $a | awk '{print $NF}'); cpu0_steps=$(echo $a | tr " " ","); }
-  a=$(cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_available_frequencies 2>/dev/null)
-  [ -n "$a" ] && { cpu4_hw_min=$(echo $a | awk '{print $1}'); cpu4_hw_max=$(echo $a | awk '{print $NF}'); cpu4_steps=$(echo $a | tr " " ","); }
-  a=$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_available_frequencies 2>/dev/null)
-  [ -n "$a" ] && { cpu7_hw_min=$(echo $a | awk '{print $1}'); cpu7_hw_max=$(echo $a | awk '{print $NF}'); cpu7_steps=$(echo $a | tr " " ","); }
+  local hw_min="" hw_max="" st=""
+  # CPU: read hardware limits, synthesize step list
+  for c in cpu0 cpu4 cpu7; do
+    hw_min=""; hw_max=""; st=""
+    # prefer cpuinfo_max_freq; fallback to available_frequencies extremes
+    a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_max_freq 2>/dev/null)
+    [ -n "$a" ] && hw_max=$a
+    a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_min_freq 2>/dev/null)
+    [ -n "$a" ] && hw_min=$a
+    # fallback: use available_frequencies first/last
+    if [ -z "$hw_min" ] || [ -z "$hw_max" ]; then
+      a=$(cat /sys/devices/system/cpu/$c/cpufreq/scaling_available_frequencies 2>/dev/null)
+      [ -n "$a" ] && {
+        [ -z "$hw_min" ] && hw_min=$(echo $a | awk '{print $1}')
+        [ -z "$hw_max" ] && hw_max=$(echo $a | awk '{print $NF}')
+      }
+    fi
+    # generate steps in 100 MHz increments
+    if [ -n "$hw_min" ] && [ -n "$hw_max" ] && [ "$hw_min" -gt 0 ]; then
+      step=$hw_min
+      while [ "$step" -le "$hw_max" ]; do
+        st="${st}${step},"
+        step=$((step + 100000))
+      done
+      st="${st%,}"
+    fi
+    case $c in
+      cpu0)
+        cpu0_hw_min=$hw_min; cpu0_hw_max=$hw_max; cpu0_steps=$st ;;
+      cpu4)
+        cpu4_hw_min=$hw_min; cpu4_hw_max=$hw_max; cpu4_steps=$st ;;
+      cpu7)
+        cpu7_hw_min=$hw_min; cpu7_hw_max=$hw_max; cpu7_steps=$st ;;
+    esac
+  done
+  # GPU: read available_frequencies, fallback to synthesize
   a=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies 2>/dev/null)
   if [ -n "$a" ]; then
     gpu_hw_min=$(echo $a | tr ' ' '\n' | sort -n | head -1); gpu_hw_max=$(echo $a | tr ' ' '\n' | sort -n | tail -1); gpu_steps=$(echo $a | tr ' ' '\n' | sort -n | tr '\n' ',' | sed 's/,$//')
@@ -320,7 +357,7 @@ webui_status() {
   fi
   local auto_pump=0
   [ -f "$MODDIR/auto_pump" ] && auto_pump=1
-  echo "{\"battery\":\"${bat}\",\"temp_deg\":\"${temp_deg}\",\"power\":\"${power}\",\"cs\":\"${cs}\",\"threshold\":\"${threshold}\",\"auto_charge\":${auto_charge},\"charge_enabled\":${charge_enabled},\"fan_level\":\"${fan_level}\",\"auto_fan\":${auto_fan},\"auto_fan_screen_off\":${auto_fan_screen_off},\"temp_control\":${temp_ctrl},\"temp_ctrl_mode\":\"${temp_ctrl_mode}\",\"temp_ctrl_threshold\":\"${temp_ctrl_threshold}\",\"fan_enabled\":${fan_enabled},\"touch_enabled\":${touch_enabled},\"touch_boost\":${touch_boost},\"touch_mode\":\"${touch_mode}\",\"touch_apps\":\"${touch_apps}\",\"vibe_enabled\":${vibe_enabled},\"auto_vibe\":${auto_vibe},\"vibe_gain\":\"${vibe_gain}\",\"vibe_duration\":\"${vibe_duration}\",\"vibe_vmax\":\"${vibe_vmax}\",\"vibe_gain_def\":\"${vibe_gain_def}\",\"vibe_dur_def\":\"${vibe_dur_def}\",\"vibe_vmax_def\":\"${vibe_vmax_def}\",\"pump_available\":${pump_available},\"pump_level\":\"${pump_level}\",\"auto_pump\":${auto_pump},\"perf_pending\":${perf_pending},\"perf_profile\":\"${perf_profile}\",\"perf_enabled\":${perf_enabled},\"thermal_enabled\":${thermal_enabled},\"cluster_count\":${cluster_count},\"cpu0_max\":\"${cpu0_max}\",\"cpu4_max\":\"${cpu4_max}\",\"cpu7_max\":\"${cpu7_max}\",\"gpu_max\":\"${gpu_max}\",\"cpu_cur\":\"${cpu_cur}\",\"gpu_cur\":\"${gpu_cur}\",\"cpu_gov\":\"${cpu_gov}\",\"cpu0_hw_min\":\"${cpu0_hw_min}\",\"cpu0_hw_max\":\"${cpu0_hw_max}\",\"cpu4_hw_min\":\"${cpu4_hw_min}\",\"cpu4_hw_max\":\"${cpu4_hw_max}\",\"cpu7_hw_min\":\"${cpu7_hw_min}\",\"cpu7_hw_max\":\"${cpu7_hw_max}\",\"gpu_hw_min\":\"${gpu_hw_min}\",\"gpu_hw_max\":\"${gpu_hw_max}\",\"cpu0_steps\":\"${cpu0_steps}\",\"cpu4_steps\":\"${cpu4_steps}\",\"cpu7_steps\":\"${cpu7_steps}\",\"gpu_steps\":\"${gpu_steps}\"}" > "$WEBUI_STATUS"
+  echo "{\"battery\":\"${bat}\",\"temp_deg\":\"${temp_deg}\",\"power\":\"${power}\",\"cs\":\"${cs}\",\"threshold\":\"${threshold}\",\"auto_charge\":${auto_charge},\"charge_enabled\":${charge_enabled},\"fan_level\":\"${fan_level}\",\"auto_fan\":${auto_fan},\"auto_fan_screen_off\":${auto_fan_screen_off},\"temp_control\":${temp_ctrl},\"temp_ctrl_mode\":\"${temp_ctrl_mode}\",\"temp_ctrl_threshold\":\"${temp_ctrl_threshold}\",\"fan_enabled\":${fan_enabled},\"touch_enabled\":${touch_enabled},\"touch_boost\":${touch_boost},\"touch_mode\":\"${touch_mode}\",\"touch_apps\":\"${touch_apps}\",\"vibe_enabled\":${vibe_enabled},\"auto_vibe\":${auto_vibe},\"vibe_gain\":\"${vibe_gain}\",\"vibe_duration\":\"${vibe_duration}\",\"vibe_vmax\":\"${vibe_vmax}\",\"vibe_gain_def\":\"${vibe_gain_def}\",\"vibe_dur_def\":\"${vibe_dur_def}\",\"vibe_vmax_def\":\"${vibe_vmax_def}\",\"pump_available\":${pump_available},\"pump_level\":\"${pump_level}\",\"auto_pump\":${auto_pump},\"perf_pending\":${perf_pending},\"perf_profile\":\"${perf_profile}\",\"perf_enabled\":${perf_enabled},\"thermal_enabled\":${thermal_enabled},\"cluster_count\":${cluster_count},\"cpu0_max\":\"${cpu0_max}\",\"cpu4_max\":\"${cpu4_max}\",\"cpu7_max\":\"${cpu7_max}\",\"gpu_max\":\"${gpu_max}\",\"cpu_cur\":\"${cpu_cur}\",\"gpu_cur\":\"${gpu_cur}\",\"cpu_gov\":\"${cpu_gov}\",\"cpu_avail_gov\":\"${cpu_avail_gov}\",\"cpu0_hw_min\":\"${cpu0_hw_min}\",\"cpu0_hw_max\":\"${cpu0_hw_max}\",\"cpu4_hw_min\":\"${cpu4_hw_min}\",\"cpu4_hw_max\":\"${cpu4_hw_max}\",\"cpu7_hw_min\":\"${cpu7_hw_min}\",\"cpu7_hw_max\":\"${cpu7_hw_max}\",\"gpu_hw_min\":\"${gpu_hw_min}\",\"gpu_hw_max\":\"${gpu_hw_max}\",\"cpu0_steps\":\"${cpu0_steps}\",\"cpu4_steps\":\"${cpu4_steps}\",\"cpu7_steps\":\"${cpu7_steps}\",\"gpu_steps\":\"${gpu_steps}\"}" > "$WEBUI_STATUS"
 }
 
 PERF_KILL_PID=""
@@ -674,6 +711,9 @@ webui_loop() {
         fi
       fi
     fi
+    if [ "$(cfg '充电加速')" = "1" ]; then
+      echo 0 > /sys/class/qcom-battery/screen_is_on 2>/dev/null
+    fi
     webui_status
     sleep 1
   done
@@ -710,6 +750,20 @@ if [ "$(cfg '充电分离')" = "1" ]; then
       else
         sleep 3
       fi
+    done
+  ) &
+fi
+
+# 充电加速维护：防止系统刷回限流
+if [ "$(cfg '充电加速')" = "1" ]; then
+  (
+    while true; do
+      echo 1 > /sys/class/qcom-battery/charging_enabled 2>/dev/null
+      echo 1 > /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null
+      if [ -e /sys/class/qcom-battery/screen_is_on ]; then
+        su system -c "chmod 644 /sys/class/qcom-battery/screen_is_on 2>/dev/null; echo 0 > /sys/class/qcom-battery/screen_is_on; chmod 444 /sys/class/qcom-battery/screen_is_on" 2>/dev/null
+      fi
+      sleep 30
     done
   ) &
 fi

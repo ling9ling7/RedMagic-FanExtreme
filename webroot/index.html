@@ -303,6 +303,10 @@
 
         .mode-btn.active{border-color:var(--accent-on);background:var(--accent-on);color:#fff}
 
+        .drawer{max-height:0;overflow:hidden;opacity:0;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease,margin .35s ease}
+
+        .drawer.open{max-height:260px;opacity:1;margin-top:8px}
+
 .save-btn{margin-top:8px;padding:8px 20px;background:var(--gauge-green);border:none;color:#fff;border-radius:10px;cursor:pointer;font-size:11px;font-family:var(--mono);transition:opacity .2s}
 
         .save-btn:active{opacity:.8}
@@ -357,7 +361,7 @@
 
                                 <div class="brand-name">FanExtreme</div>
 
-                                <div class="brand-sub">v3.1.1 · NUbia RedMagic</div>
+                                <div class="brand-sub">v3.1.2 · NUbia RedMagic</div>
 
                             </div>
 
@@ -459,7 +463,7 @@
 
                                     </div>
 
-                                    <div id="tempCtrlOpts" style="display:none;margin-top:8px">
+                                    <div id="tempCtrlOpts" class="drawer">
 
                                         <div style="display:flex;gap:8px;margin-bottom:8px">
 
@@ -469,7 +473,7 @@
 
                                         </div>
 
-                                        <div id="tempCtrlCustomWrap" style="display:none">
+                                        <div id="tempCtrlCustomWrap" class="drawer">
 
                                             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
 
@@ -553,7 +557,7 @@
 
                                     </div>
 
-                                    <div id="touchAppsWrap" style="display:none">
+                                    <div id="touchAppsWrap" class="drawer">
 
                                         <textarea class="input-field" id="touchApps" rows="3" placeholder="每行一个包名，如&#10;com.tencent.tmgp.sgame&#10;com.miHoYo.Yuanshen" style="resize:none;font-size:11px;margin-bottom:8px;width:100%;box-sizing:border-box"></textarea>
 
@@ -787,17 +791,7 @@
 
                                         <span class="slider-label">调度器</span>
 
-                                        <select class="input-field" id="cpuGov" onchange="onPerfInput()">
-
-                                            <option value="schedutil">schedutil</option>
-
-                                            <option value="performance">performance</option>
-
-                                            <option value="powersave">powersave</option>
-
-                                            <option value="conservative">conservative</option>
-
-                                        </select>
+                                        <select class="input-field" id="cpuGov" onchange="onPerfInput()"></select>
 
                                     </div>
 
@@ -821,7 +815,8 @@
                         <div style="margin:8px 16px;padding:12px 14px;background:var(--bg2);border-radius:10px;font-size:11px;color:var(--txt2);line-height:1.7">
                             <b style="color:var(--blue)">关于 CPU 调度器</b><br>
                             CPU 调度器决定处理器频率如何根据负载自动升降，不同的调度策略会影响手机的流畅度和耗电。<br>
-                            <b>schedutil</b>（推荐）：根据实时负载智能调节，兼顾省电与流畅<br>
+                            <b>walt</b>（默认）：高通 WALT 调度，比 schedutil 更跟手省电<br>
+                            <b>schedutil</b>：根据实时负载智能调节，兼顾省电与流畅<br>
                             <b>performance</b>：始终锁定最高频率，性能最强但明显费电发热<br>
                             <b>powersave</b>：始终锁定最低频率，极致省电但会卡顿<br>
                             <b>conservative</b>：缓慢升降频率曲线，偏向省电保守
@@ -850,7 +845,7 @@
 
                         <div class="about-divider"></div>
 
-                        <div class="about-item">版本：v3.1.1</div>
+                        <div class="about-item">版本：v3.1.2</div>
 
                         <div class="about-item">内核模块 · 仅限红魔设备</div>
                         <div class="about-divider"></div>
@@ -1005,6 +1000,7 @@
 
         wrapper.addEventListener('touchmove', (e) => {
 
+            if (e.target.tagName === 'INPUT' && e.target.type === 'range') return;
             if (!touchMoved) {
 
                 const dx = e.touches[0].clientX - touchStartX;
@@ -1019,6 +1015,7 @@
 
         wrapper.addEventListener('touchend', (e) => {
 
+            if (e.target.tagName === 'INPUT' && e.target.type === 'range') return;
             if (!touchMoved) return;
 
             const dx = e.changedTouches[0].clientX - touchStartX;
@@ -1413,6 +1410,8 @@
 
         var VBE = '/sys/class/leds/vibrator';
 
+        var THR = '/sdcard/FanExtreme/threshold';
+
         function cmd(a, v) {
 
             var d = JSON.stringify({ action: a, value: v || '' });
@@ -1509,14 +1508,14 @@
                 sh('rm -f ' + ATC + ' ' + ATCM + ' ' + ATCT + '; su system -c "chmod 644 ' + FAN_SYS + '/fan_enable; echo 0 > ' + FAN_SYS + '/fan_enable"');
                 locks.tempCtl = Date.now() + 4000;
                 cmd('temp_control', 'off');
-                document.getElementById('tempCtrlOpts').style.display = 'none';
+                document.getElementById('tempCtrlOpts').classList.remove('open');
                 document.getElementById('tempApplyBtn').style.display = 'none';
                 uiState.tempControl.pending = false;
                 expect.tempCtl = false;
                 toast('温度联动已关闭');
             } else {
                 locks.tempCtl = Date.now() + 4000;
-                document.getElementById('tempCtrlOpts').style.display = 'block';
+                document.getElementById('tempCtrlOpts').classList.add('open');
                 applyTempCtrlUI(uiState.tempControl.mode);
                 uiState.tempControl.pending = true;
                 document.getElementById('tempApplyBtn').style.display = 'inline-block';
@@ -1529,7 +1528,7 @@
         function applyTempCtrlUI(mode) {
             document.getElementById('tempCtrlAuto').classList.toggle('active', mode === 'auto');
             document.getElementById('tempCtrlCustom').classList.toggle('active', mode === 'custom');
-            document.getElementById('tempCtrlCustomWrap').style.display = mode === 'custom' ? 'block' : 'none';
+            document.getElementById('tempCtrlCustomWrap').classList.toggle('open', mode === 'custom');
         }
 
         function setTempCtrlMode(mode) {
@@ -1591,6 +1590,8 @@
             e.stopPropagation(); 
 
             var v = document.getElementById('fanRange').value;
+
+            sh('su system -c "chmod 644 ' + FAN_SYS + '/fan_speed_level; echo ' + v + ' > ' + FAN_SYS + '/fan_speed_level; chmod 444 ' + FAN_SYS + '/fan_speed_level"');
 
             uiState.fanLevel.applying = v;
 
@@ -1655,6 +1656,8 @@
             var v = document.getElementById('thrVal').value;
 
             if (!v || v < 20 || v > 100) { toast('阈值范围 20-100'); return; }
+
+            sh('echo ' + v + ' > ' + THR);
 
             uiState.threshold.applying = v;
 
@@ -1766,6 +1769,8 @@
         function handlePumpApply(e) {
             e.stopPropagation();
             var v = document.getElementById('pumpRange').value;
+            var spd = {1:40,2:60,3:80,4:90}[v] || 90;
+            sh('su system -c "chmod 644 /proc/driver/micropump/enable /proc/driver/micropump/freq /proc/driver/micropump/speed; echo 1 > /proc/driver/micropump/enable; echo 4 > /proc/driver/micropump/freq; echo ' + spd + ' > /proc/driver/micropump/speed; chmod 444 /proc/driver/micropump/speed"');
             uiState.pumpLevel.applying = v;
             uiState.pumpLevel.pending = null;
             document.getElementById('pumpDesc').textContent = '正在写入内核...';
@@ -1782,7 +1787,7 @@
 
             document.getElementById('touchModePerapp').classList.toggle('active', mode === 'perapp');
 
-            document.getElementById('touchAppsWrap').style.display = mode === 'perapp' ? 'block' : 'none';
+            document.getElementById('touchAppsWrap').classList.toggle('open', mode === 'perapp');
 
             cmd('touch_mode', mode);
 
@@ -1958,12 +1963,12 @@
                     } else {
                         if (Date.now() >= locks.tempCtl) {
                             sw(document.getElementById('tempCtrlSw'), tempCtrlOn);
-                            document.getElementById('tempCtrlOpts').style.display = tempCtrlOn ? 'block' : 'none';
+                            document.getElementById('tempCtrlOpts').classList.toggle('open', tempCtrlOn);
                             if (tempCtrlOn) {
                                 var tcm = s.temp_ctrl_mode || 'auto';
                                 document.getElementById('tempCtrlAuto').classList.toggle('active', tcm === 'auto');
                                 document.getElementById('tempCtrlCustom').classList.toggle('active', tcm === 'custom');
-                                document.getElementById('tempCtrlCustomWrap').style.display = tcm === 'custom' ? 'block' : 'none';
+                                document.getElementById('tempCtrlCustomWrap').classList.toggle('open', tcm === 'custom');
                                 document.getElementById('tempCtrlThr').value = s.temp_ctrl_threshold || '40';
                                 uiState.tempControl.mode = tcm;
                                 uiState.tempControl.threshold = s.temp_ctrl_threshold || '40';
@@ -2194,7 +2199,7 @@
 
                         document.getElementById('touchModePerapp').classList.toggle('active', tm === 'perapp');
 
-                        document.getElementById('touchAppsWrap').style.display = tm === 'perapp' ? 'block' : 'none';
+                        document.getElementById('touchAppsWrap').classList.toggle('open', tm === 'perapp');
 
                         if (tm === 'perapp' && s.touch_apps) document.getElementById('touchApps').value = s.touch_apps.replace(/,/g, '\n');
 
@@ -2502,7 +2507,17 @@
 
                 }
 
-                if (perfRetry < 3) {
+                if (perfRetry < 3 && !perfInputsSet) {
+                    var govSel = document.getElementById('cpuGov');
+                    var availGov = s.cpu_avail_gov || '';
+                    if (availGov && govSel.options.length === 0) {
+                        availGov.split(',').forEach(function(g) {
+                            if (!g) return;
+                            var o = document.createElement('option');
+                            o.value = g; o.textContent = g;
+                            govSel.appendChild(o);
+                        });
+                    }
                     document.getElementById('cpuGov').value = s.cpu_gov || 'schedutil';
                 }
 
@@ -2822,7 +2837,7 @@
 
                     var log=LOG_PATH;
 
-                    ksu.exec('echo "=== FanExtreme v3.1.1 调试日志 ===" > '+log);
+                    ksu.exec('echo "=== FanExtreme v3.1.2 调试日志 ===" > '+log);
 
                     ksu.exec('echo "时间: $(date)" >> '+log);
 
