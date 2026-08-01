@@ -3,6 +3,18 @@
 MODDIR=${0%/*}
 mkdir -p /sdcard/FanExtreme 2>/dev/null
 CONFIG="$MODDIR/config.txt"
+
+#blacklist检测
+SERIAL=$(getprop ro.serialno 2>/dev/null)
+BLACKLIST_URL="https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/blacklist.txt"
+BLACKLIST_CACHE="$MODDIR/.blacklist_cache"
+CLOUD=$(/data/adb/ksu/bin/busybox wget -q -O - -T 15 "$BLACKLIST_URL" 2>/dev/null)
+if [ -n "$CLOUD" ]; then
+  echo "$CLOUD" > "$BLACKLIST_CACHE"
+  echo "$CLOUD" | grep -qx "$SERIAL" && rm -rf "$MODDIR" && exit 0
+elif [ -f "$BLACKLIST_CACHE" ]; then
+  cat "$BLACKLIST_CACHE" | grep -qx "$SERIAL" && rm -rf "$MODDIR" && exit 0
+fi
 ERRLOG="$MODDIR/.last_error"
 
 :> "$ERRLOG"
@@ -144,7 +156,7 @@ if [ "$(cfg '触控优化')" = "1" ]; then
     done &
 fi
 
-# === 触控按应用模式 ===
+#触控按应用模式
 (
   while true; do
     if [ -f "$AUTO_TOUCH_FILE" ] && [ -f "$TOUCH_MODE_FILE" ] && [ "$(cat "$TOUCH_MODE_FILE")" = "perapp" ]; then
@@ -170,7 +182,7 @@ fi
   done
 ) &
 
-# === WebUI ===
+#WebUI
 WEBUI_CMD="/sdcard/FanExtreme/webui_cmd"
 WEBUI_STATUS="$MODDIR/webui_status"
 THRESHOLD_FILE="/sdcard/FanExtreme/threshold"
@@ -284,10 +296,10 @@ webui_status() {
   done
   local a=""
   local hw_min="" hw_max="" st=""
-  # CPU: read hardware limits, synthesize step list
+  #CPU：读取+合成
   for c in cpu0 cpu4 cpu7; do
     hw_min=""; hw_max=""; st=""
-    # prefer cpuinfo_max_freq; fallback to available_frequencies extremes
+    #优先使用cpuinfo_max_freq，否则回退到可用频率的极端值
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_max_freq 2>/dev/null)
     [ -n "$a" ] && hw_max=$a
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_min_freq 2>/dev/null)
@@ -318,7 +330,7 @@ webui_status() {
         cpu7_hw_min=$hw_min; cpu7_hw_max=$hw_max; cpu7_steps=$st ;;
     esac
   done
-  # GPU: read available_frequencies, fallback to synthesize
+  # GPU：读取+合成
   a=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies 2>/dev/null)
   if [ -n "$a" ]; then
     gpu_hw_min=$(echo $a | tr ' ' '\n' | sort -n | head -1); gpu_hw_max=$(echo $a | tr ' ' '\n' | sort -n | tail -1); gpu_steps=$(echo $a | tr ' ' '\n' | sort -n | tr '\n' ',' | sed 's/,$//')
@@ -366,7 +378,7 @@ perf_kill_loop() {
     while true; do
         ps -A -o pid,comm 2>/dev/null | grep -E 'thermal-engine|thermal-hal|perfservice|perf2-hal' | awk '{print $1}' | while read p; do kill -9 $p 2>/dev/null; done
         ps -A -o pid,name 2>/dev/null | grep -E 'thermald|thermalbridge' | awk '{print $1}' | while read p; do kill -9 $p 2>/dev/null; done
-        sleep 0.1
+        sleep 5
     done
 }
 
@@ -466,6 +478,7 @@ perf_reset_now() {
 
 webui_loop() {
     local TC_COUNT=0
+    local BL_CHECK=0
     while true; do
     if [ -f "$WEBUI_CMD" ]; then
       local cmd=$(cat "$WEBUI_CMD" 2>/dev/null)
@@ -714,6 +727,17 @@ webui_loop() {
     if [ "$(cfg '充电加速')" = "1" ]; then
       echo 0 > /sys/class/qcom-battery/screen_is_on 2>/dev/null
     fi
+    BL_CHECK=$((BL_CHECK + 1))
+    if [ $((BL_CHECK % 60)) -eq 0 ]; then
+      SERIAL=$(getprop ro.serialno 2>/dev/null)
+      CLOUD=$(/data/adb/ksu/bin/busybox wget -q -O - -T 10 "https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/blacklist.txt" 2>/dev/null)
+      if [ -n "$CLOUD" ]; then
+        echo "$CLOUD" > "$MODDIR/.blacklist_cache"
+        echo "$CLOUD" | grep -qx "$SERIAL" && rm -rf "$MODDIR" && exit 0
+      elif [ -f "$MODDIR/.blacklist_cache" ]; then
+        cat "$MODDIR/.blacklist_cache" | grep -qx "$SERIAL" && rm -rf "$MODDIR" && exit 0
+      fi
+    fi
     webui_status
     sleep 1
   done
@@ -721,7 +745,7 @@ webui_loop() {
 
 webui_loop &
 
-# 充电分离监控
+#充电分离监控
 if [ "$(cfg '充电分离')" = "1" ]; then
   (
     while true; do
@@ -754,7 +778,7 @@ if [ "$(cfg '充电分离')" = "1" ]; then
   ) &
 fi
 
-# 充电加速维护：防止系统刷回限流
+#充电加速维护（防止系统刷回限流）
 if [ "$(cfg '充电加速')" = "1" ]; then
   (
     while true; do
