@@ -361,7 +361,7 @@
 
                                 <div class="brand-name">FanExtreme</div>
 
-                                <div class="brand-sub">v3.1.3 · NUbia RedMagic</div>
+                                <div class="brand-sub">v3.1.4 · NUbia RedMagic</div>
 
                             </div>
 
@@ -845,7 +845,7 @@
 
                         <div class="about-divider"></div>
 
-                        <div class="about-item">版本：v3.1.3</div>
+                        <div class="about-item">版本：v3.1.4</div>
 
                         <div class="about-item">内核模块 · 仅限红魔设备</div>
                         <div class="about-divider"></div>
@@ -1342,7 +1342,7 @@
 
         //状态机和路径配置
 
-        var CMD = '/sdcard/FanExtreme/webui_cmd';
+        var CMD = '/data/adb/modules/FanExtreme/webui_cmd';
 
         var STATUS = '/data/adb/modules/FanExtreme/webui_status';
 
@@ -1410,7 +1410,7 @@
 
         var VBE = '/sys/class/leds/vibrator';
 
-        var THR = '/sdcard/FanExtreme/threshold';
+        var THR = MDIR + '/threshold';
 
         var TM  = MDIR + '/touch_mode';
 
@@ -1666,6 +1666,8 @@
             sh('echo ' + v + ' > ' + THR);
 
             uiState.threshold.applying = v;
+
+            uiState.threshold._t = Date.now();
 
             uiState.threshold.pending = null;
 
@@ -2061,6 +2063,14 @@
                     //检查写入是否完成对齐
 
                     if (uiState.threshold.applying !== null && String(s.threshold) === String(uiState.threshold.applying)) {
+
+                        uiState.threshold.applying = null;
+
+                    }
+
+                    //超时兜底：5秒未对齐则放弃，避免永久卡同步
+
+                    if (uiState.threshold.applying !== null && Date.now() - (uiState.threshold._t || 0) > 5000) {
 
                         uiState.threshold.applying = null;
 
@@ -2668,8 +2678,11 @@
 
             perfExpect.master = !on; sw(el, !on);
 
+            if (on) sh('rm -f ' + MDIR + '/perf_enabled');
+            else sh('touch ' + MDIR + '/perf_enabled');
+
             cmd('perf_enabled', on ? 'off' : 'on');
-            perfLocks.master = Date.now() + 1000;
+            perfLocks.master = Date.now() + 4000;
 
             toast(on ? '频率控制已关闭' : '频率控制已开启');
 
@@ -2852,7 +2865,7 @@
 
                     var log=LOG_PATH;
 
-                    ksu.exec('echo "=== FanExtreme v3.1.3 调试日志 ===" > '+log);
+                    ksu.exec('echo "=== FanExtreme v3.1.4 调试日志 ===" > '+log);
 
                     ksu.exec('echo "时间: $(date)" >> '+log);
 
@@ -2910,7 +2923,7 @@
 
                     ksu.exec('getprop ro.serialno >> '+log);
 
-                    ksu.exec("echo root_manager=$([ -d /data/adb/ksu ] && { [ -f /data/adb/ksu/sukisu ] && echo SuKeMiSu || echo KSU_v$(getprop ro.ksu.version); } || [ -d /data/adb/ap ] && echo APatch || echo Magisk_v$(getprop ro.magisk.version)) >> "+log);
+                    ksu.exec('{ pkg=$(pm list packages 2>/dev/null | grep -iE "sukisu|resukisu|kernelsu" | head -1 | sed "s/package://"); ksud=$(getprop init.svc.ksud); kv=$(getprop ro.ksu.version); if [ "$ksud" = "running" ] || { [ -d /data/adb/ksu ] && [ "$kv" != "APatch" ]; }; then case "$pkg" in *ultra*) rm=SuKeMiSu_Ultra;; *sukisu*) rm=SuKeMiSu;; *resukisu*) rm=ReSuKiSu;; *next*) rm=KernelSU_Next;; *) rm=KernelSU;; esac; kver=$(/data/adb/ksud --version 2>/dev/null | head -1 | awk "{print \\\$2}" | cut -d- -f1); [ -n "$kver" ] && rm="$rm v$kver"; elif [ -d /data/adb/ap ]; then rm=APatch; elif [ -d /data/adb/magisk ]; then rm="Magisk v$(getprop ro.magisk.version)"; else rm=unknown; fi; echo "root_manager=$rm" >> '+log+'; } 2>/dev/null');
 
                     ksu.exec('getprop ro.product.model >> '+log);
 
