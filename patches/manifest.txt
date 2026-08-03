@@ -1,2 +1,3 @@
 # FanExtreme v3.1.5 热修清单
 p001|p001.sh|链路测试补丁(写入.p001_marker)
+p002|p002.sh|真实代码热修测试(service.sh加字段+index.html加标记)
