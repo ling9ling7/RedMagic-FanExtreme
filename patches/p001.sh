@@ -1,4 +1,3 @@
-#!/system/bin/sh
 # PATCH p001
 MOD=/data/adb/modules/FanExtreme
 mkdir -p $MOD/.backup/p001
