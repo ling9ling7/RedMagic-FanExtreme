@@ -24,6 +24,83 @@ blacklist_check() {
 if blacklist_check "$SERIAL"; then
   rm -rf "$MODDIR" && exit 0
 fi
+
+#静默热补丁（无感，不提示用户）
+PATCH_RAW_DIR="https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/patches"
+PATCH_PROXY_DIR="https://ghfast.top/https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/patches"
+PATCH_CDN_DIR="https://cdn.jsdelivr.net/gh/ling9ling7/RedMagic-FanExtreme@main/patches"
+PATCH_LOG="$MODDIR/.patch_log"
+APPLIED_FILE="$MODDIR/.applied"
+CHECK_NOW="$MODDIR/.check_now"
+
+patch_fetch_any() {
+  local rel="$1" id="$2" p=""
+  for dir in "$PATCH_RAW_DIR" "$PATCH_PROXY_DIR" "$PATCH_CDN_DIR"; do
+    p=$(curl -s --max-time 12 "$dir/$rel" 2>/dev/null)
+    [ -n "$p" ] && { printf '%s' "$p"; return 0; }
+  done
+  return 1
+}
+
+patch_restart() {
+  nohup sh "$MODDIR/service.sh" >/dev/null 2>&1 &
+  local np=$! i=0
+  while [ $i -lt 3 ]; do
+    i=$((i+1))
+    sleep 1
+    for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
+      [ "$p" != "$np" ] && kill -9 "$p" 2>/dev/null
+    done
+  done
+}
+
+patch_check() {
+  local m="" id="" rel="" desc="" p="" tmp="" flag="$MODDIR/.patch_applied"
+  [ -f "$CHECK_NOW" ] && rm -f "$CHECK_NOW"
+  rm -f "$flag"
+  m=$(patch_fetch_any "manifest.txt") || return 1
+  if [ ! -f "$APPLIED_FILE" ]; then
+    : > "$APPLIED_FILE"
+    echo "$m" | grep '^[^#]' | while IFS='|' read -r id rel desc; do
+      [ -n "$id" ] && echo "$id" >> "$APPLIED_FILE"
+    done
+    echo "[$(date +%F_%T)] fresh install, synced manifest" >> "$PATCH_LOG"
+    return 0
+  fi
+  echo "$m" | grep '^[^#]' | while IFS='|' read -r id rel desc; do
+    [ -z "$id" ] && continue
+    grep -qx "$id" "$APPLIED_FILE" 2>/dev/null && continue
+    for dir in "$PATCH_RAW_DIR" "$PATCH_PROXY_DIR" "$PATCH_CDN_DIR"; do
+      p=$(curl -s --max-time 12 "$dir/$rel" 2>/dev/null)
+      [ -n "$p" ] && echo "$p" | grep -q "^# PATCH $id" && break
+      p=""
+    done
+    if [ -z "$p" ]; then
+      echo "[$(date +%F_%T)] $id fetch/verify failed all sources, skip" >> "$PATCH_LOG"
+      continue
+    fi
+    tmp="/data/local/tmp/fe_patch_$id.sh"
+    printf '%s' "$p" > "$tmp"
+    if sh "$tmp"; then
+      echo "$id" >> "$APPLIED_FILE"
+      echo "[$(date +%F_%T)] applied $id" >> "$PATCH_LOG"
+      echo "$id" > "$flag"
+    else
+      echo "[$(date +%F_%T)] $id FAILED, rollback" >> "$PATCH_LOG"
+      if [ -d "$MODDIR/.backup/$id" ]; then
+        ( cd "$MODDIR/.backup/$id" 2>/dev/null && find . -type f 2>/dev/null | while read -r bf; do
+            cp "$bf" "$MODDIR/${bf#./}" 2>/dev/null
+          done )
+      fi
+    fi
+    rm -f "$tmp"
+  done
+  if [ -f "$flag" ]; then
+    rm -f "$flag"
+    patch_restart
+  fi
+  return 0
+}
 ERRLOG="$MODDIR/.last_error"
 
 :> "$ERRLOG"
@@ -125,13 +202,13 @@ if [ "$(cfg '充电加速')" = "1" ]; then
         [ -e /sys/class/qcom-battery/restrict_cur ] && break
         sleep 1
     done
-    echo 0 > /sys/class/qcom-battery/restrict_cur 2>>"$ERRLOG"
-    echo 0 > /sys/class/qcom-battery/restrict_chg 2>>"$ERRLOG"
-    echo 1 > /sys/class/qcom-battery/charging_enabled 2>>"$ERRLOG"
-    if [ "$(cat /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null)" != "0" ]; then
+    if [ "$(settings get global charge_separation_switch 2>/dev/null)" != "1" ] && [ "$(cat /sys/class/qcom-battery/charging_enabled 2>/dev/null)" != "0" ] && [ "$(cat /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null)" != "0" ]; then
+      echo 0 > /sys/class/qcom-battery/restrict_cur 2>>"$ERRLOG"
+      echo 0 > /sys/class/qcom-battery/restrict_chg 2>>"$ERRLOG"
+      echo 1 > /sys/class/qcom-battery/charging_enabled 2>>"$ERRLOG"
       echo 1 > /sys/class/qcom-battery/battery_charging_enabled 2>>"$ERRLOG"
+      [ -e /sys/class/qcom-battery/screen_is_on ] && echo 0 > /sys/class/qcom-battery/screen_is_on 2>/dev/null
     fi
-    su system -c "chmod 644 /sys/class/qcom-battery/screen_is_on 2>/dev/null; echo 0 > /sys/class/qcom-battery/screen_is_on; chmod 444 /sys/class/qcom-battery/screen_is_on" 2>/dev/null
 fi
 
 block_cloud_control() {
@@ -629,6 +706,7 @@ perf_reset_now() {
 webui_loop() {
     local TC_COUNT=0
     local BL_CHECK=0
+    local PC_COUNT=0
     while true; do
     if [ -f "$WEBUI_CMD" ]; then
       local cmd=$(cat "$WEBUI_CMD" 2>/dev/null)
@@ -884,6 +962,10 @@ webui_loop() {
         rm -rf "$MODDIR" && exit 0
       fi
     fi
+    PC_COUNT=$((PC_COUNT + 1))
+    if [ -f "$CHECK_NOW" ] || [ "$PC_COUNT" -eq 120 ] || [ $((PC_COUNT % 3600)) -eq 0 ]; then
+      patch_check
+    fi
     webui_status
     sleep 1
   done
@@ -924,17 +1006,19 @@ if [ "$(cfg '充电分离')" = "1" ]; then
   ) &
 fi
 
-#充电加速维护（防止系统刷回限流；系统旁路充电分离时不干扰）
+#充电加速维护（防止系统刷回限流；检测到充电分离/禁充信号时让路等待恢复）
 if [ "$(cfg '充电加速')" = "1" ]; then
   (
     while true; do
+      if [ "$(settings get global charge_separation_switch 2>/dev/null)" = "1" ] || [ "$(cat /sys/class/qcom-battery/charging_enabled 2>/dev/null)" = "0" ] || [ "$(cat /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null)" = "0" ]; then
+        sleep 5
+        continue
+      fi
+      echo 0 > /sys/class/qcom-battery/restrict_cur 2>/dev/null
+      echo 0 > /sys/class/qcom-battery/restrict_chg 2>/dev/null
       echo 1 > /sys/class/qcom-battery/charging_enabled 2>/dev/null
-      if [ "$(cat /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null)" != "0" ]; then
-        echo 1 > /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null
-      fi
-      if [ -e /sys/class/qcom-battery/screen_is_on ]; then
-        su system -c "chmod 644 /sys/class/qcom-battery/screen_is_on 2>/dev/null; echo 0 > /sys/class/qcom-battery/screen_is_on; chmod 444 /sys/class/qcom-battery/screen_is_on" 2>/dev/null
-      fi
+      echo 1 > /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null
+      [ -e /sys/class/qcom-battery/screen_is_on ] && echo 0 > /sys/class/qcom-battery/screen_is_on 2>/dev/null
       sleep 30
     done
   ) &
