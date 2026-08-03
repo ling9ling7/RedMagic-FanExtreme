@@ -1,11 +1,13 @@
 #!/system/bin/sh
 
 ui_print "===================================="
-ui_print "  FanExtreme v3.1.3"
+ui_print "  FanExtreme v3.1.5"
 ui_print "===================================="
 
 INSTALLED_CONFIG="/data/adb/modules/FanExtreme/config.txt"
 NEW_CONFIG="$MODPATH/config.txt"
+
+rm -f "$MODPATH/.applied" "$MODPATH/.patch_log"
 
 if [ -f "$INSTALLED_CONFIG" ]; then
     ui_print "  📋 检测到已安装版本，保留现有配置"
