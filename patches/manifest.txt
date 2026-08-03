@@ -1,6 +1,5 @@
 # FanExtreme v3.1.5 热修清单
 p001|p001.sh|链路测试补丁(写入.p001_marker)
 p002|p002.sh|真实代码热修测试(service.sh加字段+index.html加标记)
-p003_bad|p003_bad.sh|故意失败的补丁(测回滚)
-p004|p004_missing.sh|不存在的补丁文件(测下载失败跳过)
-this is a garbage line without pipes
+p005|p005.sh|批量测试补丁A
+p006|p006.sh|批量测试补丁B
