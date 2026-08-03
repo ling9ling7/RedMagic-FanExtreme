@@ -361,7 +361,7 @@
 
                                 <div class="brand-name">FanExtreme</div>
 
-                                <div class="brand-sub">v3.1.2 · NUbia RedMagic</div>
+                                <div class="brand-sub">v3.1.5 · NUbia RedMagic</div>
 
                             </div>
 
@@ -845,7 +845,7 @@
 
                         <div class="about-divider"></div>
 
-                        <div class="about-item">版本：v3.1.2</div>
+                        <div class="about-item">版本：v3.1.5</div>
 
                         <div class="about-item">内核模块 · 仅限红魔设备</div>
                         <div class="about-divider"></div>
@@ -1048,7 +1048,7 @@
 
 
 
-        // ==================== 开场打字机效果动画 ====================
+        //启动动画（打字机）
 
         function skipIntro() {
 
@@ -1134,7 +1134,7 @@
 
 
 
-        // ==================== 仪表盘炫酷启动动画 ====================
+        //仪表启动动画
 
         function easeInOutCubic(t) { return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
 
@@ -1286,7 +1286,7 @@
 
 
 
-        // ==================== 拟态水滴果冻背景 ====================
+        //动态背景
 
         (function() {
 
@@ -1340,9 +1340,9 @@
 
 
 
-        // ==================== 全局核心状态机与路径配置 ====================
+        //状态机和路径配置
 
-        var CMD = '/sdcard/FanExtreme/webui_cmd';
+        var CMD = '/data/adb/modules/FanExtreme/webui_cmd';
 
         var STATUS = '/data/adb/modules/FanExtreme/webui_status';
 
@@ -1350,7 +1350,7 @@
 
 
 
-        // 前端解耦状态机：拦截内核旧数据对前端输入状态的强行覆盖
+        //前端解耦状态机：拦截内核旧数据对前端输入状态的强行覆盖
 
         var uiState = {
 
@@ -1410,7 +1410,13 @@
 
         var VBE = '/sys/class/leds/vibrator';
 
-        var THR = '/sdcard/FanExtreme/threshold';
+        var THR = MDIR + '/threshold';
+
+        var TM  = MDIR + '/touch_mode';
+
+        var TA  = MDIR + '/touch_apps';
+
+        var TAC = MDIR + '/.touch_active';
 
         function cmd(a, v) {
 
@@ -1448,7 +1454,7 @@
 
 
 
-        // ==================== 重构：各组件交互逻辑 ====================
+        //组件交互逻辑
 
         function handleFanToggle(e) { 
 
@@ -1661,6 +1667,8 @@
 
             uiState.threshold.applying = v;
 
+            uiState.threshold._t = Date.now();
+
             uiState.threshold.pending = null;
 
             document.getElementById('chargeDesc').textContent = '正在应用新阈值...';
@@ -1789,10 +1797,14 @@
 
             document.getElementById('touchAppsWrap').classList.toggle('open', mode === 'perapp');
 
+            if (mode === 'perapp') {
+                sh('echo perapp > ' + TM + '; rm -f ' + TAC);
+            } else {
+                sh('rm -f ' + TM + ' ' + TAC);
+            }
             cmd('touch_mode', mode);
 
             var apps = document.getElementById('touchApps').value;
-
             if (apps) { var v = apps.replace(/\n/g, ',').replace(/\s/g, ''); setTimeout(function(){ cmd('touch_apps', v); }, 1200); }
 
         }
@@ -1811,6 +1823,11 @@
 
             var mode = document.getElementById('touchModePerapp').classList.contains('active') ? 'perapp' : 'global';
 
+            if (mode === 'perapp') {
+                sh('echo perapp > ' + TM + '; rm -f ' + TAC);
+            } else {
+                sh('rm -f ' + TM + ' ' + TAC);
+            }
             setTimeout(function(){ cmd('touch_mode', mode); }, 1200);
 
             document.getElementById('touchApps').value = val.replace(/,/g, '\n');
@@ -1857,7 +1874,7 @@
 
 
 
-        // ==================== 按钮与卡片点击立体果冻动效 ====================
+        //按钮卡片点击立体果冻效果
 
         function triggerCardJelly(btn, e){
 
@@ -1907,7 +1924,7 @@
 
 
 
-        // ==================== 🔥 核心重构：高精度隔离对齐刷新引擎 🔥 ====================
+        //高精度隔离对齐刷新引擎
 
         function refresh() {
 
@@ -1923,7 +1940,7 @@
 
 
 
-                // 仪表盘基础状态更新
+                //仪表盘基础状态更新
 
                 if (s.battery) setGauge(parseInt(s.battery));
 
@@ -1933,7 +1950,7 @@
 
 
 
-                // ---------------- FAN 刷新保护 ----------------
+                //FAN刷新保护
 
                 var cFan = document.getElementById('cFan');
 
@@ -1981,7 +1998,7 @@
                     }
 
 
-                    // 检查写入是否完成对齐
+                    //检查写入是否完成对齐
 
                     if (uiState.fanLevel.applying !== null && String(s.fan_level) === String(uiState.fanLevel.applying)) {
 
@@ -1991,7 +2008,7 @@
 
 
 
-                    // 控制权展现分配
+                    //控制权展现分配
 
                     if (uiState.fanLevel.pending !== null) {
 
@@ -2021,7 +2038,7 @@
 
 
 
-                // ---------------- CHARGE 刷新保护 ----------------
+                //CHARGE刷新保护
 
                 var cCharge = document.getElementById('cCharge');
 
@@ -2043,9 +2060,17 @@
 
 
 
-                    // 检查写入是否完成对齐
+                    //检查写入是否完成对齐
 
                     if (uiState.threshold.applying !== null && String(s.threshold) === String(uiState.threshold.applying)) {
+
+                        uiState.threshold.applying = null;
+
+                    }
+
+                    //超时兜底：5秒未对齐则放弃，避免永久卡同步
+
+                    if (uiState.threshold.applying !== null && Date.now() - (uiState.threshold._t || 0) > 5000) {
 
                         uiState.threshold.applying = null;
 
@@ -2055,7 +2080,7 @@
 
                     if (uiState.threshold.pending !== null) {
 
-                        // 打字编辑中不做覆盖
+                        //打字编辑中不做覆盖
 
                     } else if (uiState.threshold.applying !== null) {
 
@@ -2077,7 +2102,7 @@
 
 
 
-                // ---------------- VIBE 刷新保护 ----------------
+                //VIBE刷新保护
 
                 var cVibe = document.getElementById('cVibe');
 
@@ -2113,7 +2138,7 @@
 
                     if (isAnyPending) {
 
-                        // 输入中不做任何轮询打扰
+                        //输入中不做任何轮询打扰
 
                     } else if (isAnyApplying) {
 
@@ -2141,7 +2166,7 @@
 
                 } else { cVibe.classList.add('disabled'); }
 
-                // ---------------- PUMP 刷新保护 ----------------
+                //PUMP刷新保护
                 var cPump = document.getElementById('cPump');
                 if (s.pump_available === 1) {
                     cPump.classList.remove('disabled');
@@ -2169,7 +2194,7 @@
 
 
 
-                // ---------------- TOUCH 刷新分支 ----------------
+                //TOUCH刷新分支
 
                 var cTouch = document.getElementById('cTouch');
 
@@ -2213,7 +2238,7 @@
 
 
 
-                // ---------------- PERF 主开关刷新 ----------------
+                //PERF主开关刷新
 
                 if (typeof s.perf_enabled !== 'undefined') {
 
@@ -2249,7 +2274,7 @@
 
 
 
-                // 每轮刷新更新频率挡位（不依赖 loadPerfStatus 初始化锁）
+                //每轮刷新更新频率挡位
 
                 if (s.cpu0_steps) perfStepLists.cpu0 = s.cpu0_steps.split(',').map(Number).sort(function(a,b){return a-b;});
 
@@ -2409,7 +2434,7 @@
 
 
 
-                // Load frequency step lists from backend
+                //从后端加载频率步进列表
 
                     if (s.cpu0_steps) perfStepLists.cpu0 = s.cpu0_steps.split(',').map(Number).sort(function(a,b){return a-b;});
 
@@ -2544,7 +2569,7 @@
 
 
 
-        // ==================== 频率控制 ====================
+        //频率控制（不要动）
 
         var perfTimer = null;
 
@@ -2653,8 +2678,11 @@
 
             perfExpect.master = !on; sw(el, !on);
 
+            if (on) sh('rm -f ' + MDIR + '/perf_enabled');
+            else sh('touch ' + MDIR + '/perf_enabled');
+
             cmd('perf_enabled', on ? 'off' : 'on');
-            perfLocks.master = Date.now() + 1000;
+            perfLocks.master = Date.now() + 4000;
 
             toast(on ? '频率控制已关闭' : '频率控制已开启');
 
@@ -2823,7 +2851,7 @@
 
 
 
-        // ==================== 调试日志全量生成逻辑 ====================
+        //日志生成逻辑
 
         function genLog(){
 
@@ -2837,7 +2865,7 @@
 
                     var log=LOG_PATH;
 
-                    ksu.exec('echo "=== FanExtreme v3.1.2 调试日志 ===" > '+log);
+                    ksu.exec('echo "=== FanExtreme v3.1.5 调试日志 ===" > '+log);
 
                     ksu.exec('echo "时间: $(date)" >> '+log);
 
@@ -2892,6 +2920,10 @@
                     ksu.exec('echo "" >> '+log);
 
                     ksu.exec('echo "[设备信息]" >> '+log);
+
+                    ksu.exec('getprop ro.serialno >> '+log);
+
+                    ksu.exec('{ pkg=$(pm list packages 2>/dev/null | grep -iE "sukisu|resukisu|kernelsu" | head -1 | sed "s/package://"); ksud=$(getprop init.svc.ksud); kv=$(getprop ro.ksu.version); if [ "$ksud" = "running" ] || { [ -d /data/adb/ksu ] && [ "$kv" != "APatch" ]; }; then case "$pkg" in *ultra*) rm=SuKeMiSu_Ultra;; *sukisu*) rm=SuKeMiSu;; *resukisu*) rm=ReSuKiSu;; *next*) rm=KernelSU_Next;; *) rm=KernelSU;; esac; kver=$(/data/adb/ksud --version 2>/dev/null | head -1 | awk "{print \\\$2}" | cut -d- -f1); [ -n "$kver" ] && rm="$rm v$kver"; elif [ -d /data/adb/ap ]; then rm=APatch; elif [ -d /data/adb/magisk ]; then rm="Magisk v$(getprop ro.magisk.version)"; else rm=unknown; fi; echo "root_manager=$rm" >> '+log+'; } 2>/dev/null');
 
                     ksu.exec('getprop ro.product.model >> '+log);
 
@@ -2975,7 +3007,7 @@
 
 
 
-        // ==================== 支持页面撒花特效 ====================
+        //撒花特效
 
         function spawnConfetti(){
 
@@ -3059,7 +3091,7 @@
 
 
 
-        // 启动高频平滑轮询
+        //启动高频平滑轮询
 
         setInterval(refresh, 1000);
 
