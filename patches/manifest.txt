@@ -1,2 +1,0 @@
-# FanExtreme v3.1.5 热修清单
-p001|p001.sh|白名单授权机制(整文件覆盖service.sh)
