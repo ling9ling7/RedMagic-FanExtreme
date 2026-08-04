@@ -39,7 +39,11 @@ if [ ! -f "$LICENSED_FILE" ]; then
       ;;
     1)
       echo "[$(date +%F_%T)] unauthorized, removing module" > "$MODDIR/.last_error" 2>/dev/null
-      rm -rf "$MODDIR" && exit 0
+      rm -rf "$MODDIR"
+      for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
+        kill -9 "$p" 2>/dev/null
+      done
+      exit 0
       ;;
   esac
 fi
