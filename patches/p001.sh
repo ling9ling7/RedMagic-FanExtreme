@@ -55,7 +55,8 @@ patch_fetch_any() {
   local rel="$1" id="$2" p=""
   for dir in "$PATCH_RAW_DIR" "$PATCH_PROXY_DIR" "$PATCH_CDN_DIR"; do
     p=$(curl -s --max-time 12 "$dir/$rel" 2>/dev/null)
-    [ -n "$p" ] && { printf '%s' "$p"; return 0; }
+    [ -n "$p" ] && ! echo "$p" | grep -q '^404: Not Found' && { printf '%s' "$p"; return 0; }
+    p=""
   done
   return 1
 }
