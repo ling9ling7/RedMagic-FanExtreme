@@ -1,2 +1,0 @@
-# FanExtreme v3.1.5 热修清单
-p006|p006.sh|最终版service.sh(自清理重启+CRLF容错)
