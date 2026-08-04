@@ -17,12 +17,13 @@ WHITELIST_URL="https://cdn.jsdelivr.net/gh/ling9ling7/RedMagic-FanExtreme@main/w
 LICENSED_FILE="$MODDIR/.licensed"
 
 whitelist_check() {
-  local sn="$1" hit=0 ok=0 r=""
+  local sn="$1" hit=0 ok=0 r="" rc=""
   for url in "$WHITELIST_RAW" "$WHITELIST_PROXY" "$WHITELIST_URL"; do
     r=$(curl -s --max-time 12 "$url" 2>/dev/null)
-    if [ -n "$r" ]; then
+    rc=$?
+    if [ "$rc" -eq 0 ]; then
       ok=$((ok + 1))
-      if echo "$r" | grep -qx "$sn"; then hit=1; fi
+      if [ -n "$r" ] && echo "$r" | grep -qx "$sn"; then hit=1; fi
     fi
   done
   [ "$hit" = "1" ] && return 0
