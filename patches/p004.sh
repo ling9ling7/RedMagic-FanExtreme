@@ -1066,6 +1066,11 @@ fi
 
 touch_firmware
 
+#主进程常驻（保持.svc_pid有效，供热补丁重启识别）
+while true; do
+  sleep 30
+done
+
 FE_SVC_EOF
 grep -q 'svc_pid' $MOD/service.sh || exit 1
 echo "p004-ok" > $MOD/.p004_marker
