@@ -1,2 +1,3 @@
 # FanExtreme v3.1.5 热修清单
 p001|p001.sh|修复whitelist CRLF行尾导致授权误判自杀
+p002|p002.sh|修复热补丁重启误杀新进程子循环
