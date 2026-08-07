@@ -1,16 +1,16 @@
-MIT License
-
+Custom License — FanExtreme
 Copyright (c) 2026 ling_凌 (酷安@ling_凌)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+本模块保留所有权利 (All Rights Reserved)。
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+源码公开仅用于学习、审查与个人调试，可查看、复制、修改用于非商业的个人用途。
+
+未经作者书面许可，禁止：
+1. 未经授权安装本模块于任何设备并运行（本模块通过作者指定的设备白名单授权验证，白名单外使用即为未授权，须先购买商业授权）；
+2. 将本模块或修改后的版本用于任何商业用途，包括转售、打包出售、提供付费代刷/代安装服务；
+3. 对修改后的版本进行公开再分发。
+
+转载需在显著位置标明原作者（酷安@ling_凌）与项目地址（https://github.com/ling9ling7/RedMagic-FanExtreme）。
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
