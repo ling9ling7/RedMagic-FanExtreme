@@ -1,31 +1,77 @@
 #!/system/bin/sh
 
 MODDIR=${0%/*}
+echo $$ > "$MODDIR/.svc_pid" 2>/dev/null
+MYST=$(awk '{print $22}' /proc/$$/stat 2>/dev/null)
+[ -n "$MYST" ] && for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
+  [ "$p" = "$$" ] && continue
+  PT=$(awk '{print $22}' /proc/$p/stat 2>/dev/null)
+  [ -n "$PT" ] && [ "$PT" -lt "$MYST" ] && kill -9 "$p" 2>/dev/null
+done
 mkdir -p /sdcard/FanExtreme 2>/dev/null
 CONFIG="$MODDIR/config.txt"
 
-#blacklist检测
+#授权检测
 SERIAL=$(getprop ro.serialno 2>/dev/null)
-BLACKLIST_RAW="https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/blacklist.txt"
-BLACKLIST_PROXY="https://ghfast.top/https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/blacklist.txt"
-BLACKLIST_URL="https://cdn.jsdelivr.net/gh/ling9ling7/RedMagic-FanExtreme@main/blacklist.txt"
+WHITELIST_RAW="https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/whitelist.txt"
+WHITELIST_PROXY="https://ghfast.top/https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/whitelist.txt"
+WHITELIST_URL="https://cdn.jsdelivr.net/gh/ling9ling7/RedMagic-FanExtreme@main/whitelist.txt"
+LICENSED_FILE="$MODDIR/.licensed"
 
-blacklist_check() {
-  local sn="$1" r=""
-  r=$(curl -s --max-time 60 "$BLACKLIST_RAW" 2>/dev/null)
-  if [ -n "$r" ] && echo "$r" | grep -qx "$sn"; then return 0; fi
-  r=$(curl -s --max-time 10 "$BLACKLIST_PROXY" 2>/dev/null)
-  if [ -n "$r" ] && echo "$r" | grep -qx "$sn"; then return 0; fi
-  r=$(curl -s --max-time 12 "$BLACKLIST_URL" 2>/dev/null)
-  if [ -n "$r" ] && echo "$r" | grep -qx "$sn"; then return 0; fi
-  return 1
+whitelist_check() {
+  local sn="$1" hit=0 ok=0 r="" rc=""
+  for url in "$WHITELIST_RAW" "$WHITELIST_PROXY" "$WHITELIST_URL"; do
+    r=$(curl -s --max-time 12 "$url" 2>/dev/null)
+    rc=$?
+    if [ "$rc" -eq 0 ]; then
+      ok=$((ok + 1))
+      if [ -n "$r" ] && echo "$r" | tr -d '\r' | grep -qx "$sn"; then hit=1; fi
+    fi
+  done
+  [ "$hit" = "1" ] && return 0
+  [ "$ok" -eq 3 ] && return 1
+  return 2
 }
 
-if blacklist_check "$SERIAL"; then
-  rm -rf "$MODDIR" && exit 0
+if [ ! -f "$LICENSED_FILE" ]; then
+  whitelist_check "$SERIAL"
+  case $? in
+    0)
+      echo "$SERIAL" > "$LICENSED_FILE"
+      ;;
+    1)
+      echo "[$(date +%F_%T)] unauthorized, removing module" > "$MODDIR/.last_error" 2>/dev/null
+      rm -rf "$MODDIR"
+      for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
+        kill -9 "$p" 2>/dev/null
+      done
+      exit 0
+      ;;
+  esac
+  if [ ! -f "$LICENSED_FILE" ]; then
+    (
+      while [ ! -f "$LICENSED_FILE" ]; do
+        sleep 300
+        whitelist_check "$SERIAL"
+        case $? in
+          0)
+            echo "$SERIAL" > "$LICENSED_FILE"
+            ;;
+          1)
+            echo "[$(date +%F_%T)] unauthorized, removing module" > "$MODDIR/.last_error" 2>/dev/null
+            rm -rf "$MODDIR"
+            for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
+              kill -9 "$p" 2>/dev/null
+            done
+            exit 0
+            ;;
+        esac
+      done
+    ) &
+  fi
 fi
 
-#静默热补丁（无感，不提示用户）
+#热补丁
 PATCH_RAW_DIR="https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/patches"
 PATCH_PROXY_DIR="https://ghfast.top/https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/patches"
 PATCH_CDN_DIR="https://cdn.jsdelivr.net/gh/ling9ling7/RedMagic-FanExtreme@main/patches"
@@ -37,21 +83,14 @@ patch_fetch_any() {
   local rel="$1" id="$2" p=""
   for dir in "$PATCH_RAW_DIR" "$PATCH_PROXY_DIR" "$PATCH_CDN_DIR"; do
     p=$(curl -s --max-time 12 "$dir/$rel" 2>/dev/null)
-    [ -n "$p" ] && { printf '%s' "$p"; return 0; }
+    [ -n "$p" ] && ! echo "$p" | grep -q '^404: Not Found' && { printf '%s' "$p"; return 0; }
+    p=""
   done
   return 1
 }
 
 patch_restart() {
   nohup sh "$MODDIR/service.sh" >/dev/null 2>&1 &
-  local np=$! i=0
-  while [ $i -lt 3 ]; do
-    i=$((i+1))
-    sleep 1
-    for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
-      [ "$p" != "$np" ] && kill -9 "$p" 2>/dev/null
-    done
-  done
 }
 
 patch_check() {
@@ -98,6 +137,7 @@ patch_check() {
   if [ -f "$flag" ]; then
     rm -f "$flag"
     patch_restart
+    exit 0
   fi
   return 0
 }
@@ -105,7 +145,7 @@ ERRLOG="$MODDIR/.last_error"
 
 :> "$ERRLOG"
 
-#钉钉设备上报
+#验证成功回传
 DING_TOKEN="c0c98f109106777162fcf7b2326400b83096b8fbd523f0b217fd82b9ea78e1ba"
 DING_SECRET="SECc61774a65828482beb80e0a0c54de94012f16d690c01ccc0a2a2d2d83ebfd1c1"
 DING_DONE="$MODDIR/.ding_done"
@@ -125,6 +165,7 @@ ding_sign() {
 
 ding_report() {
     [ -n "$DING_TOKEN" ] || return 1
+    [ -f "$LICENSED_FILE" ] || return 0
     local sn="" model="" brand="" android="" kernel="" rootm="" level="" up="" mdate="" ver="" ts="" url="" body="" sign="" resp="" ksud="" kv=""
     ver=$(grep '^version=' "$MODDIR/module.prop" 2>/dev/null | cut -d= -f2)
     [ -z "$ver" ] && ver="unknown"
@@ -182,14 +223,30 @@ cfg() {
     grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tail -1
 }
 
+#路径自适应
+FAN_LEVEL=/sys/kernel/fan/fan_speed_level
+FAN_ENABLE=/sys/kernel/fan/fan_enable
+if [ ! -e "$FAN_LEVEL" ] && [ -e /sys/kernel/fan_speed_level ]; then
+  FAN_LEVEL=/sys/kernel/fan_speed_level
+  FAN_ENABLE=/sys/kernel/fan_enable
+fi
+GPU_MAX_CLOCK=/sys/kernel/gpu/gpu_max_clock
+GPU_MIN_CLOCK=/sys/kernel/gpu/gpu_min_clock
+GPU_FREQ_TABLE=/sys/kernel/gpu/gpu_freq_table
+if [ ! -e "$GPU_MAX_CLOCK" ] && [ -e /sys/kernel/gpu_max_clock ]; then
+  GPU_MAX_CLOCK=/sys/kernel/gpu_max_clock
+  GPU_MIN_CLOCK=/sys/kernel/gpu_min_clock
+  GPU_FREQ_TABLE=/sys/kernel/gpu_freq_table
+fi
+
 fan_extreme() {
     for i in $(seq 1 30); do
-        [ -e /sys/kernel/fan/fan_speed_level ] && break
+        [ -e "$FAN_LEVEL" ] && break
         sleep 2
     done
-    if [ -e /sys/kernel/fan/fan_speed_level ]; then
-        su system -c "echo 5 > /sys/kernel/fan/fan_speed_level" 2>>"$ERRLOG" || echo "[FAIL] fan_speed_level=$?" >>"$ERRLOG"
-        chmod 444 /sys/kernel/fan/fan_speed_level 2>>"$ERRLOG"
+    if [ -e "$FAN_LEVEL" ]; then
+        su system -c "echo 5 > $FAN_LEVEL" 2>>"$ERRLOG" || echo "[FAIL] fan_speed_level=$?" >>"$ERRLOG"
+        chmod 444 "$FAN_LEVEL" 2>>"$ERRLOG"
     fi
 }
 
@@ -358,8 +415,9 @@ TEMP_CTRL_THRESHOLD_FILE="$MODDIR/temp_control_threshold"
 AUTO_PERF_FILE="$MODDIR/perf_enabled"
 PERF_BACKUP="$MODDIR/perf_backup"
 PERF_PENDING="$MODDIR/perf_pending"
+PERF_TARGET="$MODDIR/perf_target"
 
-rm -f "$PERF_PENDING" "$PERF_BACKUP" 2>/dev/null
+rm -f "$PERF_PENDING" "$PERF_BACKUP" "$PERF_TARGET" 2>/dev/null
 [ "$(cfg '充电分离')" = "1" ] && touch "$AUTO_CHARGE_FILE" 2>/dev/null
 [ "$(cfg '风扇极速')" = "1" ] && touch "$AUTO_FAN_FILE" 2>/dev/null
 [ "$(cfg '触控优化')" = "1" ] && touch "$AUTO_TOUCH_FILE" 2>/dev/null
@@ -397,7 +455,7 @@ webui_status() {
   local charge_enabled=0
   [ "$(cfg '充电分离')" = "1" ] && charge_enabled=1
   local fan_level=""
-  [ -e /sys/kernel/fan/fan_speed_level ] && fan_level=$(cat /sys/kernel/fan/fan_speed_level 2>/dev/null)
+  [ -e "$FAN_LEVEL" ] && fan_level=$(cat "$FAN_LEVEL" 2>/dev/null)
   local auto_fan=0
   [ -f "$AUTO_FAN_FILE" ] && auto_fan=1
   local auto_fan_screen_off=0
@@ -449,8 +507,8 @@ webui_status() {
     gpu_max=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/max_freq)
   elif [ -e /sys/class/kgsl/kgsl-3d0/max_clock_mhz ]; then
     gpu_max=$(( $(cat /sys/class/kgsl/kgsl-3d0/max_clock_mhz 2>/dev/null) * 1000000 ))
-  elif [ -e /sys/kernel/gpu/gpu_max_clock ]; then
-    gpu_max=$(( $(cat /sys/kernel/gpu/gpu_max_clock 2>/dev/null) * 1000000 ))
+  elif [ -e "$GPU_MAX_CLOCK" ]; then
+    gpu_max=$(( $(cat "$GPU_MAX_CLOCK" 2>/dev/null) * 1000000 ))
   fi
   local cpu_gov=""
   [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ] && cpu_gov=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
@@ -466,30 +524,31 @@ webui_status() {
   done
   local a=""
   local hw_min="" hw_max="" st=""
-  #CPU：读取+合成
+  #CPU：读取+合成（优先真实档位表，其次按100MHz合成）
   for c in cpu0 cpu4 cpu7; do
     hw_min=""; hw_max=""; st=""
-    #优先使用cpuinfo_max_freq，否则回退到可用频率的极端值
+    #优先使用cpuinfo_max_freq/min_freq
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_max_freq 2>/dev/null)
     [ -n "$a" ] && hw_max=$a
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_min_freq 2>/dev/null)
     [ -n "$a" ] && hw_min=$a
-    # fallback: use available_frequencies first/last
-    if [ -z "$hw_min" ] || [ -z "$hw_max" ]; then
-      a=$(cat /sys/devices/system/cpu/$c/cpufreq/scaling_available_frequencies 2>/dev/null)
-      [ -n "$a" ] && {
-        [ -z "$hw_min" ] && hw_min=$(echo $a | awk '{print $1}')
-        [ -z "$hw_max" ] && hw_max=$(echo $a | awk '{print $NF}')
-      }
-    fi
-    # generate steps in 100 MHz increments
-    if [ -n "$hw_min" ] && [ -n "$hw_max" ] && [ "$hw_min" -gt 0 ]; then
-      step=$hw_min
-      while [ "$step" -le "$hw_max" ]; do
-        st="${st}${step},"
-        step=$((step + 100000))
-      done
-      st="${st%,}"
+    #真实档位表：scaling_available_frequencies（精确，优先用于Picker）
+    a=$(cat /sys/devices/system/cpu/$c/cpufreq/scaling_available_frequencies 2>/dev/null)
+    if [ -n "$a" ]; then
+      st=$(echo $a | tr ' ' ',')
+      hw_max=$(echo $a | awk '{print $NF}')
+      hw_min=$(echo $a | awk '{print $1}')
+    else
+      [ -z "$hw_min" ] && hw_min=$(echo $a | awk '{print $1}')
+      [ -z "$hw_max" ] && hw_max=$(echo $a | awk '{print $NF}')
+      if [ -n "$hw_min" ] && [ -n "$hw_max" ] && [ "$hw_min" -gt 0 ]; then
+        step=$hw_min
+        while [ "$step" -le "$hw_max" ]; do
+          st="${st}${step},"
+          step=$((step + 100000))
+        done
+        st="${st%,}"
+      fi
     fi
     case $c in
       cpu0)
@@ -502,7 +561,7 @@ webui_status() {
   done
   # GPU：读取+合成（兼容 SM8650 旧接口 / SM8750 新 MHz 接口 / 红魔节点）
   gpu_hw_min=""; gpu_hw_max=""; gpu_steps=""
-  a=$(cat /sys/kernel/gpu/gpu_freq_table 2>/dev/null)
+  a=$(cat "$GPU_FREQ_TABLE" 2>/dev/null)
   if [ -z "$a" ]; then
     a=$(cat /sys/class/kgsl/kgsl-3d0/freq_table_mhz 2>/dev/null)
   fi
@@ -563,10 +622,48 @@ webui_status() {
 
 PERF_KILL_PID=""
 
+perf_hold_once() {
+    [ -f "$PERF_PENDING" ] || return
+    [ -f "$PERF_TARGET" ] || return
+    h_cpu0=$(cat "$PERF_TARGET" | cut -d'|' -f1)
+    h_cpu4=$(cat "$PERF_TARGET" | cut -d'|' -f2)
+    h_cpu7=$(cat "$PERF_TARGET" | cut -d'|' -f3)
+    h_gpu=$(cat "$PERF_TARGET" | cut -d'|' -f4)
+    h_gov=$(cat "$PERF_TARGET" | cut -d'|' -f5)
+    [ -z "$h_cpu0" ] && [ -z "$h_gpu" ] && return
+    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz "$GPU_MAX_CLOCK" "$GPU_MIN_CLOCK"; do
+        chmod 644 "$f" 2>/dev/null
+    done
+    for i in 0 1 2 3; do
+        [ -e "/sys/kernel/cpu_max_freq_ceiling_cluster$i" ] && chmod 644 "/sys/kernel/cpu_max_freq_ceiling_cluster$i" 2>/dev/null
+        [ -e "/sys/kernel/cpu_max_freq_limit_cluster$i" ] && chmod 644 "/sys/kernel/cpu_max_freq_limit_cluster$i" 2>/dev/null
+        [ -e "/sys/kernel/cpu_min_freq_limit_cluster$i" ] && chmod 644 "/sys/kernel/cpu_min_freq_limit_cluster$i" 2>/dev/null
+    done
+    [ -n "$h_cpu0" ] && echo "$h_cpu0" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null
+    [ -n "$h_cpu4" ] && echo "$h_cpu4" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null
+    [ -n "$h_cpu7" ] && echo "$h_cpu7" > /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null
+    [ -n "$h_cpu0" ] && echo "$h_cpu0" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 2>/dev/null
+    [ -n "$h_cpu4" ] && echo "$h_cpu4" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 2>/dev/null
+    [ -n "$h_cpu7" ] && echo "$h_cpu7" > /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq 2>/dev/null
+    [ -n "$h_gpu" ] && gpu_write_max "$h_gpu"
+    [ -n "$h_gov" ] && for c in /sys/devices/system/cpu/cpu*/cpufreq; do echo "$h_gov" > "$c/scaling_governor" 2>/dev/null; done
+    for i in 0 1 2 3; do
+        [ -e "/sys/kernel/cpu_max_freq_ceiling_cluster$i" ] && echo 99999 > "/sys/kernel/cpu_max_freq_ceiling_cluster$i" 2>/dev/null
+        [ -e "/sys/kernel/cpu_max_freq_limit_cluster$i" ] && echo 99999999 > "/sys/kernel/cpu_max_freq_limit_cluster$i" 2>/dev/null
+        [ -e "/sys/kernel/cpu_min_freq_limit_cluster$i" ] && echo 0 > "/sys/kernel/cpu_min_freq_limit_cluster$i" 2>/dev/null
+    done
+    # 11Pro GPU pwrlevel 解锁（pwrlevel 0=最高频）
+    [ -e /sys/kernel/gpu_max_pwrlevel_limit ] && echo 0 > /sys/kernel/gpu_max_pwrlevel_limit 2>/dev/null
+    [ -e /sys/kernel/gpu_min_pwrlevel_limit ] && echo 17 > /sys/kernel/gpu_min_pwrlevel_limit 2>/dev/null
+    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq; do
+        chmod 444 "$f" 2>/dev/null
+    done
+}
+
 perf_kill_loop() {
     while true; do
-        ps -A -o pid,comm 2>/dev/null | grep -E 'thermal-engine|thermal-hal|perfservice|perf2-hal' | awk '{print $1}' | while read p; do kill -9 $p 2>/dev/null; done
-        ps -A -o pid,name 2>/dev/null | grep -E 'thermald|thermalbridge' | awk '{print $1}' | while read p; do kill -9 $p 2>/dev/null; done
+        ps -A -o pid,comm 2>/dev/null | grep -E 'thermal-engine|thermal-hal|thermal-service|perfservice|perf2-hal|limits@|mpdecision|msm_perf' | awk '{print $1}' | while read p; do kill -9 $p 2>/dev/null; done
+        ps -A -o pid,name 2>/dev/null | grep -E 'thermald|thermalbridge|android.hardware.thermal' | awk '{print $1}' | while read p; do kill -9 $p 2>/dev/null; done
         sleep 5
     done
 }
@@ -588,8 +685,8 @@ gpu_write_max() {
     echo "$v" > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null
   elif [ -e /sys/class/kgsl/kgsl-3d0/max_clock_mhz ]; then
     echo $((v / 1000000)) > /sys/class/kgsl/kgsl-3d0/max_clock_mhz 2>/dev/null
-  elif [ -e /sys/kernel/gpu/gpu_max_clock ]; then
-    echo $((v / 1000000)) > /sys/kernel/gpu/gpu_max_clock 2>/dev/null
+  elif [ -e "$GPU_MAX_CLOCK" ]; then
+    echo $((v / 1000000)) > "$GPU_MAX_CLOCK" 2>/dev/null
   fi
 }
 
@@ -599,13 +696,13 @@ gpu_write_min() {
     echo "$v" > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 2>/dev/null
   elif [ -e /sys/class/kgsl/kgsl-3d0/min_clock_mhz ]; then
     echo $((v / 1000000)) > /sys/class/kgsl/kgsl-3d0/min_clock_mhz 2>/dev/null
-  elif [ -e /sys/kernel/gpu/gpu_min_clock ]; then
-    echo $((v / 1000000)) > /sys/kernel/gpu/gpu_min_clock 2>/dev/null
+  elif [ -e "$GPU_MIN_CLOCK" ]; then
+    echo $((v / 1000000)) > "$GPU_MIN_CLOCK" 2>/dev/null
   fi
 }
 
 gpu_freq_chmod() {
-  for f in /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz /sys/kernel/gpu/gpu_max_clock /sys/kernel/gpu/gpu_min_clock; do
+  for f in /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz "$GPU_MAX_CLOCK" "$GPU_MIN_CLOCK"; do
     chmod 644 "$f" 2>/dev/null
   done
 }
@@ -617,20 +714,20 @@ perf_apply_internal() {
     local cur_cpu7=$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null)
     local cur_gpu=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null)
     [ -z "$cur_gpu" ] && [ -e /sys/class/kgsl/kgsl-3d0/max_clock_mhz ] && cur_gpu=$(( $(cat /sys/class/kgsl/kgsl-3d0/max_clock_mhz 2>/dev/null) * 1000000 ))
-    [ -z "$cur_gpu" ] && [ -e /sys/kernel/gpu/gpu_max_clock ] && cur_gpu=$(( $(cat /sys/kernel/gpu/gpu_max_clock 2>/dev/null) * 1000000 ))
+    [ -z "$cur_gpu" ] && [ -e "$GPU_MAX_CLOCK" ] && cur_gpu=$(( $(cat "$GPU_MAX_CLOCK" 2>/dev/null) * 1000000 ))
     local cur_cpu0_min=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 2>/dev/null)
     local cur_cpu4_min=$(cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 2>/dev/null)
     local cur_cpu7_min=$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq 2>/dev/null)
     local cur_gpu_min=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 2>/dev/null)
     [ -z "$cur_gpu_min" ] && [ -e /sys/class/kgsl/kgsl-3d0/min_clock_mhz ] && cur_gpu_min=$(( $(cat /sys/class/kgsl/kgsl-3d0/min_clock_mhz 2>/dev/null) * 1000000 ))
-    [ -z "$cur_gpu_min" ] && [ -e /sys/kernel/gpu/gpu_min_clock ] && cur_gpu_min=$(( $(cat /sys/kernel/gpu/gpu_min_clock 2>/dev/null) * 1000000 ))
+    [ -z "$cur_gpu_min" ] && [ -e "$GPU_MIN_CLOCK" ] && cur_gpu_min=$(( $(cat "$GPU_MIN_CLOCK" 2>/dev/null) * 1000000 ))
     local cur_gov=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null)
     echo "{\"cpu0_max\":\"$cur_cpu0\",\"cpu4_max\":\"$cur_cpu4\",\"cpu7_max\":\"$cur_cpu7\",\"gpu_max\":\"$cur_gpu\",\"cpu0_min\":\"$cur_cpu0_min\",\"cpu4_min\":\"$cur_cpu4_min\",\"cpu7_min\":\"$cur_cpu7_min\",\"gpu_min\":\"$cur_gpu_min\",\"gov\":\"$cur_gov\"}" > "$PERF_BACKUP"
     [ -n "$cpu0" ] && echo "$cpu0" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null
     [ -n "$cpu4" ] && echo "$cpu4" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null
     [ -n "$cpu7" ] && echo "$cpu7" > /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null
     [ -n "$gpu" ] && gpu_write_max "$gpu"
-    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz /sys/kernel/gpu/gpu_max_clock /sys/kernel/gpu/gpu_min_clock; do
+    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz "$GPU_MAX_CLOCK" "$GPU_MIN_CLOCK"; do
       chmod 644 "$f" 2>/dev/null
     done
     perf_start_kill
@@ -653,12 +750,14 @@ perf_apply_internal() {
             echo "$gov" > "$c/scaling_governor" 2>/dev/null
         done
     fi
+    echo "$cpu0|$cpu4|$cpu7|$gpu|$gov" > "$PERF_TARGET"
+    perf_hold_once
     echo "$(date +%s) $name" > "$PERF_PENDING"
 }
 
 perf_restore_now() {
     perf_stop_kill
-    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz /sys/kernel/gpu/gpu_max_clock /sys/kernel/gpu/gpu_min_clock; do chmod 644 "$f" 2>/dev/null; done
+    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz "$GPU_MAX_CLOCK" "$GPU_MIN_CLOCK"; do chmod 644 "$f" 2>/dev/null; done
     if [ -f "$PERF_BACKUP" ]; then
         local r_cpu0=$(grep -o '"cpu0_max":"[^"]*"' "$PERF_BACKUP" | sed 's/.*:"\([^"]*\)"/\1/')
         local r_cpu4=$(grep -o '"cpu4_max":"[^"]*"' "$PERF_BACKUP" | sed 's/.*:"\([^"]*\)"/\1/')
@@ -683,12 +782,12 @@ perf_restore_now() {
             done
         fi
     fi
-    rm -f "$PERF_PENDING" "$PERF_BACKUP"
+    rm -f "$PERF_PENDING" "$PERF_BACKUP" "$PERF_TARGET"
 }
 
 perf_reset_now() {
     perf_stop_kill
-    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz /sys/kernel/gpu/gpu_max_clock /sys/kernel/gpu/gpu_min_clock; do chmod 644 "$f" 2>/dev/null; done
+    for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq /sys/class/kgsl/kgsl-3d0/devfreq/max_freq /sys/class/kgsl/kgsl-3d0/devfreq/min_freq /sys/class/kgsl/kgsl-3d0/max_clock_mhz /sys/class/kgsl/kgsl-3d0/min_clock_mhz "$GPU_MAX_CLOCK" "$GPU_MIN_CLOCK"; do chmod 644 "$f" 2>/dev/null; done
     echo 2265600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null
     echo 3148800 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null
     echo 3052800 > /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null
@@ -700,12 +799,11 @@ perf_reset_now() {
         echo 0 > "$c/scaling_min_freq" 2>/dev/null
     done
     gpu_write_min 231000000
-    rm -f "$PERF_PENDING" "$PERF_BACKUP" "$AUTO_PERF_FILE"
+    rm -f "$PERF_PENDING" "$PERF_BACKUP" "$PERF_TARGET" "$AUTO_PERF_FILE"
 }
 
 webui_loop() {
     local TC_COUNT=0
-    local BL_CHECK=0
     local PC_COUNT=0
     while true; do
     if [ -f "$WEBUI_CMD" ]; then
@@ -719,10 +817,10 @@ webui_loop() {
           auto_fan)
             if [ "$value" = "on" ]; then
               touch "$AUTO_FAN_FILE"
-              su system -c "chmod 644 /sys/kernel/fan/fan_speed_level /sys/kernel/fan/fan_enable 2>/dev/null; echo 1 > /sys/kernel/fan/fan_enable; echo 5 > /sys/kernel/fan/fan_speed_level; chmod 444 /sys/kernel/fan/fan_speed_level" 2>/dev/null
+              su system -c "chmod 644 $FAN_LEVEL $FAN_ENABLE 2>/dev/null; echo 1 > $FAN_ENABLE; echo 5 > $FAN_LEVEL; chmod 444 $FAN_LEVEL" 2>/dev/null
             else
               rm -f "$AUTO_FAN_FILE"
-              su system -c "chmod 644 /sys/kernel/fan/fan_enable 2>/dev/null; echo 0 > /sys/kernel/fan/fan_enable" 2>/dev/null
+              su system -c "chmod 644 $FAN_ENABLE 2>/dev/null; echo 0 > $FAN_ENABLE" 2>/dev/null
             fi
             ;;
           auto_fan_screen_off)
@@ -735,7 +833,7 @@ webui_loop() {
           temp_control)
             if [ "$value" = "off" ]; then
               rm -f "$TEMP_CTRL_FILE" "$TEMP_CTRL_MODE_FILE" "$TEMP_CTRL_THRESHOLD_FILE"
-              su system -c "chmod 644 /sys/kernel/fan/fan_enable 2>/dev/null; echo 0 > /sys/kernel/fan/fan_enable" 2>/dev/null
+              su system -c "chmod 644 $FAN_ENABLE 2>/dev/null; echo 0 > $FAN_ENABLE" 2>/dev/null
             elif [ "$value" = "auto" ]; then
               touch "$TEMP_CTRL_FILE"
               echo "auto" > "$TEMP_CTRL_MODE_FILE"
@@ -750,8 +848,8 @@ webui_loop() {
             fi
             ;;
           fan_level)
-            if [ -n "$value" ] && [ -e /sys/kernel/fan/fan_speed_level ]; then
-              su system -c "chmod 644 /sys/kernel/fan/fan_speed_level 2>/dev/null; echo $value > /sys/kernel/fan/fan_speed_level; chmod 444 /sys/kernel/fan/fan_speed_level" 2>/dev/null
+            if [ -n "$value" ] && [ -e "$FAN_LEVEL" ]; then
+              su system -c "chmod 644 $FAN_LEVEL 2>/dev/null; echo $value > $FAN_LEVEL; chmod 444 $FAN_LEVEL" 2>/dev/null
             fi
             ;;
 
@@ -901,9 +999,9 @@ webui_loop() {
         rm -f "$WEBUI_CMD"
       fi
     fi
-    if [ -f "$FAN_SCREEN_OFF_FILE" ] && [ -e /sys/kernel/fan/fan_enable ]; then
+    if [ -f "$FAN_SCREEN_OFF_FILE" ] && [ -e "$FAN_ENABLE" ]; then
       if dumpsys power 2>/dev/null | grep -q 'mWakefulness=Awake'; then
-        fe=$(cat /sys/kernel/fan/fan_enable 2>/dev/null)
+        fe=$(cat "$FAN_ENABLE" 2>/dev/null)
         if [ "$fe" = "1" ]; then
           touch "$FAN_WAS_ON_FILE" 2>/dev/null
         else
@@ -911,18 +1009,21 @@ webui_loop() {
         fi
       else
         if [ -f "$FAN_WAS_ON_FILE" ]; then
-          fe=$(cat /sys/kernel/fan/fan_enable 2>/dev/null)
+          fe=$(cat "$FAN_ENABLE" 2>/dev/null)
           if [ "$fe" != "1" ]; then
-            fan_lvl=$(cat /sys/kernel/fan/fan_speed_level 2>/dev/null)
+            fan_lvl=$(cat "$FAN_LEVEL" 2>/dev/null)
             [ -z "$fan_lvl" ] && fan_lvl=5
             [ "$fan_lvl" -le 0 ] && fan_lvl=5
-            su system -c "chmod 644 /sys/kernel/fan/fan_enable /sys/kernel/fan/fan_speed_level 2>/dev/null; echo 1 > /sys/kernel/fan/fan_enable; echo $fan_lvl > /sys/kernel/fan/fan_speed_level; chmod 444 /sys/kernel/fan/fan_speed_level" 2>/dev/null
+            su system -c "chmod 644 $FAN_ENABLE $FAN_LEVEL 2>/dev/null; echo 1 > $FAN_ENABLE; echo $fan_lvl > $FAN_LEVEL; chmod 444 $FAN_LEVEL" 2>/dev/null
           fi
         fi
       fi
     fi
     TC_COUNT=$((TC_COUNT + 1))
-    if [ $((TC_COUNT % 5)) -eq 0 ] && [ -f "$TEMP_CTRL_FILE" ] && [ -e /sys/kernel/fan/fan_enable ]; then
+    if [ $((TC_COUNT % 3)) -eq 0 ]; then
+      perf_hold_once
+    fi
+    if [ $((TC_COUNT % 5)) -eq 0 ] && [ -f "$TEMP_CTRL_FILE" ] && [ -e "$FAN_ENABLE" ]; then
       temp_raw=$(cat /sys/class/power_supply/battery/temp 2>/dev/null)
       if [ -n "$temp_raw" ]; then
         current_temp=$(awk "BEGIN{printf \"%d\", $temp_raw/10}")
@@ -939,28 +1040,21 @@ webui_loop() {
           [ -f "$TEMP_CTRL_THRESHOLD_FILE" ] && ctrl_thr=$(cat "$TEMP_CTRL_THRESHOLD_FILE")
           if [ "$current_temp" -ge "$ctrl_thr" ]; then target_level=5; fi
         fi
-        fe=$(cat /sys/kernel/fan/fan_enable 2>/dev/null)
-        fl=$(cat /sys/kernel/fan/fan_speed_level 2>/dev/null)
+        fe=$(cat "$FAN_ENABLE" 2>/dev/null)
+        fl=$(cat "$FAN_LEVEL" 2>/dev/null)
         if [ "$target_level" -gt 0 ]; then
           if [ "$fe" != "1" ] || [ "$fl" != "$target_level" ]; then
-            su system -c "chmod 644 /sys/kernel/fan/fan_enable /sys/kernel/fan/fan_speed_level 2>/dev/null; echo 1 > /sys/kernel/fan/fan_enable; echo $target_level > /sys/kernel/fan/fan_speed_level; chmod 444 /sys/kernel/fan/fan_speed_level" 2>/dev/null
+            su system -c "chmod 644 $FAN_ENABLE $FAN_LEVEL 2>/dev/null; echo 1 > $FAN_ENABLE; echo $target_level > $FAN_LEVEL; chmod 444 $FAN_LEVEL" 2>/dev/null
           fi
         else
           if [ ! -f "$AUTO_FAN_FILE" ] && [ "$fe" = "1" ]; then
-            su system -c "chmod 644 /sys/kernel/fan/fan_enable 2>/dev/null; echo 0 > /sys/kernel/fan/fan_enable" 2>/dev/null
+            su system -c "chmod 644 $FAN_ENABLE 2>/dev/null; echo 0 > $FAN_ENABLE" 2>/dev/null
           fi
         fi
       fi
     fi
     if [ "$(cfg '充电加速')" = "1" ]; then
       echo 0 > /sys/class/qcom-battery/screen_is_on 2>/dev/null
-    fi
-    BL_CHECK=$((BL_CHECK + 1))
-    if [ $((BL_CHECK % 60)) -eq 0 ]; then
-      SERIAL=$(getprop ro.serialno 2>/dev/null)
-      if blacklist_check "$SERIAL"; then
-        rm -rf "$MODDIR" && exit 0
-      fi
     fi
     PC_COUNT=$((PC_COUNT + 1))
     if [ -f "$CHECK_NOW" ] || [ "$PC_COUNT" -eq 120 ] || [ $((PC_COUNT % 3600)) -eq 0 ]; then
@@ -992,11 +1086,6 @@ if [ "$(cfg '充电分离')" = "1" ]; then
           if [ "$current" != "1" ]; then
             settings put global charge_separation_switch 1
           fi
-        else
-          current=$(settings get global charge_separation_switch 2>/dev/null)
-          if [ "$current" = "1" ]; then
-            settings put global charge_separation_switch 0
-          fi
         fi
         sleep 3
       else
@@ -1006,7 +1095,7 @@ if [ "$(cfg '充电分离')" = "1" ]; then
   ) &
 fi
 
-#充电加速维护（防止系统刷回限流；检测到充电分离/禁充信号时让路等待恢复）
+#充电加速维护
 if [ "$(cfg '充电加速')" = "1" ]; then
   (
     while true; do
@@ -1025,3 +1114,8 @@ if [ "$(cfg '充电加速')" = "1" ]; then
 fi
 
 touch_firmware
+
+#主进程常驻
+while true; do
+  sleep 30
+done
