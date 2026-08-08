@@ -730,6 +730,10 @@
         <span class="value" id="forksValue">加载中...</span>
       </div>
       <div class="hero-meta-item">
+        <span class="label">下载量</span>
+        <span class="value blue" id="downloadsValue">加载中...</span>
+      </div>
+      <div class="hero-meta-item">
         <span class="label">许可证</span>
         <span class="value">MIT + 附加条款</span>
       </div>
@@ -1069,6 +1073,7 @@ window.addEventListener('load', () => {
   const REPO = 'ling9ling7/RedMagic-FanExtreme';
   const starsEl = document.getElementById('starsValue');
   const forksEl = document.getElementById('forksValue');
+  const downloadsEl = document.getElementById('downloadsValue');
   const versionEl = document.getElementById('versionText');
   const syncDot = document.getElementById('syncDot');
   const syncInfo = document.getElementById('syncInfo');
@@ -1118,6 +1123,21 @@ window.addEventListener('load', () => {
     starsEl.textContent = '\u2b50 —';
     forksEl.textContent = '—';
     syncInfo.textContent = '数据加载失败';
+  }
+
+  // Step 4: Total downloads across all releases
+  try {
+    const res = await fetch('https://api.github.com/repos/' + REPO + '/releases');
+    if (res.ok) {
+      const releases = await res.json();
+      const total = (releases || []).reduce((sum, rel) =>
+        sum + (rel.assets || []).reduce((s, a) => s + (a.download_count || 0), 0), 0);
+      downloadsEl.textContent = fmt(total || 0);
+    } else {
+      downloadsEl.textContent = '—';
+    }
+  } catch (e) {
+    downloadsEl.textContent = '—';
   }
 })();
 </script>
