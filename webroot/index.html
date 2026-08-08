@@ -361,7 +361,7 @@
 
                                 <div class="brand-name">FanExtreme</div>
 
-                                <div class="brand-sub">v3.1.5 · NUbia RedMagic</div>
+                                <div class="brand-sub"><span id="brandVersion">v3.1.6</span> · NUbia RedMagic</div>
 
                             </div>
 
@@ -845,7 +845,7 @@
 
                         <div class="about-divider"></div>
 
-                        <div class="about-item">版本：v3.1.5</div>
+                        <div class="about-item">版本：<span id="aboutVersion">v3.1.6</span></div>
 
                         <div class="about-item">内核模块 · 仅限红魔设备</div>
                         <div class="about-divider"></div>
@@ -1033,6 +1033,20 @@
         });
 
         document.addEventListener('DOMContentLoaded', function(){
+
+            try {
+                var mp = ksu.exec('cat /data/adb/modules/FanExtreme/module.prop 2>/dev/null');
+                if (mp) {
+                    var vm = mp.match(/^version=v?(.+)$/m);
+                    if (vm && vm[1]) {
+                        var ver = 'v' + vm[1].replace(/\s/g, '');
+                        var bv = document.getElementById('brandVersion');
+                        var av = document.getElementById('aboutVersion');
+                        if (bv) bv.textContent = ver;
+                        if (av) av.textContent = ver;
+                    }
+                }
+            } catch (e) {}
 
             var pi = document.getElementById('pageIndicator');
 
@@ -2730,7 +2744,7 @@
 
         }function startPerfCountdown(){
 
-            var sec = 30;
+            var sec = 15;
             var btn = document.getElementById('perfConfirmBtn');
             var cd = document.getElementById('perfOvCountdown');
             cd.textContent = sec;
@@ -2763,7 +2777,7 @@
 
         function confirmPerf(){
 
-            if (perfCountdownId) { toast('请等待 30 秒冷静期结束后再确认'); return; }
+            if (perfCountdownId) { toast('请等待 15 秒冷静期结束后再确认'); return; }
 
             clearInterval(perfCountdownId);
             perfCountdownId = null;
@@ -2774,9 +2788,9 @@
             toast('调度已确认，已生效');
 
             setTimeout(function() {
-                perfInitialized = false;
-                perfInputsSet = false;
-                perfRetry = 3;
+                perfInitialized = true;
+                perfInputsSet = true;
+                perfRetry = 0;
             }, 3000);
 
         }
@@ -2865,7 +2879,7 @@
 
                     var log=LOG_PATH;
 
-                    ksu.exec('echo "=== FanExtreme v3.1.5 调试日志 ===" > '+log);
+                    ksu.exec('echo "=== FanExtreme v3.1.6 调试日志 ===" > '+log);
 
                     ksu.exec('echo "时间: $(date)" >> '+log);
 
