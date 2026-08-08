@@ -1,7 +1,7 @@
 # 🔥 FanExtreme — 更好的红魔
 
 [![GitHub Release](https://img.shields.io/github/v/release/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600)](https://github.com/ling9ling7/RedMagic-FanExtreme/releases/latest)
-[![License](https://img.shields.io/github/license/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600)](LICENSE)
+[![License](https://img.shields.io/badge/License-Custom-red?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/ling9ling7/RedMagic-FanExtreme?style=flat-square)](https://github.com/ling9ling7/RedMagic-FanExtreme/stargazers)
 
 红魔手机 KernelSU 模块 · 九合一性能优化 · WebUI 可视化控制面板 · 在线更新
@@ -99,7 +99,7 @@ A: 请确认：① config.txt 中 `充电分离=1` 并重启；② WebUI 中充�
 
 Custom License © 酷安@ling_凌
 
-本模块**保留所有权利**，采用白名单设备授权机制。源码公开供学习/审查/个人调试，未经授权不得安装运行于设备（白名单外使用需购买商业授权），禁止商用与二次公开分发。详见 [LICENSE](LICENS
+本模块**保留所有权利**，采用白名单设备授权机制。源码公开供学习/审查/个人调试，未经授权不得安装运行于设备（白名单外使用需购买商业授权），禁止商用与二次公开分发。
 
 ---
 ## ⚠️ 新闻
