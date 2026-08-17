@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FanExtreme — 更好的红魔 | KernelSU Module</title>
 <style>
+  /* 主题色板：暗色打底，红魔红做强调 */
   :root {
     --bg: #0d1117;
-    --bg2: #161b22;
-    --bg3: #1c2128;
+    --panel: #161b22;
+    --panel-hi: #1c2128;
     --border: #30363d;
     --text: #c9d1d9;
-    --text2: #8b949e;
+    --muted: #8b949e;
     --accent: #e34c26;
-    --accent2: #f97316;
+    --accent-soft: #f97316;
     --green: #3fb950;
     --blue: #58a6ff;
     --purple: #bc8cff;
@@ -35,7 +36,7 @@
     -webkit-user-select: none;
   }
 
-  /* ── Page Entrance ── */
+  /* 入场 */
   @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   body.loading .bg-fx { opacity: 0; }
@@ -49,7 +50,7 @@
   .hero-actions { animation-delay: .65s; }
   .hero-meta { animation-delay: .8s; }
 
-  /* ── Scroll Reveal ── */
+/* 滚动显现 */
   .reveal { opacity: 0; transform: translateY(40px); transition: opacity .8s cubic-bezier(.2,0,0,1), transform .8s cubic-bezier(.2,0,0,1); }
   .reveal.show { opacity: 1; transform: translateY(0); }
   .reveal-d1 { transition-delay: 0s; }
@@ -68,7 +69,7 @@
   .reveal-scale { opacity: 0; transform: scale(.92); transition: opacity .8s cubic-bezier(.2,0,0,1), transform .8s cubic-bezier(.2,0,0,1); }
   .reveal-scale.show { opacity: 1; transform: scale(1); }
 
-  /* ── Dynamic Background FX ── */
+  /* 背景：网格 + 光晕，慢慢飘，别抢戏 */
   .bg-fx { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
   .bg-fx::before {
     content: '';
@@ -104,7 +105,7 @@
   @keyframes gridPan { from { background-position: 0 0; } to { background-position: 56px 56px; } }
   @keyframes glowA { 0%,100% { transform: translate(0,0) scale(1); opacity:.45; } 50% { transform: translate(40px,30px) scale(1.15); opacity:.65; } }
   @keyframes glowB { 0%,100% { transform: translate(0,0) scale(1); opacity:.35; } 50% { transform: translate(-50px,-20px) scale(1.2); opacity:.55; } }
-  /* ── 3D Card Hover ── */
+  /* 功能卡片跟随鼠标微转 */
   .features-grid { perspective: 900px; }
   .feature-card {
     transition: transform .12s ease-out, box-shadow .35s, border-color .35s;
@@ -190,7 +191,7 @@
   .hero-badge { transition: all .35s cubic-bezier(.2,0,0,1); }
   .hero-badge:hover { transform: translateZ(60px) scale(1.05); }
   .hero-badge .v { transition: all .3s; }
-  .hero-badge:hover .v { background: var(--accent2); }
+  .hero-badge:hover .v { background: var(--accent-soft); }
 
   .hero-desc { transition: all .35s; }
   .hero-desc:hover { color: var(--text); padding-left: 8px; border-left: 2px solid var(--accent); }
@@ -202,7 +203,7 @@
   .section-label:hover { color: var(--accent); transform: translateX(4px); letter-spacing: .2em; }
 
   .section-title { transition: all .3s; display: inline-block; }
-  .section-title:hover { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .section-title:hover { background: linear-gradient(90deg, var(--accent), var(--accent-soft)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
   .section-desc { transition: all .3s; }
   .section-desc:hover { color: var(--text); }
@@ -219,19 +220,19 @@
   .license-box { transition: all .35s cubic-bezier(.2,0,0,1); }
   .license-box:hover { border-color: rgba(249,115,22,.3); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.3); }
   .license-box strong { transition: color .3s; }
-  .license-box:hover strong { color: var(--accent2); }
+  .license-box:hover strong { color: var(--accent-soft); }
 
   footer .footer-links a { transition: all .3s; position: relative; }
   footer .footer-links a::after {
     content: '';
     position: absolute; bottom: -2px; left: 0; right: 0;
     height: 1px; border-radius: 1px;
-    background: var(--accent2);
+    background: var(--accent-soft);
     transform: scaleX(0);
     transition: transform .3s cubic-bezier(.2,0,0,1);
   }
   footer .footer-links a:hover::after { transform: scaleX(1); }
-  footer .footer-links a:hover { color: var(--accent2); transform: translateY(-1px); }
+  footer .footer-links a:hover { color: var(--accent-soft); transform: translateY(-1px); }
 
   .qq-cta { transition: all .35s cubic-bezier(.2,0,0,1); }
   .qq-cta:hover { top: -3px; box-shadow: 0 12px 40px rgba(0,0,0,.3), 0 0 0 1px rgba(18,183,245,.15); }
@@ -240,20 +241,19 @@
 
   @media (prefers-reduced-motion: reduce) {
     .bg-fx::before, .bg-fx .grid, .bg-fx .glow { animation: none !important; }
-    .feature-card, .btn, .nav-links a, .sysfs-item, .step, .step-num, .qq-cta, .nav-logo, .hero-badge, .hero-desc, .hero-meta-item, .section-label, .section-title, .section-desc, .code-block, .license-box, footer .footer-links a,
-    .feature-card::before, .btn-primary::after, .sysfs-item::before, .feature-card .feature-icon, .feature-card .feature-tag, .code-dots span, .hero-badge .v, .nav-logo .dot, .qq-cta .btn-qq, footer .footer-links a::after, .license-box strong { transition: none !important; animation: none !important; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
     .feature-card:hover, .btn:hover, .feature-card .feature-icon, .feature-card .feature-tag { transform: none !important; }
-    .reveal, .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .reveal, .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; }
   }
   a { color: var(--blue); text-decoration: none; transition: color .2s; }
-  a:hover { color: var(--accent2); }
+  a:hover { color: var(--accent-soft); }
 
-  /* ── Layout ── */
+  /* 布局 */
   .container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
   section { padding: 80px 0; border-bottom: 1px solid var(--border); }
   section:last-child { border-bottom: none; }
 
-  /* ── Nav ── */
+  /* 顶部导航 */
   nav {
     position: fixed; top: 0; left: 0; right: 0;
     z-index: 100;
@@ -275,10 +275,10 @@
   }
   .nav-logo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
   .nav-links { display: flex; gap: 24px; }
-  .nav-links a { color: var(--text2); font-size: .85rem; font-weight: 500; }
+  .nav-links a { color: var(--muted); font-size: .85rem; font-weight: 500; }
   .nav-links a:hover { color: #fff; }
 
-  /* ── Hero ── */
+  /* Hero 主视觉 */
   .hero {
     padding: 140px 0 100px;
     border-bottom: 1px solid var(--border);
@@ -299,7 +299,7 @@
     border: 1px solid rgba(227,76,38,.25);
     border-radius: 999px;
     font-size: .75rem;
-    color: var(--accent2);
+    color: var(--accent-soft);
     font-weight: 600;
     margin-bottom: 24px;
     letter-spacing: .03em;
@@ -331,7 +331,7 @@
   .hero h1 .hl { color: var(--accent); }
   .hero-desc {
     font-size: 1.15rem;
-    color: var(--text2);
+    color: var(--muted);
     max-width: 620px;
     margin-bottom: 32px;
     line-height: 1.75;
@@ -357,7 +357,7 @@
     color: var(--text);
     border-color: var(--border);
   }
-  .btn-ghost:hover { border-color: var(--text2); color: #fff; }
+  .btn-ghost:hover { border-color: var(--muted); color: #fff; }
   .hero-meta {
     display: flex; gap: 24px; margin-top: 48px;
     padding-top: 32px;
@@ -367,17 +367,17 @@
   .hero-meta-item {
     display: flex; flex-direction: column; gap: 4px;
   }
-  .hero-meta-item .label { font-size: .7rem; color: var(--text2); text-transform: uppercase; letter-spacing: .1em; }
+  .hero-meta-item .label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
   .hero-meta-item .value { font-size: .95rem; font-weight: 600; color: #fff; }
   .hero-meta-item .value.green { color: var(--green); }
   .hero-meta-item .value.blue { color: var(--blue); }
 
-  /* ── Section Titles ── */
+  /* 区块标题 */
   .section-label {
     font-size: .7rem;
     text-transform: uppercase;
     letter-spacing: .15em;
-    color: var(--accent2);
+    color: var(--accent-soft);
     font-weight: 700;
     margin-bottom: 8px;
   }
@@ -388,16 +388,16 @@
     letter-spacing: -.02em;
     margin-bottom: 12px;
   }
-  .section-desc { color: var(--text2); max-width: 560px; margin-bottom: 48px; }
+  .section-desc { color: var(--muted); max-width: 560px; margin-bottom: 48px; }
 
-  /* ── Feature Grid ── */
+  /* 功能九宫格 */
   .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
   }
   .feature-card {
-    background: var(--bg2);
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 28px 24px;
@@ -426,7 +426,7 @@
     font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 8px;
   }
   .feature-card p {
-    font-size: .85rem; color: var(--text2); line-height: 1.65;
+    font-size: .85rem; color: var(--muted); line-height: 1.65;
   }
   .feature-tag {
     display: inline-block;
@@ -440,9 +440,9 @@
     font-weight: 600;
   }
 
-  /* ── Code Block ── */
+  /* 代码块 */
   .code-block {
-    background: var(--bg2);
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
@@ -451,10 +451,10 @@
   .code-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 20px;
-    background: var(--bg3);
+    background: var(--panel-hi);
     border-bottom: 1px solid var(--border);
     font-size: .8rem;
-    color: var(--text2);
+    color: var(--muted);
     font-family: var(--font-mono);
   }
   .code-dots { display: flex; gap: 6px; }
@@ -472,12 +472,12 @@
     color: var(--text);
   }
   .code-body .kw { color: var(--purple); }
-  .code-body .str { color: var(--accent2); }
-  .code-body .cmt { color: var(--text2); font-style: italic; }
+  .code-body .str { color: var(--accent-soft); }
+  .code-body .cmt { color: var(--muted); font-style: italic; }
   .code-body .key { color: var(--blue); }
   .code-body .val { color: var(--green); }
 
-  /* ── Steps ── */
+  /* 安装步骤 */
   .steps { counter-reset: step; }
   .step {
     display: flex; gap: 20px;
@@ -490,7 +490,7 @@
     flex-shrink: 0;
     width: 40px; height: 40px;
     border-radius: 50%;
-    background: var(--bg2);
+    background: var(--panel);
     border: 2px solid var(--accent);
     display: flex; align-items: center; justify-content: center;
     font-size: .9rem;
@@ -507,9 +507,9 @@
     background: var(--border);
   }
   .step-content h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
-  .step-content p { color: var(--text2); font-size: .9rem; line-height: 1.7; }
+  .step-content p { color: var(--muted); font-size: .9rem; line-height: 1.7; }
 
-  /* ── Config Table ── */
+  /* 配置表格 */
   .config-table {
     width: 100%;
     border-collapse: collapse;
@@ -518,12 +518,12 @@
   .config-table th {
     text-align: left;
     padding: 12px 16px;
-    background: var(--bg2);
+    background: var(--panel);
     border: 1px solid var(--border);
     font-size: .75rem;
     text-transform: uppercase;
     letter-spacing: .1em;
-    color: var(--text2);
+    color: var(--muted);
     font-weight: 700;
   }
   .config-table td {
@@ -540,11 +540,11 @@
     font-family: var(--font-mono);
     color: var(--code);
   }
-  .config-table td:nth-child(3) { color: var(--text2); font-size: .85rem; }
+  .config-table td:nth-child(3) { color: var(--muted); font-size: .85rem; }
   .toggle-on { color: var(--green) !important; font-weight: 600; }
-  .toggle-off { color: var(--text2) !important; }
+  .toggle-off { color: var(--muted) !important; }
 
-  /* ── Sysfs ── */
+  /* sysfs 节点 */
   .sysfs-list {
     display: grid;
     gap: 12px;
@@ -552,36 +552,72 @@
   .sysfs-item {
     display: flex; align-items: baseline; gap: 12px;
     padding: 14px 18px;
-    background: var(--bg2);
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 8px;
     font-family: var(--font-mono);
     font-size: .8rem;
-    color: var(--text2);
+    color: var(--muted);
     transition: border-color .2s;
   }
   .sysfs-item:hover { border-color: rgba(88,166,255,.3); }
   .sysfs-path { color: var(--code); word-break: break-all; }
-  .sysfs-desc { color: var(--text2); font-family: var(--font-sans); font-size: .82rem; }
+  .sysfs-desc { color: var(--muted); font-family: var(--font-sans); font-size: .82rem; }
 
-  /* ── License ── */
+  /* 授权说明 */
   .license-box {
-    background: var(--bg2);
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 24px;
     font-size: .85rem;
-    color: var(--text2);
+    color: var(--muted);
     line-height: 1.7;
   }
   .license-box strong { color: var(--text); }
 
-  /* ── Footer ── */
+  /* 常见问题 */
+  .faq-list { display: flex; flex-direction: column; gap: 16px; }
+  .faq-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 26px;
+    transition: border-color .3s, box-shadow .3s, transform .3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .faq-item::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(227,76,38,.05), transparent);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .faq-item:hover::before { opacity: 1; }
+  .faq-item:hover { border-color: rgba(227,76,38,.3); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.3); }
+  .faq-q {
+    font-size: 1rem; font-weight: 700; color: #fff;
+    margin-bottom: 8px; position: relative;
+    display: flex; gap: 10px; align-items: baseline;
+  }
+  .faq-q .q-mark { color: var(--accent); font-weight: 800; flex-shrink: 0; }
+  .faq-a { font-size: .88rem; color: var(--muted); line-height: 1.7; position: relative; }
+  .faq-a code {
+    font-family: var(--font-mono);
+    color: var(--code);
+    font-size: .85em;
+    background: rgba(255,123,114,.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* 页脚 */
   footer {
     padding: 48px 0;
     border-top: 1px solid var(--border);
     text-align: center;
-    color: var(--text2);
+    color: var(--muted);
     font-size: .8rem;
   }
   footer .footer-links {
@@ -589,17 +625,17 @@
     margin-bottom: 16px;
     flex-wrap: wrap;
   }
-  footer .footer-links a { color: var(--text2); font-size: .8rem; }
-  footer .footer-links a:hover { color: var(--accent2); }
+  footer .footer-links a { color: var(--muted); font-size: .8rem; }
+  footer .footer-links a:hover { color: var(--accent-soft); }
   footer .copy { color: #484f58; font-size: .75rem; }
   footer .sync-info { color: #30363d; font-size: .7rem; }
 
-  /* ── QQ Group CTA ── */
+  /* 社区引导 */
   .qq-cta {
     margin-top: 48px;
     text-align: center;
     padding: 32px;
-    background: var(--bg2);
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 16px;
     display: flex;
@@ -611,7 +647,7 @@
   .qq-cta p { flex: 1; display: flex; align-items: center; }
   .qq-cta .emoji { font-size: 32px; margin-bottom: 12px; }
   .qq-cta h3 { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
-  .qq-cta p { font-size: .9rem; color: var(--text2); margin-bottom: 20px; }
+  .qq-cta p { font-size: .9rem; color: var(--muted); margin-bottom: 20px; }
   .qq-cta .btn-qq {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 12px 32px;
@@ -627,7 +663,7 @@
   }
   .qq-cta .btn-qq:hover { background: #109ed1; color: #fff; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(18,183,245,.2); }
 
-  /* ── Community CTA grid (QQ + Telegram) ── */
+  /* 社区双卡片 */
   .community-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -656,7 +692,7 @@
     .community-grid { grid-template-columns: 1fr; }
   }
 
-  /* ── Responsive ── */
+  /* 小屏适配 */
   @media (max-width: 640px) {
     .hero-meta { flex-direction: column; gap: 16px; }
     .nav-links { display: none; }
@@ -668,7 +704,7 @@
 </head>
 <body class="loading">
 
-<!-- ═══ Background FX ═══ -->
+<!-- 背景特效 -->
 <div class="bg-fx">
   <div class="grid"></div>
   <div class="glow g1"></div>
@@ -680,7 +716,7 @@
 
 
 
-<!-- ═══ Nav ═══ -->
+<!-- 顶栏 -->
 <nav>
   <div class="container">
     <div class="nav-logo">
@@ -692,12 +728,13 @@
       <a href="#install">安装</a>
       <a href="#config">配置</a>
       <a href="#sysfs">Sysfs</a>
+      <a href="#faq">常见问题</a>
       <a href="https://github.com/ling9ling7/RedMagic-FanExtreme" target="_blank">GitHub ↗</a>
     </div>
   </div>
 </nav>
 
-<!-- ═══ Hero ═══ -->
+<!-- 首屏 -->
 <section class="hero">
   <div class="container">
     <div class="hero-badge">
@@ -749,7 +786,7 @@
   </div>
 </section>
 
-<!-- ═══ Features ═══ -->
+<!-- 功能 -->
 <section id="features">
     <div class="container">
     <div class="section-label reveal">Features</div>
@@ -824,7 +861,7 @@
   </div>
 </section>
 
-<!-- ═══ Install ═══ -->
+<!-- 安装 -->
 <section id="install">
   <div class="container">
     <div class="section-label reveal">Installation</div>
@@ -856,7 +893,7 @@
   </div>
 </section>
 
-<!-- ═══ Config ═══ -->
+<!-- 配置 -->
 <section id="config">
   <div class="container">
     <div class="section-label reveal">Configuration</div>
@@ -908,7 +945,7 @@
   </div>
 </section>
 
-<!-- ═══ Sysfs ═══ -->
+<!-- 内核节点 -->
 <section id="sysfs">
   <div class="container">
     <div class="section-label reveal">Technical</div>
@@ -951,7 +988,49 @@
   </div>
 </section>
 
-<!-- ═══ License ═══ -->
+<!-- 常见问题 -->
+<section id="faq">
+  <div class="container">
+    <div class="section-label reveal">FAQ</div>
+    <h2 class="section-title reveal">常见问题</h2>
+    <p class="section-desc reveal">关于安装、授权与使用的常见疑问。</p>
+    <div class="faq-list">
+
+      <div class="faq-item reveal">
+        <div class="faq-q"><span class="q-mark">Q</span> 为什么安装模块后过一会模块会自己消失？</div>
+        <p class="faq-a">模块已从 2026年8月7日（v3.1.5 版本）开始正式转变为仅赞助用户可安装使用，非授权机型模块会自动卸载，可联系作者了解赞助授权相关信息。</p>
+      </div>
+
+      <div class="faq-item reveal reveal-d1">
+        <div class="faq-q"><span class="q-mark">Q</span> 控制面板（WebUI）入口在哪？</div>
+        <p class="faq-a">KernelSU Manager → 模块 → 找到「更好的红魔」→ 点击「控制面板」。</p>
+      </div>
+
+      <div class="faq-item reveal reveal-d1">
+        <div class="faq-q"><span class="q-mark">Q</span> 我是 Magisk 用户，模块列表里没有「控制面板」按钮怎么办？</div>
+        <p class="faq-a">Magisk 暂不支持 WebUI 功能。你可以：① 换用 KernelSU 管理器；② 安装独立的 WebUI 管理软件（如 MMRL、KsuWebUI 等）。模块其他功能不受影响。</p>
+      </div>
+
+      <div class="faq-item reveal reveal-d1">
+        <div class="faq-q"><span class="q-mark">Q</span> 我不是 KernelSU 用户，也能使用吗？</div>
+        <p class="faq-a">可以。FanExtreme 兼容 KernelSU、KernelSU Next、APatch、Magisk（部分版本）。但 WebUI 控制面板目前仅 KernelSU 系列管理器支持。Magisk 用户功能正常生效，只是没有控制面板界面。</p>
+      </div>
+
+      <div class="faq-item reveal reveal-d1">
+        <div class="faq-q"><span class="q-mark">Q</span> 装了模块后游戏掉帧？</div>
+        <p class="faq-a">模块本身不会导致掉帧。如果遇到问题，请用控制面板的「调试日志」功能导出日志反馈。</p>
+      </div>
+
+      <div class="faq-item reveal reveal-d1">
+        <div class="faq-q"><span class="q-mark">Q</span> 充电分离为什么没有触发？</div>
+        <p class="faq-a">请确认：① config.txt 中 <code>充电分离=1</code> 并重启；② WebUI 中充电分离开关已开启；③ 手机正在充电；④ 电量达到了设定的阈值。</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 协议 -->
 <section id="license">
   <div class="container">
     <div class="section-label reveal">License</div>
@@ -962,7 +1041,7 @@
   </div>
 </section>
 
-<!-- ═══ QQ Group CTA ═══ -->
+<!-- 加群 -->
 <section id="community" style="border-bottom: none;">
   <div class="container">
     <div class="community-grid">
@@ -987,7 +1066,7 @@
   </div>
 </section>
 
-<!-- ═══ Footer ═══ -->
+<!-- 页脚 -->
 <footer>
   <div class="container">
     <div class="footer-links reveal">
@@ -1002,7 +1081,7 @@
 </footer>
 
 <script>
-/* ── 3D Card Tilt ── */
+/* 卡片跟随鼠标轻微 3D 倾斜 */
 (function(){
   document.querySelectorAll('.feature-card').forEach(card => {
     card.addEventListener('mousemove', e => {
@@ -1021,7 +1100,7 @@
   });
 })();
 
-/* ── Hero Parallax ── */
+/* 首屏视差（鼠标平滑跟随） */
 (function(){
   const hero = document.querySelector('.hero');
   if (!hero) return;
@@ -1039,12 +1118,12 @@
   tick();
 })();
 
-/* ── Force scroll to top on load ── */
+/* 进页面强制回到顶部 */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 if (location.hash) history.replaceState(null, '', location.pathname + location.search);
 window.scrollTo(0, 0);
 
-/* ── Page Entrance: clear animation after load ── */
+/* 加载完清掉入场动画 */
 window.addEventListener('load', () => {
   document.body.classList.remove('loading');
   setTimeout(() => {
@@ -1055,7 +1134,7 @@ window.addEventListener('load', () => {
   }, 1200);
 });
 
-/* ── Scroll Reveal ── */
+// 滚动显现
 (function(){
   if (!window.IntersectionObserver) return;
   const observer = new IntersectionObserver(entries => {
@@ -1082,7 +1161,7 @@ window.addEventListener('load', () => {
 
   let version = null;
 
-  // Step 1: module.prop (no rate limit)
+  // Step 1: module.prop（没有限流）
   try {
     const res = await fetch('https://raw.githubusercontent.com/' + REPO + '/main/module.prop');
     if (res.ok) {
@@ -1091,7 +1170,7 @@ window.addEventListener('load', () => {
     }
   } catch (e) {}
 
-  // Step 2: tags fallback
+  // Step 2: tags 兜底
   if (!version) {
     try {
       const res = await fetch('https://api.github.com/repos/' + REPO + '/tags');
@@ -1102,7 +1181,7 @@ window.addEventListener('load', () => {
     } catch (e) {}
   }
 
-  // Step 3: hardcoded
+  // Step 3: 实在拿不到就写死一个
   if (!version) version = 'v1.0.0';
 
   versionEl.textContent = 'v' + version;
@@ -1125,7 +1204,7 @@ window.addEventListener('load', () => {
     syncInfo.textContent = '数据加载失败（显示缓存值）';
   }
 
-  // Step 4: Total downloads across all releases
+  // Step 4: 汇总所有 release 的下载量
   try {
     const res = await fetch('https://api.github.com/repos/' + REPO + '/releases');
     if (res.ok) {
