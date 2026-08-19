@@ -444,9 +444,9 @@
 
 
 
-        var locks = { fan: 0, fanScreenOff: 0, charge: 0, touch: 0, vibe: 0, touchMode: 0, pump: 0, tempCtl: 0, pumpTempCtl: 0 };
+        var locks = { fan: 0, fanScreenOff: 0, charge: 0, touch: 0, vibe: 0, touchMode: 0, pump: 0, pumpScreenOff: 0, tempCtl: 0, pumpTempCtl: 0 };
 
-        var expect = { fan: null, fanScreenOff: null, charge: null, touch: null, vibe: null, touchMode: null, pump: null, tempCtl: null, pumpTempCtl: null };
+        var expect = { fan: null, fanScreenOff: null, charge: null, touch: null, vibe: null, touchMode: null, pump: null, pumpScreenOff: null, tempCtl: null, pumpTempCtl: null };
 
         var logDebounceTimer = null;
 
@@ -475,6 +475,8 @@
         var AV  = MDIR + '/auto_vibe';
 
         var AP  = MDIR + '/auto_pump';
+
+        var APSS = MDIR + '/auto_pump_screen_off';
 
         var PATC = MDIR + '/auto_pump_temp_control';
 
@@ -843,6 +845,19 @@
             locks.pump = Date.now() + 1000;
             cmd('auto_pump', on ? 'off' : 'on');
             toast(on ? '液冷控制已关闭' : '液冷控制已开启');
+            triggerCardJelly(e.currentTarget, e);
+        }
+
+        function handlePumpScreenOffToggle(e) {
+            e.stopPropagation();
+            var el = document.getElementById('pumpScreenOffSw');
+            var on = el.classList.contains('on'),
+                nxt = !on;
+            expect.pumpScreenOff = nxt; sw(el, nxt);
+            sh(nxt ? 'touch ' + APSS : 'rm -f ' + APSS);
+            locks.pumpScreenOff = Date.now() + 4000;
+            cmd('auto_pump_screen_off', on ? 'off' : 'on');
+            toast(on ? '液冷熄屏保持已关闭' : '液冷熄屏保持已开启');
             triggerCardJelly(e.currentTarget, e);
         }
 
@@ -1324,6 +1339,9 @@
                     if (Date.now() >= locks.pump) sw(document.getElementById('pumpSw'), pumpOn);
                     dot(document.getElementById('pumpDot'), pumpOn, 'var(--gauge-green)');
                     if (pumpOn) cPump.classList.add('active'); else cPump.classList.remove('active');
+                    var pumpScreenOffOn = s.auto_pump_screen_off === 1;
+                    if (Date.now() < locks.pumpScreenOff && expect.pumpScreenOff !== null && pumpScreenOffOn === expect.pumpScreenOff) { expect.pumpScreenOff = null; }
+                    if (Date.now() >= locks.pumpScreenOff) sw(document.getElementById('pumpScreenOffSw'), pumpScreenOffOn);
                     var pumpTempCtrlOn = s.pump_temp_control === 1;
                     if (Date.now() < locks.pumpTempCtl && expect.pumpTempCtl !== null && pumpTempCtrlOn === expect.pumpTempCtl) { expect.pumpTempCtl = null; }
                     if (uiState.pumpTempControl.pending) {
@@ -1694,13 +1712,13 @@
 
                 if (!perfInputsSet) {
 
-                    document.getElementById('cpu0Max').value = cpu0;
+                    document.getElementById('cpu0Max').value = Math.round(snapToStep(parseInt(s.cpu0_max)||0, perfStepLists.cpu0) / 1000);
 
-                    if (clusterCount >= 3) document.getElementById('cpu4Max').value = cpu4;
+                    if (clusterCount >= 3) document.getElementById('cpu4Max').value = Math.round(snapToStep(parseInt(s.cpu4_max)||0, perfStepLists.cpu4) / 1000);
 
-                    document.getElementById('cpu7Max').value = cpu7;
+                    document.getElementById('cpu7Max').value = Math.round(snapToStep(parseInt(s.cpu7_max)||0, perfStepLists.cpu7) / 1000);
 
-                    document.getElementById('gpuMax').value = gpu;
+                    document.getElementById('gpuMax').value = Math.round(snapToStep(parseInt(s.gpu_max)||0, perfStepLists.gpu) / 1000000);
 
                 }
 
@@ -1775,6 +1793,16 @@
         var perfHw = {cpu0_max:2265600,cpu4_max:3148800,cpu7_max:3052800,gpu_max:903000000};
 
 
+
+        function snapToStep(val, steps) {
+            if (!steps || steps.length === 0) return val;
+            var best = steps[0], bestDiff = Math.abs(val - best);
+            for (var i = 1; i < steps.length; i++) {
+                var d = Math.abs(val - steps[i]);
+                if (d < bestDiff) { bestDiff = d; best = steps[i]; }
+            }
+            return best;
+        }
 
         function fillPerfInputs(prof){
 
@@ -2037,7 +2065,7 @@
 
                     var log=LOG_PATH;
 
-                    ksu.exec('echo "=== FanExtreme v3.1.7 调试日志 ===" > '+log);
+                    ksu.exec('echo "=== FanExtreme v3.1.8 调试日志 ===" > '+log);
 
                     ksu.exec('echo "时间: $(date)" >> '+log);
 
