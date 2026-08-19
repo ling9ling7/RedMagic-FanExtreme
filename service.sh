@@ -167,6 +167,10 @@ if [ "$(cfg '触控优化')" = "1" ]; then
     done &
 fi
 
+if [ "$(cfg '亮度解锁')" = "1" ]; then
+    brightness_unlock
+fi
+
 #触控按应用模式
 (
   while true; do
@@ -209,6 +213,8 @@ PUMP_TEMP_CTRL_FILE="$MODDIR/auto_pump_temp_control"
 PUMP_TEMP_CTRL_MODE_FILE="$MODDIR/pump_temp_control_mode"
 PUMP_TEMP_CTRL_THRESHOLD_FILE="$MODDIR/pump_temp_control_threshold"
 AUTO_PUMP_FILE="$MODDIR/auto_pump"
+PUMP_SCREEN_OFF_FILE="$MODDIR/auto_pump_screen_off"
+PUMP_WAS_ON_FILE="$MODDIR/.pump_was_on"
 AUTO_PERF_FILE="$MODDIR/perf_enabled"
 PERF_BACKUP="$MODDIR/perf_backup"
 PERF_PENDING="$MODDIR/perf_pending"

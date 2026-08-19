@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 ui_print "===================================="
-ui_print "  FanExtreme v3.1.7"
+ui_print "  FanExtreme v3.1.8"
 ui_print "===================================="
 
 INSTALLED_CONFIG="/data/adb/modules/FanExtreme/config.txt"
