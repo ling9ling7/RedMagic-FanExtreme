@@ -3,14 +3,21 @@
 [![GitHub Release](https://img.shields.io/github/v/release/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600)](https://github.com/ling9ling7/RedMagic-FanExtreme/releases/latest)
 [![License](https://img.shields.io/badge/License-Custom-red?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/ling9ling7/RedMagic-FanExtreme?style=flat-square)](https://github.com/ling9ling7/RedMagic-FanExtreme/stargazers)
+![GitHub All Releases](https://img.shields.io/github/downloads/ling9ling7/RedMagic-FanExtreme/total.svg)
 
-红魔手机 KernelSU 模块 · 九合一性能优化 · WebUI 可视化控制面板 · 在线更新
+红魔手机 KernelSU 模块 · 多合一性能优化 · WebUI 可视化控制面板 · 在线更新
 
-> 为红魔手机而生：风扇极速、充电分离、云控屏蔽、温控移除、振动增强、触控优化、充电加速，一站式解决性能调校。
+> 为红魔手机而生：风扇极速、充电分离、云控屏蔽、温控移除、振动增强、触控优化、充电加速等，一站式解决性能调校。
+<table>
+  <tr>
+    <td><img width="350" alt="前端展示" src="https://github.com/user-attachments/assets/990ab9a2-f490-4c4c-8cf9-f6a1cf6e4056" /></td>
+    <td><img width="350" alt="前端展示2" src="https://github.com/user-attachments/assets/f0a6dd4e-030d-4741-b83a-b01f3727a85b" /></td>
+  </tr>
+</table>
 
 ## ✨ 为什么选择 FanExtreme？
 
-其他模块单独一项功能就一个模块，装多了互相冲突。**FanExtreme 一个模块搞定全部九项**，内置 WebUI 控制面板，开关随心，新手也能用。
+其他模块单独一项功能就一个模块，装多了互相冲突。**FanExtreme 一个模块搞定多个功能**，内置 WebUI 控制面板，开关随心，新手也能用。
 
 - 🎛️ **WebUI 控制面板** — 模块列表直接进入，实时电量/温度/功率监控，充电分离与风扇极速开关自如
 - 🔌 **在线更新** — 模块列表内一键检测新版本，不用手动下载 ZIP
@@ -30,6 +37,7 @@
 | 👆 触控优化 | 提高采样率 + 游戏模式 + 跟手度 4 级 + 熄屏守护 + 960Hz 系统层 + 60 秒守护防回退 |
 | 🔋 充电加速 | 解除部分情况下的充电电流限制 |
 | 📈 频率控制 | 自定义CPU和GPU的频率，同时提供了一个省电预设 |
+| 💡 亮度解锁 | 红魔11Pro系列可激发最大屏幕亮度 |
 
 ## 📲 安装
 
@@ -54,9 +62,53 @@
 振动上限=128
 触控优化=1
 充电加速=1
+亮度解锁=1
 ```
 
 WebUI 中可实时开关功能、调整风扇挡位和充电分离阈值。
+
+## 📖 项目结构
+```
+FanExtreme/
+│
+├── module.prop            # 模块元数据
+├── customize.sh           # 安装时执行
+├── service.sh             # 主守护进程
+├── config.txt             # 配置文件
+├── update.json            # 在线更新描述
+│
+├── lib/                   # 功能库
+│   ├── common.sh          # cfg() 读 config.txt 配置
+│   ├── whitelist.sh       # 白名单授权检查
+│   ├── patch.sh           # 拉取 GitHub 热补丁
+│   ├── ding.sh            # 安装成功回传
+│   ├── features.sh        # 各功能开关实现
+│   ├── status.sh          # 生成 WebUI 状态 JSON
+│   ├── perf.sh            # CPU/GPU 频率与锁频控制
+│   └── loop.sh            # WebUI 命令循环
+│
+├── webroot/               # WebUI 控制面板
+│   ├── index.html         # 页面骨架
+│   ├── style.css          # 样式
+│   ├── app.js             # 前端逻辑
+│   ├── avatar.png         # 页面头像
+│   ├── sponsor.jpg        # 赞助图
+│   └── xmtx.png           # 社区贡献者头像
+│
+├── system/etc/init/       # KernelSU init 服务占位
+│   ├── init.thermal-engine.rc
+│   ├── init.thermald.rc
+│   ├── init.perfservice.rc
+│   └── init.zperfcube.rc
+│
+└── vendor/etc/
+    └── thermal-engine.conf   # 温控引擎配置
+```
+
+## 🛠️ 开发环境
+- 模块本体纯 shell (system/bin/sh) + JS/CSS，无需编译
+- 测试设备红魔 9 Pro (NX769J, Android 16, KernelSU)
+- 打包 ZIP 直接压缩模块根目录即可
 
 ## ❓ 常见问题
 
@@ -72,6 +124,9 @@ A: Magisk 暂不支持 WebUI 功能。你可以：① 换用 KernelSU 管理器�
 **Q: 我不是 KernelSU 用户，也能使用吗？**  
 A: 可以。FanExtreme 兼容 KernelSU、KernelSU Next、APatch、Magisk（部分版本）。但 WebUI 控制面板目前仅 KernelSU 系列管理器支持。Magisk 用户功能正常生效，只是没有控制面板界面。
 
+**Q：红魔原生就支持充电分离为什么模块还要做这个功能？**
+A：红魔原生充电分离的电量触发值范围为 20-90 并不能设置90以上的电量触发分离，模块则完美解决这个问题。
+
 **Q: 装了模块后游戏掉帧？**  
 A: 模块本身不会导致掉帧。如果遇到问题，请用控制面板的「调试日志」功能导出日志反馈。
 
@@ -84,9 +139,13 @@ A: 请确认：① config.txt 中 `充电分离=1` 并重启；② WebUI 中充�
 
 | 机型 | Android | 适配情况 |
 |------|---------|---------|
+| 红魔 8 Pro | 15 | 完美适配✅ |
 | 红魔 9 Pro | 16 | 完美适配✅ |
 | 红魔 10 Pro | 16 | 完美适配✅ |
 | 红魔 11 Pro | 16 | 完美适配✅ |
+| 红魔电竞平板 Pro | 16 | 完美适配✅ |
+| 红魔电竞平板 3 Pro | 16 | 完美适配✅ |
+| 红魔电竞平板 5 Pro | 16 | 完美适配✅ |
 
 ## 💬 反馈 & 社区
 
