@@ -62,6 +62,7 @@
   .reveal-d7 { transition-delay: .6s; }
   .reveal-d8 { transition-delay: .7s; }
   .reveal-d9 { transition-delay: .8s; }
+  .reveal-d10 { transition-delay: .9s; }
   .reveal-left { opacity: 0; transform: translateX(-30px); transition: opacity .8s cubic-bezier(.2,0,0,1), transform .8s cubic-bezier(.2,0,0,1); }
   .reveal-left.show { opacity: 1; transform: translateX(0); }
   .reveal-right { opacity: 0; transform: translateX(30px); transition: opacity .8s cubic-bezier(.2,0,0,1), transform .8s cubic-bezier(.2,0,0,1); }
@@ -194,7 +195,7 @@
   .hero-badge:hover .v { background: var(--accent-soft); }
 
   .hero-desc { transition: all .35s; }
-  .hero-desc:hover { color: var(--text); padding-left: 8px; border-left: 2px solid var(--accent); }
+  .hero-desc:hover { color: var(--text); transform: translateX(8px); box-shadow: inset 3px 0 0 var(--accent); }
 
   .hero-meta-item { transition: all .3s; padding: 6px 10px; border-radius: 6px; }
   .hero-meta-item:hover { background: rgba(227,76,38,.06); transform: translateY(-2px); }
@@ -332,9 +333,15 @@
   .hero-desc {
     font-size: 1.15rem;
     color: var(--muted);
-    max-width: 620px;
+    max-width: 720px;
     margin-bottom: 32px;
     line-height: 1.75;
+    padding-left: 0;
+  }
+  .hero-desc:hover {
+    color: var(--text);
+    transform: translateX(8px);
+    box-shadow: inset 3px 0 0 var(--accent);
   }
   .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
   .btn {
@@ -390,17 +397,18 @@
   }
   .section-desc { color: var(--muted); max-width: 560px; margin-bottom: 48px; }
 
-  /* 功能九宫格 */
+  /* 功能五列 */
+  #features .container.features-wide { max-width: 1180px; }
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 16px;
   }
   .feature-card {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 28px 24px;
+    padding: 20px 16px;
     transition: all .25s;
     position: relative;
     overflow: hidden;
@@ -693,10 +701,14 @@
   }
 
   /* 小屏适配 */
+  @media (max-width: 1024px) {
+    .features-grid { grid-template-columns: repeat(3, 1fr); }
+  }
   @media (max-width: 640px) {
     .hero-meta { flex-direction: column; gap: 16px; }
     .nav-links { display: none; }
-    .features-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .feature-card { padding: 16px 14px; }
     .config-table { font-size: .75rem; }
     .config-table th, .config-table td { padding: 8px 10px; }
   }
@@ -728,7 +740,10 @@
       <a href="#install">安装</a>
       <a href="#config">配置</a>
       <a href="#sysfs">Sysfs</a>
+      <a href="#structure">项目结构</a>
+      <a href="#compat">兼容性</a>
       <a href="#faq">常见问题</a>
+      <a href="#news">新闻</a>
       <a href="https://github.com/ling9ling7/RedMagic-FanExtreme" target="_blank">GitHub ↗</a>
     </div>
   </div>
@@ -746,7 +761,7 @@
     </div>
     <h1>更好的<span class="hl">红魔</span></h1>
     <p class="hero-desc" id="heroDesc">
-      FanExtreme 是一款面向红魔游戏手机的 KernelSU 模块，将多项内核级性能优化集成于一个模块中，通过配置文件灵活开关，带来更纯粹的玩机体验。
+      FanExtreme 是一款面向红魔游戏手机的<span class="hl">多合一</span> KernelSU 性能优化模块：内置 WebUI 可视化控制面板与在线更新，将风扇极速、充电分离、云控屏蔽、温控移除、振动增强、触控优化、频率控制、液冷控制等十余项内核级调校集成于一个模块，配置文件一键开关，带来更纯粹的玩机体验。
     </p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="https://github.com/ling9ling7/RedMagic-FanExtreme" target="_blank">
@@ -790,8 +805,10 @@
 <section id="features">
     <div class="container">
     <div class="section-label reveal">Features</div>
-    <h2 class="section-title reveal">九项核心优化</h2>
-    <p class="section-desc reveal">每一项都针对红魔手机的痛点，通过 sysfs 节点直接调优内核参数，配置文件一键开关。</p>
+    <h2 class="section-title reveal">多项核心优化</h2>
+    <p class="section-desc reveal">每一项都针对红魔手机的痛点，通过 sysfs 节点直接调优内核参数，配置文件一键开关，WebUI 实时可视化调节。</p>
+    </div>
+    <div class="container features-wide">
     <div class="features-grid">
 
       <div class="feature-card reveal reveal-d1">
@@ -846,12 +863,19 @@
       <div class="feature-card reveal reveal-d8">
         <div class="feature-icon fi-red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e34c26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="16"/><line x1="9" y1="20" x2="9" y2="10"/><line x1="14" y1="20" x2="14" y2="6"/><line x1="19" y1="20" x2="19" y2="2"/></svg></div>
         <h3>频率控制</h3>
-        <p>自定义 CPU 各核心与 GPU 最高频率，支持频率挡位选择与调度器切换，精细掌控性能与功耗。</p>
+        <p>自定义 CPU 各核心与 GPU 最高频率，支持频率挡位选择与调度器切换，内置省电预设一键启用，精细掌控性能与功耗。</p>
         <span class="feature-tag">CPU / GPU</span>
       </div>
 
       <div class="feature-card reveal reveal-d9">
-        <div class="feature-icon fi-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C12 2 6 9 6 14a6 6 0 0 0 12 0c0-5-6-12-6-12Z"/><path d="M12 16a2 2 0 0 1-2-2"/></svg></div>
+        <div class="feature-icon fi-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6 6 0 0 0-3.68 10.72c.65.53 1.08 1.28 1.13 2.28h5.1c.05-1 .48-1.75 1.13-2.28A6 6 0 0 0 12 2Z"/><path d="m11 8.2 2 2M13 8.2l-2 2"/></svg></div>
+        <h3>亮度解锁</h3>
+        <p>红魔 11 Pro 系列可激发最大屏幕亮度，户外强光下依然清晰可见。</p>
+        <span class="feature-tag">Brightness</span>
+      </div>
+
+      <div class="feature-card reveal reveal-d10">
+        <div class="feature-icon fi-red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e34c26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
         <h3>液冷控制</h3>
         <p>支持红魔11 Pro 内置液冷水泵四档调速，按需主动降温。</p>
         <span class="feature-tag">Liquid Cooling</span>
@@ -917,7 +941,8 @@
 <span class="key">振动时长</span> = <span class="val">18ms</span>
 <span class="key">振动上限</span> = <span class="val">128</span>
 <span class="key">触控优化</span> = <span class="val">1</span>
-<span class="key">充电加速</span> = <span class="val">1</span></div>
+<span class="key">充电加速</span> = <span class="val">1</span>
+<span class="key">亮度解锁</span> = <span class="val">1</span></div>
     </div>
 
     <table class="config-table reveal">
@@ -940,6 +965,7 @@
         <tr><td>振动上限</td><td>128</td><td>最大振动幅度</td></tr>
         <tr><td>触控优化</td><td>1</td><td>960Hz 触控采样率</td></tr>
         <tr><td>充电加速</td><td>1</td><td>移除充电电流软限制</td></tr>
+        <tr><td>亮度解锁</td><td>1</td><td>红魔11 Pro系列激发最大亮度</td></tr>
       </tbody>
     </table>
   </div>
@@ -988,6 +1014,88 @@
   </div>
 </section>
 
+<!-- 项目结构 -->
+<section id="structure">
+  <div class="container">
+    <div class="section-label reveal">Structure</div>
+    <h2 class="section-title reveal">项目结构</h2>
+    <p class="section-desc reveal">模块按职责拆分为 lib 功能库，全部由 service.sh 统一加载；根目录即模块安装目录，打包时直接压缩根目录即可。</p>
+
+    <div class="code-block reveal reveal-scale">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        项目结构
+      </div>
+      <div class="code-body"><span class="cmt">FanExtreme/</span>
+│
+├── <span class="key">module.prop</span>            <span class="cmt"># 模块元数据</span>
+├── <span class="key">customize.sh</span>           <span class="cmt"># 安装时执行</span>
+├── <span class="key">service.sh</span>             <span class="cmt"># 主守护进程</span>
+├── <span class="key">config.txt</span>             <span class="cmt"># 配置文件</span>
+├── <span class="key">update.json</span>            <span class="cmt"># 在线更新描述</span>
+│
+├── <span class="key">lib/</span>                   <span class="cmt"># 功能库</span>
+│   ├── <span class="key">common.sh</span>          <span class="cmt"># cfg() 读 config.txt 配置</span>
+│   ├── <span class="key">whitelist.sh</span>       <span class="cmt"># 白名单授权检查</span>
+│   ├── <span class="key">patch.sh</span>           <span class="cmt"># 拉取 GitHub 热补丁</span>
+│   ├── <span class="key">ding.sh</span>            <span class="cmt"># 安装成功回传</span>
+│   ├── <span class="key">features.sh</span>        <span class="cmt"># 各功能开关实现</span>
+│   ├── <span class="key">status.sh</span>          <span class="cmt"># 生成 WebUI 状态 JSON</span>
+│   ├── <span class="key">perf.sh</span>            <span class="cmt"># CPU/GPU 频率与锁频控制</span>
+│   └── <span class="key">loop.sh</span>            <span class="cmt"># WebUI 命令循环</span>
+│
+├── <span class="key">webroot/</span>               <span class="cmt"># WebUI 控制面板</span>
+│   ├── <span class="key">index.html</span>         <span class="cmt"># 页面骨架</span>
+│   ├── <span class="key">style.css</span>          <span class="cmt"># 样式</span>
+│   ├── <span class="key">app.js</span>             <span class="cmt"># 前端逻辑</span>
+│   ├── <span class="key">avatar.png</span>         <span class="cmt"># 页面头像</span>
+│   ├── <span class="key">sponsor.jpg</span>        <span class="cmt"># 赞助图</span>
+│   └── <span class="key">xmtx.png</span>           <span class="cmt"># 社区贡献者头像</span>
+│
+├── <span class="key">system/etc/init/</span>       <span class="cmt"># KernelSU init 服务占位</span>
+│   ├── <span class="key">init.thermal-engine.rc</span>
+│   ├── <span class="key">init.thermald.rc</span>
+│   ├── <span class="key">init.perfservice.rc</span>
+│   └── <span class="key">init.zperfcube.rc</span>
+│
+└── <span class="key">vendor/etc/</span>
+    └── <span class="key">thermal-engine.conf</span>   <span class="cmt"># 温控引擎配置</span></div>
+    </div>
+
+    <div class="license-box reveal reveal-left">
+      <p><strong>开发环境</strong> — 模块本体纯 shell (system/bin/sh) + JS/CSS，无需编译；测试设备为红魔 9 Pro (NX769J, Android 16, KernelSU)；打包 ZIP 直接压缩模块根目录即可。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 兼容性 -->
+<section id="compat">
+  <div class="container">
+    <div class="section-label reveal">Compatibility</div>
+    <h2 class="section-title reveal">兼容性</h2>
+    <p class="section-desc reveal">理论支持全版本红魔机型，以下机型已实测。</p>
+
+    <table class="config-table reveal">
+      <thead>
+        <tr>
+          <th>机型</th>
+          <th>Android</th>
+          <th>适配情况</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>红魔 8 Pro</td><td>15</td><td>完美适配 ✅</td></tr>
+        <tr><td>红魔 9 Pro</td><td>16</td><td>完美适配 ✅</td></tr>
+        <tr><td>红魔 10 Pro</td><td>16</td><td>完美适配 ✅</td></tr>
+        <tr><td>红魔 11 Pro</td><td>16</td><td>完美适配 ✅</td></tr>
+        <tr><td>红魔电竞平板 Pro</td><td>16</td><td>完美适配 ✅</td></tr>
+        <tr><td>红魔电竞平板 3 Pro</td><td>16</td><td>完美适配 ✅</td></tr>
+        <tr><td>红魔电竞平板 5 Pro</td><td>16</td><td>完美适配 ✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <!-- 常见问题 -->
 <section id="faq">
   <div class="container">
@@ -1017,6 +1125,11 @@
       </div>
 
       <div class="faq-item reveal reveal-d1">
+        <div class="faq-q"><span class="q-mark">Q</span> 红魔原生就支持充电分离，为什么模块还要做这个功能？</div>
+        <p class="faq-a">红魔原生充电分离的电量触发值范围为 20-90，并不能设置 90 以上的电量触发分离，模块则完美解决这个问题。</p>
+      </div>
+
+      <div class="faq-item reveal reveal-d1">
         <div class="faq-q"><span class="q-mark">Q</span> 装了模块后游戏掉帧？</div>
         <p class="faq-a">模块本身不会导致掉帧。如果遇到问题，请用控制面板的「调试日志」功能导出日志反馈。</p>
       </div>
@@ -1037,6 +1150,33 @@
     <h2 class="section-title reveal">开源协议</h2>
     <div class="license-box reveal reveal-left">
       <p>本项目采用 <strong>自定义授权协议</strong>（保留所有权利），采用白名单设备授权机制。源码公开供学习/审查，未经授权禁止安装运行、商用与二次公开分发。作者：酷安@ling_凌</p>
+    </div>
+  </div>
+</section>
+
+<!-- 新闻 -->
+<section id="news">
+  <div class="container">
+    <div class="section-label reveal">News</div>
+    <h2 class="section-title reveal">项目动态</h2>
+    <p class="section-desc reveal">模块开发与授权状态的重要通知。</p>
+    <div class="faq-list">
+
+      <div class="faq-item reveal">
+        <div class="faq-q"><span class="q-mark">⚠️</span> 2026年8月7日 · 仅赞助用户可用</div>
+        <p class="faq-a">自首次发布以来模块已历经 20+ 版本迭代，维护与更新成本不断上升。与模块用户讨论后决定：从 <code>v3.1.5</code> 版本开始正式实施仅赞助用户可安装使用；低于 v3.1.5 的版本仍然保持开源免费使用，但不再维护。赞助模块 15R 支持开发后联系开发者，即可永久使用此模块。</p>
+      </div>
+
+      <div class="faq-item reveal reveal-d1">
+        <div class="faq-q"><span class="q-mark">✅</span> 2026年7月26日 · 恢复更新</div>
+        <p class="faq-a">在熬过一个艰难的时期后，作者重新有精力继续维护项目，未来项目会继续保持更新，感谢大家的支持与陪伴。</p>
+      </div>
+
+      <div class="faq-item reveal reveal-d2">
+        <div class="faq-q"><span class="q-mark">ℹ️</span> 2026年6月14日 · 曾宣布停止更新</div>
+        <p class="faq-a">因个人原因曾宣布 FanExtreme 正式停止更新，后于 7 月恢复。模块功能已趋近完备，可做的都做了，欢迎有能力者 Fork 继续维护。</p>
+      </div>
+
     </div>
   </div>
 </section>
