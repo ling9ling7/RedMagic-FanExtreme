@@ -78,3 +78,30 @@ touch_boost() {
     fi
     settings put system touch_sampling_rate 960 2>/dev/null
 }
+brightness_unlock() {
+    local BRIGHT_FILE=""
+    local BRIGHT_MAX=""
+    local TRIGGER_VALUE="7030"
+    local TARGET_VALUE="8190"
+    for d in /sys/class/backlight/panel0-backlight/brightness /sys/class/backlight/*/brightness; do
+        [ -e "$d" ] && { BRIGHT_FILE="$d"; break; }
+    done
+    [ -z "$BRIGHT_FILE" ] && return 0
+    BRIGHT_MAX=$(cat "${BRIGHT_FILE%/brightness}/max_brightness" 2>/dev/null)
+    [ -n "$BRIGHT_MAX" ] && [ "$BRIGHT_MAX" -gt 0 ] && [ "$BRIGHT_MAX" -lt "$TARGET_VALUE" ] && TARGET_VALUE="$BRIGHT_MAX"
+    for i in $(seq 1 30); do
+        [ -f "$BRIGHT_FILE" ] && break
+        sleep 2
+    done
+    if [ -f "$BRIGHT_FILE" ]; then
+        (
+            while true; do
+                cur=$(cat "$BRIGHT_FILE" 2>/dev/null)
+                if [ -n "$cur" ] && [ "$cur" = "$TRIGGER_VALUE" ]; then
+                    echo "$TARGET_VALUE" > "$BRIGHT_FILE" 2>>"$ERRLOG" || echo "[FAIL] brightness_unlock=$?" >>"$ERRLOG"
+                fi
+                sleep 0.5
+            done
+        ) &
+    fi
+}

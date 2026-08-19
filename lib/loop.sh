@@ -175,6 +175,13 @@ webui_loop() {
               echo 0 > /proc/driver/micropump/enable 2>/dev/null
             fi
             ;;
+          auto_pump_screen_off)
+            if [ "$value" = "on" ]; then
+              touch "$PUMP_SCREEN_OFF_FILE"
+            else
+              rm -f "$PUMP_SCREEN_OFF_FILE"
+            fi
+            ;;
           pump_level)
             if [ -n "$value" ] && [ "$value" -ge 1 ] && [ "$value" -le 4 ]; then
               local pump_speed_val
@@ -228,6 +235,31 @@ webui_loop() {
             [ -z "$fan_lvl" ] && fan_lvl=5
             [ "$fan_lvl" -le 0 ] && fan_lvl=5
             su system -c "chmod 644 $FAN_ENABLE $FAN_LEVEL 2>/dev/null; echo 1 > $FAN_ENABLE; echo $fan_lvl > $FAN_LEVEL; chmod 444 $FAN_LEVEL" 2>/dev/null
+          fi
+        fi
+      fi
+    fi
+    if [ -f "$PUMP_SCREEN_OFF_FILE" ] && [ -e /proc/driver/micropump/enable ]; then
+      if dumpsys power 2>/dev/null | grep -q 'mWakefulness=Awake'; then
+        pe=$(cat /proc/driver/micropump/enable 2>/dev/null)
+        if [ "$pe" = "1" ]; then
+          touch "$PUMP_WAS_ON_FILE" 2>/dev/null
+        else
+          rm -f "$PUMP_WAS_ON_FILE" 2>/dev/null
+        fi
+      else
+        if [ -f "$PUMP_WAS_ON_FILE" ]; then
+          pe=$(cat /proc/driver/micropump/enable 2>/dev/null)
+          if [ "$pe" != "1" ]; then
+            pump_sp=$(cat /proc/driver/micropump/speed 2>/dev/null)
+            case "$pump_sp" in
+              40) pump_lvl=1;; 60) pump_lvl=2;; 80) pump_lvl=3;; 90) pump_lvl=4;;
+              *) pump_lvl=4;;
+            esac
+            case "$pump_lvl" in
+              1) pump_sp_val=40;; 2) pump_sp_val=60;; 3) pump_sp_val=80;; 4) pump_sp_val=90;;
+            esac
+            su system -c "chmod 644 /proc/driver/micropump/enable /proc/driver/micropump/freq /proc/driver/micropump/speed 2>/dev/null; echo 1 > /proc/driver/micropump/enable; echo 4 > /proc/driver/micropump/freq; echo $pump_sp_val > /proc/driver/micropump/speed; chmod 444 /proc/driver/micropump/speed" 2>/dev/null
           fi
         fi
       fi
