@@ -1,11 +1,14 @@
-# 🔥 FanExtreme — 更好的红魔
+<div align="center">
+  <h1>🔥 FanExtreme — 更好的红魔</h1>
+</div>
 
-[![GitHub Release](https://img.shields.io/github/v/release/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600)](https://github.com/ling9ling7/RedMagic-FanExtreme/releases/latest)
-[![License](https://img.shields.io/badge/License-Custom-red?style=flat-square)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/ling9ling7/RedMagic-FanExtreme?style=flat-square)](https://github.com/ling9ling7/RedMagic-FanExtreme/stargazers)
-![GitHub All Releases](https://img.shields.io/github/downloads/ling9ling7/RedMagic-FanExtreme/total.svg)
+<div align="center">
+  <a href="https://github.com/ling9ling7/RedMagic-FanExtreme/releases/latest"><img src="https://img.shields.io/github/v/release/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600" alt="GitHub Release"></a><a href="LICENSE"><img src="https://img.shields.io/badge/License-Custom-red?style=flat-square" alt="License"></a><a href="https://github.com/ling9ling7/RedMagic-FanExtreme/stargazers"><img src="https://img.shields.io/github/stars/ling9ling7/RedMagic-FanExtreme?style=flat-square" alt="Stars"></a><img src="https://img.shields.io/github/downloads/ling9ling7/RedMagic-FanExtreme/total.svg?style=flat-square" alt="Downloads">
+</div>
 
+<div align="center">
 红魔手机 KernelSU 模块 · 多合一性能优化 · WebUI 可视化控制面板 · 在线更新
+</div>
 
 > 为红魔手机而生：风扇极速、充电分离、云控屏蔽、温控移除、振动增强、触控优化、充电加速等，一站式解决性能调校。
 <table>
