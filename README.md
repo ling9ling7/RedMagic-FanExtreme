@@ -82,9 +82,6 @@ FanExtreme/
 │
 ├── lib/                   # 功能库
 │   ├── common.sh          # cfg() 读 config.txt 配置
-│   ├── whitelist.sh       # 白名单授权检查
-│   ├── patch.sh           # 拉取 GitHub 热补丁
-│   ├── ding.sh            # 安装成功回传
 │   ├── features.sh        # 各功能开关实现
 │   ├── status.sh          # 生成 WebUI 状态 JSON
 │   ├── perf.sh            # CPU/GPU 频率与锁频控制
