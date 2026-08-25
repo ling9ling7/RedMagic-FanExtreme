@@ -28,7 +28,6 @@ perf_hold_once() {
         [ -e "/sys/kernel/cpu_max_freq_limit_cluster$i" ] && echo 99999999 > "/sys/kernel/cpu_max_freq_limit_cluster$i" 2>/dev/null
         [ -e "/sys/kernel/cpu_min_freq_limit_cluster$i" ] && echo 0 > "/sys/kernel/cpu_min_freq_limit_cluster$i" 2>/dev/null
     done
-    # 11Pro GPU pwrlevel 解锁（pwrlevel 0=最高频）
     [ -e /sys/kernel/gpu_max_pwrlevel_limit ] && echo 0 > /sys/kernel/gpu_max_pwrlevel_limit 2>/dev/null
     [ -e /sys/kernel/gpu_min_pwrlevel_limit ] && echo 17 > /sys/kernel/gpu_min_pwrlevel_limit 2>/dev/null
     for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq; do

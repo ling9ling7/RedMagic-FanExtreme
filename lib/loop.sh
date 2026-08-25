@@ -65,7 +65,6 @@ webui_loop() {
               su system -c "chmod 644 $FAN_LEVEL 2>/dev/null; echo $value > $FAN_LEVEL; chmod 444 $FAN_LEVEL" 2>/dev/null
             fi
             ;;
-
           auto_charge)
             if [ "$value" = "on" ]; then
               touch "$AUTO_CHARGE_FILE"

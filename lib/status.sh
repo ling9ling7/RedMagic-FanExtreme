@@ -91,15 +91,12 @@ webui_status() {
   done
   local a=""
   local hw_min="" hw_max="" st=""
-  #CPU：读取+合成（优先真实档位表，其次按100MHz合成）
   for c in cpu0 cpu4 cpu7; do
     hw_min=""; hw_max=""; st=""
-    #优先使用cpuinfo_max_freq/min_freq
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_max_freq 2>/dev/null)
     [ -n "$a" ] && hw_max=$a
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_min_freq 2>/dev/null)
     [ -n "$a" ] && hw_min=$a
-    #真实档位表：scaling_available_frequencies（精确，优先用于Picker）
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/scaling_available_frequencies 2>/dev/null)
     if [ -n "$a" ]; then
       st=$(echo $a | tr ' ' ',')
@@ -130,7 +127,6 @@ webui_status() {
         cpu7_hw_min=$hw_min; cpu7_hw_max=$hw_max; cpu7_steps=$st ;;
     esac
   done
-  # GPU：读取+合成（兼容 SM8650 旧接口 / SM8750 新 MHz 接口 / 红魔节点）
   gpu_hw_min=""; gpu_hw_max=""; gpu_steps=""
   a=$(cat "$GPU_FREQ_TABLE" 2>/dev/null)
   if [ -z "$a" ]; then
