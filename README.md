@@ -95,12 +95,6 @@ FanExtreme/
 │   ├── sponsor.jpg        # 赞助图
 │   └── xmtx.png           # 社区贡献者头像
 │
-├── system/etc/init/       # KernelSU init 服务占位
-│   ├── init.thermal-engine.rc
-│   ├── init.thermald.rc
-│   ├── init.perfservice.rc
-│   └── init.zperfcube.rc
-│
 └── vendor/etc/
     └── thermal-engine.conf   # 温控引擎配置
 ```
