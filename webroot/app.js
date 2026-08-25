@@ -2065,7 +2065,7 @@
 
                     var log=LOG_PATH;
 
-                    ksu.exec('echo "=== FanExtreme v3.1.8 调试日志 ===" > '+log);
+                    ksu.exec('echo "=== FanExtreme v3.1.9 调试日志 ===" > '+log);
 
                     ksu.exec('echo "时间: $(date)" >> '+log);
 
