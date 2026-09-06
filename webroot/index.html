@@ -22,7 +22,7 @@
 
         <div id="introText"></div>
 
-        <div id="skipHint">点击屏幕跳过</div>
+        <div id="skipHint" data-i18n>点击屏幕跳过</div>
 
     </div>
 
@@ -44,7 +44,7 @@
 
                                 <div class="brand-name">FanExtreme</div>
 
-                                <div class="brand-sub"><span id="brandVersion">v3.1.9</span> · NUbia RedMagic</div>
+                                <div class="brand-sub"><span id="brandVersion">v3.1.10</span> · NUbia RedMagic</div>
 
                             </div>
 
@@ -76,15 +76,15 @@
 
                             <div class="gauge-meta">
 
-                                <div class="meta-row"><span class="meta-val" id="batTemp">--</span><span class="meta-label">温度</span></div>
+                                <div class="meta-row"><span class="meta-val" id="batTemp">--</span><span class="meta-label" data-i18n>温度</span></div>
 
                                 <div class="meta-divider"></div>
 
-                                <div class="meta-row"><span class="meta-val" id="chgPower">--</span><span class="meta-label">功率</span></div>
+                                <div class="meta-row"><span class="meta-val" id="chgPower">--</span><span class="meta-label" data-i18n>功率</span></div>
 
                                 <div class="meta-divider"></div>
 
-                                <div class="meta-row"><span class="meta-val" id="touchRate">--</span><span class="meta-label">触控</span></div>
+                                <div class="meta-row"><span class="meta-val" id="touchRate">--</span><span class="meta-label" data-i18n>触控</span></div>
 
                             </div>
 
@@ -100,7 +100,7 @@
 
                                     <div class="ctrl-main">
 
-                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3A4.5 4.5 0 0 1 12 12L12 3Z"/><path d="M21 12A4.5 4.5 0 0 1 12 12L21 12Z"/><path d="M12 21A4.5 4.5 0 0 1 12 12L12 21Z"/><path d="M3 12A4.5 4.5 0 0 1 12 12L3 12Z"/></svg> 风扇极速</div>
+                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3A4.5 4.5 0 0 1 12 12L12 3Z"/><path d="M21 12A4.5 4.5 0 0 1 12 12L21 12Z"/><path d="M12 21A4.5 4.5 0 0 1 12 12L12 21Z"/><path d="M3 12A4.5 4.5 0 0 1 12 12L3 12Z"/></svg> <span data-i18n>风扇极速</span></div>
 
                                         <div class="ctrl-desc" id="fanDesc">STANDBY</div>
 
@@ -114,19 +114,19 @@
 
                                     <div class="slider-wrap">
 
-                                        <span class="slider-label">档位</span>
+                                        <span class="slider-label" data-i18n>档位</span>
 
                                         <input type="range" class="slider-track" id="fanRange" min="1" max="5" value="5" oninput="onFanRangeInput()">
 
                                         <span class="slider-val" id="fanRv">5</span>
 
-                                        <button class="action-btn primary compact" onclick="handleFanApply(event)">应用</button>
+                                        <button class="action-btn primary compact" onclick="handleFanApply(event)" data-i18n>应用</button>
 
                                     </div>
 
                                     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
 
-                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)">熄屏保持开启</span>
+                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)" data-i18n>熄屏保持开启</span>
 
                                         <button class="ctrl-toggle" id="fanScreenOffSw" onclick="handleFanScreenOffToggle(event)"></button>
 
@@ -134,11 +134,11 @@
 
                                     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
 
-                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)">温度联动</span>
+                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)" data-i18n>温度联动</span>
 
                                         <div style="display:flex;align-items:center;gap:8px">
 
-                                            <button class="action-btn primary compact" id="tempApplyBtn" onclick="handleTempApply(event)" style="display:none">应用</button>
+                                            <button class="action-btn primary compact" id="tempApplyBtn" onclick="handleTempApply(event)" style="display:none" data-i18n>应用</button>
 
                                             <button class="ctrl-toggle" id="tempCtrlSw" onclick="handleTempCtrlToggle(event)"></button>
 
@@ -150,9 +150,9 @@
 
                                         <div style="display:flex;gap:8px;margin-bottom:8px">
 
-                                            <button class="mode-btn" id="tempCtrlAuto" onclick="setTempCtrlMode('auto')">自动开启</button>
+                                            <button class="mode-btn" id="tempCtrlAuto" onclick="setTempCtrlMode('auto')" data-i18n>自动开启</button>
 
-                                            <button class="mode-btn" id="tempCtrlCustom" onclick="setTempCtrlMode('custom')">自定义开启</button>
+                                            <button class="mode-btn" id="tempCtrlCustom" onclick="setTempCtrlMode('custom')" data-i18n>自定义开启</button>
 
                                         </div>
 
@@ -160,7 +160,7 @@
 
                                             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
 
-                                                <span style="font-size:11px;color:var(--txt2);font-family:var(--mono);white-space:nowrap">触发温度</span>
+                                                <span style="font-size:11px;color:var(--txt2);font-family:var(--mono);white-space:nowrap" data-i18n>触发温度</span>
 
                                                 <input class="input-field" id="tempCtrlThr" type="number" value="40" min="20" max="70" style="min-width:0;width:80px;text-align:center;padding:8px" oninput="onTempThrInput()">
 
@@ -184,7 +184,7 @@
 
                                     <div class="ctrl-main">
 
-                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> 充电分离</div>
+                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> <span data-i18n>充电分离</span></div>
 
                                         <div class="ctrl-desc" id="chargeDesc">STANDBY</div>
 
@@ -198,13 +198,13 @@
 
                                     <div class="input-wrap">
 
-                                        <span class="slider-label">阈值</span>
+                                        <span class="slider-label" data-i18n>阈值</span>
 
                                         <input type="number" class="input-field" id="thrVal" min="20" max="100" placeholder="100" inputmode="numeric" oninput="onThrInput()">
 
                                         <span class="input-unit">%</span>
 
-                                        <button class="action-btn primary compact" onclick="handleThrApply(event)">设定</button>
+                                        <button class="action-btn primary compact" onclick="handleThrApply(event)" data-i18n>设定</button>
 
                                     </div>
 
@@ -220,7 +220,7 @@
 
                                     <div class="ctrl-main">
 
-                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 11V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h4"/><circle cx="17" cy="16" r="4"/><path d="m22 21-2-2"/></svg> 触控优化</div>
+                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 11V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h4"/><circle cx="17" cy="16" r="4"/><path d="m22 21-2-2"/></svg> <span data-i18n>触控优化</span></div>
 
                                         <div class="ctrl-desc" id="touchDesc">STANDBY</div>
 
@@ -234,19 +234,19 @@
 
                                     <div style="display:flex;gap:8px;margin-bottom:8px">
 
-                                        <button class="mode-btn" id="touchModeGlobal" onclick="setTouchMode('global')">全局</button>
+                                        <button class="mode-btn" id="touchModeGlobal" onclick="setTouchMode('global')" data-i18n>全局</button>
 
-                                        <button class="mode-btn" id="touchModePerapp" onclick="setTouchMode('perapp')">指定应用</button>
+                                        <button class="mode-btn" id="touchModePerapp" onclick="setTouchMode('perapp')" data-i18n>指定应用</button>
 
                                     </div>
 
                                     <div id="touchAppsWrap" class="drawer">
 
-                                        <textarea class="input-field" id="touchApps" rows="3" placeholder="每行一个包名，如&#10;com.tencent.tmgp.sgame&#10;com.miHoYo.Yuanshen" style="resize:none;font-size:11px;margin-bottom:8px;width:100%;box-sizing:border-box"></textarea>
+                                        <textarea class="input-field" id="touchApps" rows="3" data-i18n-ph placeholder="每行一个包名，如&#10;com.tencent.tmgp.sgame&#10;com.miHoYo.Yuanshen" style="resize:none;font-size:11px;margin-bottom:8px;width:100%;box-sizing:border-box"></textarea>
 
                                         <div style="text-align:right">
 
-                                             <button class="action-btn primary compact" onclick="saveTouchApps(event)">保存</button>
+                                             <button class="action-btn primary compact" onclick="saveTouchApps(event)" data-i18n>保存</button>
 
                                         </div>
 
@@ -264,7 +264,7 @@
 
                                     <div class="ctrl-main">
 
-                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg> 液冷控制</div>
+                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg> <span data-i18n>液冷控制</span></div>
 
                                         <div class="ctrl-desc" id="pumpDesc">STANDBY</div>
 
@@ -278,19 +278,19 @@
 
                                     <div class="slider-wrap">
 
-                                        <span class="slider-label">挡位</span>
+                                        <span class="slider-label" data-i18n>挡位</span>
 
                                         <input type="range" class="slider-track" id="pumpRange" min="1" max="4" value="4" oninput="onPumpRangeInput()">
 
                                         <span class="slider-val" id="pumpRv">4</span>
 
-                                        <button class="action-btn primary compact" onclick="handlePumpApply(event)">应用</button>
+                                        <button class="action-btn primary compact" onclick="handlePumpApply(event)" data-i18n>应用</button>
 
                                     </div>
 
                                     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
 
-                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)">熄屏保持开启</span>
+                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)" data-i18n>熄屏保持开启</span>
 
                                         <button class="ctrl-toggle" id="pumpScreenOffSw" onclick="handlePumpScreenOffToggle(event)"></button>
 
@@ -298,11 +298,11 @@
 
                                     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
 
-                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)">温度联动</span>
+                                        <span style="font-size:11px;color:var(--txt2);font-family:var(--mono)" data-i18n>温度联动</span>
 
                                         <div style="display:flex;align-items:center;gap:8px">
 
-                                            <button class="action-btn primary compact" id="pumpTempApplyBtn" onclick="handlePumpTempApply(event)" style="display:none">应用</button>
+                                            <button class="action-btn primary compact" id="pumpTempApplyBtn" onclick="handlePumpTempApply(event)" style="display:none" data-i18n>应用</button>
 
                                             <button class="ctrl-toggle" id="pumpTempCtrlSw" onclick="handlePumpTempCtrlToggle(event)"></button>
 
@@ -314,9 +314,9 @@
 
                                         <div style="display:flex;gap:8px;margin-bottom:8px">
 
-                                            <button class="mode-btn" id="pumpTempCtrlAuto" onclick="setPumpTempMode('auto')">自动开启</button>
+                                            <button class="mode-btn" id="pumpTempCtrlAuto" onclick="setPumpTempMode('auto')" data-i18n>自动开启</button>
 
-                                            <button class="mode-btn" id="pumpTempCtrlCustom" onclick="setPumpTempMode('custom')">自定义开启</button>
+                                            <button class="mode-btn" id="pumpTempCtrlCustom" onclick="setPumpTempMode('custom')" data-i18n>自定义开启</button>
 
                                         </div>
 
@@ -324,7 +324,7 @@
 
                                             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
 
-                                                <span style="font-size:11px;color:var(--txt2);font-family:var(--mono);white-space:nowrap">触发温度</span>
+                                                <span style="font-size:11px;color:var(--txt2);font-family:var(--mono);white-space:nowrap" data-i18n>触发温度</span>
 
                                                 <input class="input-field" id="pumpTempCtrlThr" type="number" value="40" min="20" max="70" style="min-width:0;width:80px;text-align:center;padding:8px" oninput="onPumpTempThrInput()">
 
@@ -348,7 +348,7 @@
 
                                     <div class="ctrl-main">
 
-                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="18" rx="2"/><path d="M5.5 8.5c-1.3 2.2-1.3 4.8 0 7"/><path d="M18.5 8.5c1.3 2.2 1.3 4.8 0 7"/><path d="M2.5 7c-2 3-2 7 0 10"/><path d="M21.5 7c2 3 2 7 0 10"/></svg> 振动增强</div>
+                                        <div class="ctrl-title"><svg class="ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="18" rx="2"/><path d="M5.5 8.5c-1.3 2.2-1.3 4.8 0 7"/><path d="M18.5 8.5c1.3 2.2 1.3 4.8 0 7"/><path d="M2.5 7c-2 3-2 7 0 10"/><path d="M21.5 7c2 3 2 7 0 10"/></svg> <span data-i18n>振动增强</span></div>
 
                                         <div class="ctrl-desc" id="vibeDesc">STANDBY</div>
 
@@ -362,7 +362,7 @@
 
                                     <div class="input-wrap">
 
-                                        <span class="slider-label">增益</span>
+                                        <span class="slider-label" data-i18n>增益</span>
 
                                         <input type="number" class="input-field" id="vibeGain" min="0" max="255" placeholder="168" inputmode="numeric" oninput="onVibeInput('vibeGain')">
 
@@ -372,7 +372,7 @@
 
                                     <div class="input-wrap">
 
-                                        <span class="slider-label">时长</span>
+                                        <span class="slider-label" data-i18n>时长</span>
 
                                         <input type="number" class="input-field" id="vibeDur" min="0" max="255" placeholder="18" inputmode="numeric" oninput="onVibeInput('vibeDur')">
 
@@ -382,7 +382,7 @@
 
                                     <div class="input-wrap">
 
-                                        <span class="slider-label">上限</span>
+                                        <span class="slider-label" data-i18n>上限</span>
 
                                         <input type="number" class="input-field" id="vibeVmax" min="0" max="255" placeholder="128" inputmode="numeric" oninput="onVibeInput('vibeVmax')">
 
@@ -392,7 +392,7 @@
 
                                     <div style="text-align:right;margin-top:10px">
 
-                                        <button class="action-btn primary compact" onclick="saveVibeAll(event)">保存</button>
+                                        <button class="action-btn primary compact" onclick="saveVibeAll(event)" data-i18n>保存</button>
 
                                     </div>
 
@@ -420,7 +420,7 @@
 
                                     <div class="ctrl-main">
 
-                                        <div class="ctrl-title">频率控制</div>
+                                        <div class="ctrl-title" data-i18n>频率控制</div>
 
                                         <div class="ctrl-desc" id="perfMasterDesc">STANDBY</div>
 
@@ -492,7 +492,7 @@
 
                         <div style="display:flex;gap:8px;margin-bottom:16px">
 
-                            <button class="perf-preset-btn" id="prefPowersave" onclick="applyPerfProfile('powersave',event)">省电</button>
+                            <button class="perf-preset-btn" id="prefPowersave" onclick="applyPerfProfile('powersave',event)" data-i18n>省电</button>
 
                         </div>
 
@@ -502,15 +502,15 @@
 
                                 <div class="ctrl-expand-inner" style="border-top:none;padding-top:10px">
 
-                                    <div class="input-wrap"><span class="slider-label">小核</span><input type="text" class="input-field freq-input" id="cpu0Max" readonly placeholder="--" onclick="openFreqPicker('cpu0Max','小核')"><span class="input-unit">MHz</span></div>
+                                    <div class="input-wrap"><span class="slider-label" data-i18n>小核</span><input type="text" class="input-field freq-input" id="cpu0Max" readonly placeholder="--" onclick="openFreqPicker('cpu0Max','小核')"><span class="input-unit">MHz</span></div>
 
                                     <div class="perf-range-hint">364 ~ 2265 MHz</div>
 
-                                    <div class="input-wrap" id="cpu4Row"><span class="slider-label">中核</span><input type="text" class="input-field freq-input" id="cpu4Max" readonly placeholder="--" onclick="openFreqPicker('cpu4Max','中核')"><span class="input-unit">MHz</span></div>
+                                    <div class="input-wrap" id="cpu4Row"><span class="slider-label" data-i18n>中核</span><input type="text" class="input-field freq-input" id="cpu4Max" readonly placeholder="--" onclick="openFreqPicker('cpu4Max','中核')"><span class="input-unit">MHz</span></div>
 
                                     <div class="perf-range-hint" id="cpu4Hint">499 ~ 3149 MHz</div>
 
-                                    <div class="input-wrap"><span class="slider-label">大核</span><input type="text" class="input-field freq-input" id="cpu7Max" readonly placeholder="--" onclick="openFreqPicker('cpu7Max','大核')"><span class="input-unit">MHz</span></div>
+                                    <div class="input-wrap"><span class="slider-label" data-i18n>大核</span><input type="text" class="input-field freq-input" id="cpu7Max" readonly placeholder="--" onclick="openFreqPicker('cpu7Max','大核')"><span class="input-unit">MHz</span></div>
 
                                     <div class="perf-range-hint">480 ~ 3053 MHz</div>
 
@@ -520,7 +520,7 @@
 
                                     <div class="input-wrap">
 
-                                        <span class="slider-label">调度器</span>
+                                        <span class="slider-label" data-i18n>调度器</span>
 
                                         <select class="input-field" id="cpuGov" onchange="onPerfInput()"></select>
 
@@ -528,9 +528,9 @@
 
                                     <div style="text-align:right;margin-top:10px">
 
-                                        <button class="action-btn primary compact" onclick="applyPerf(event)">应用</button>
+                                        <button class="action-btn primary compact" onclick="applyPerf(event)" data-i18n>应用</button>
 
-                                        <button class="action-btn compact" onclick="resetPerf(event)" style="background:var(--red);color:#fff;margin-left:6px">恢复默认</button>
+                                        <button class="action-btn compact" onclick="resetPerf(event)" style="background:var(--red);color:#fff;margin-left:6px" data-i18n>恢复默认</button>
 
                                     </div>
 
@@ -544,13 +544,13 @@
 
                 
                         <div style="margin:8px 16px;padding:12px 14px;background:var(--bg2);border-radius:10px;font-size:11px;color:var(--txt2);line-height:1.7">
-                            <b style="color:var(--blue)">关于 CPU 调度器</b><br>
-                            CPU 调度器决定处理器频率如何根据负载自动升降，不同的调度策略会影响手机的流畅度和耗电。<br>
-                            <b>walt</b>（默认）：高通 WALT 调度，比 schedutil 更跟手省电<br>
-                            <b>schedutil</b>：根据实时负载智能调节，兼顾省电与流畅<br>
-                            <b>performance</b>：始终锁定最高频率，性能最强但明显费电发热<br>
-                            <b>powersave</b>：始终锁定最低频率，极致省电但会卡顿<br>
-                            <b>conservative</b>：缓慢升降频率曲线，偏向省电保守
+                            <b style="color:var(--blue)" data-i18n>关于 CPU 调度器</b><br>
+                            <span data-i18n>CPU 调度器决定处理器频率如何根据负载自动升降，不同的调度策略会影响手机的流畅度和耗电。</span><br>
+                            <b>walt</b><span data-i18n>（默认）：高通 WALT 调度，比 schedutil 更跟手省电</span><br>
+                            <b>schedutil</b><span data-i18n>：根据实时负载智能调节，兼顾省电与流畅</span><br>
+                            <b>performance</b><span data-i18n>：始终锁定最高频率，性能最强但明显费电发热</span><br>
+                            <b>powersave</b><span data-i18n>：始终锁定最低频率，极致省电但会卡顿</span><br>
+                            <b>conservative</b><span data-i18n>：缓慢升降频率曲线，偏向省电保守</span>
                         </div>
 </div>
 
@@ -563,26 +563,26 @@
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
                             <img src="avatar.png" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">
                             <div>
-                                <div style="font-weight:600;font-size:15px;color:var(--txt)">酷安 @ling_凌</div>
-                                <div style="font-size:11px;color:var(--txt3);margin-top:2px">作者 & 维护者</div>
+                                <div style="font-weight:600;font-size:15px;color:var(--txt)" data-i18n>酷安 @ling_凌</div>
+                                <div style="font-size:11px;color:var(--txt3);margin-top:2px" data-i18n>作者 & 维护者</div>
                             </div>
                         </div>
 
-                        <div class="about-item">项目地址：<br><span class="about-link" onclick="openInBrowser('https://github.com/ling9ling7/RedMagic-FanExtreme')">github.com/ling9ling7/RedMagic-FanExtreme</span></div>
+                        <div class="about-item"><span data-i18n>项目地址：</span><br><span class="about-link" onclick="openInBrowser('https://github.com/ling9ling7/RedMagic-FanExtreme')">github.com/ling9ling7/RedMagic-FanExtreme</span></div>
 
-                        <div class="about-item">官网：<br><span class="about-link" onclick="openInBrowser('https://ling9ling7.github.io/RedMagic-FanExtreme/')">ling9ling7.github.io/RedMagic-FanExtreme</span></div>
+                        <div class="about-item"><span data-i18n>官网：</span><br><span class="about-link" onclick="openInBrowser('https://ling9ling7.github.io/RedMagic-FanExtreme/')">ling9ling7.github.io/RedMagic-FanExtreme</span></div>
 
-                        <div class="about-item">TG频道：<br><span class="about-link" onclick="openInBrowser('https://t.me/FanExtreme')">t.me/FanExtreme</span></div>
+                        <div class="about-item"><span data-i18n>TG频道：</span><br><span class="about-link" onclick="openInBrowser('https://t.me/FanExtreme')">t.me/FanExtreme</span></div>
 
                         <div class="about-divider"></div>
 
-                        <div class="about-item">版本：<span id="aboutVersion">v3.1.9</span></div>
+                        <div class="about-item"><span data-i18n>版本：</span><span id="aboutVersion">v3.1.10</span></div>
 
-                        <div class="about-item">内核模块 · 仅限红魔设备</div>
+                        <div class="about-item" data-i18n>内核模块 · 仅限红魔设备</div>
                         <div class="about-divider"></div>
 
                         <div class="contrib-section">
-                            <div class="contrib-title">贡献者</div>
+                            <div class="contrib-title" data-i18n>贡献者</div>
                             <div class="contrib-list">
                                 <div class="contrib-card" onclick="openInBrowser('https://kittenlink.netlify.app/')">
                                     <img src="xmtx.png" class="contrib-avatar" onerror="this.style.display='none'">
@@ -604,24 +604,15 @@
 
         <div class="overlay-box" style="max-width:420px">
 
-            <div style="font-family:var(--mono);font-size:18px;margin-bottom:6px;color:var(--red)">危险操作警告</div>
+            <div style="font-family:var(--mono);font-size:18px;margin-bottom:6px;color:var(--red)" data-i18n>危险操作警告</div>
 
-            <div style="font-size:12px;color:var(--txt2);margin-bottom:12px;line-height:1.8;text-align:left" id="perfOvBody">
-                
-修改 CPU/GPU 最高频率和调度策略属于低层硬件操作，设置不当可能导致：<br><br>
-                • 系统不稳定、莫名重启或死机<br>
-                • 过热降频/烧毁硬件<br>
-                • 开机卡 logo 无法进系统<br>
-                • 需要重新刷机或恢复备份才能救回<br><br>
-                <b>作者不对因使用本功能导致的任何数据丢失、硬件损坏或系统变砖承担任何责任。</b>
-                请确保你已完全理解上述风险并愿意自行承担后果。
-            </div>
+            <div style="font-size:12px;color:var(--txt2);margin-bottom:12px;line-height:1.8;text-align:left" id="perfOvBody" data-i18n-html>修改 CPU/GPU 最高频率和调度策略属于低层硬件操作，设置不当可能导致：<br><br>• 系统不稳定、莫名重启或死机<br>• 过热降频/烧毁硬件<br>• 开机卡 logo 无法进系统<br>• 需要重新刷机或恢复备份才能救回<br><br><b>作者不对因使用本功能导致的任何数据丢失、硬件损坏或系统变砖承担任何责任。</b>请确保你已完全理解上述风险并愿意自行承担后果。</div>
 
             <div id="perfOvCountdown" style="font-family:var(--mono);font-size:28px;color:var(--red);margin-bottom:12px">30</div>
 
             <div style="display:flex;gap:8px;justify-content:center">
-                <button id="perfConfirmBtn" class="action-btn primary" onclick="confirmPerf()" disabled style="opacity:0.5;cursor:not-allowed">确认 (30s)</button>
-                <button class="action-btn" onclick="cancelPerf()" style="background:var(--red);color:#fff">取消</button>
+                <button id="perfConfirmBtn" class="action-btn primary" onclick="confirmPerf()" disabled style="opacity:0.5;cursor:not-allowed" data-i18n>确认 (30s)</button>
+                <button class="action-btn" onclick="cancelPerf()" style="background:var(--red);color:#fff" data-i18n>取消</button>
             </div>
 
         </div>
@@ -637,11 +628,11 @@
 
             <div class="freq-grid" id="freqOvGrid"></div>
 
-            <div class="freq-scroll-hint" id="freqScrollHint">↑ 上下滑动查看更多挡位 ↑</div>
+            <div class="freq-scroll-hint" id="freqScrollHint" data-i18n>↑ 上下滑动查看更多挡位 ↑</div>
 
             <div style="text-align:center;margin-top:14px">
 
-                <button class="action-btn" onclick="closeFreqPicker()" style="background:var(--red);color:#fff;font-size:11px;padding:8px 24px">关闭</button>
+                <button class="action-btn" onclick="closeFreqPicker()" style="background:var(--red);color:#fff;font-size:11px;padding:8px 24px" data-i18n>关闭</button>
 
             </div>
 
@@ -655,13 +646,13 @@
 
         <div class="overlay-box">
 
-            <img src="sponsor.jpg" alt="赞助" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\'%3E%3Crect width=\'200\' height=\'150\' fill=\'%23eee\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23999\' font-size=\'14\'%3E请放入赞助图片%3C/text%3E%3C/svg%3E';">
+            <img src="sponsor.jpg" alt="赞助" data-i18n-alt onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\'%3E%3Crect width=\'200\' height=\'150\' fill=\'%23eee\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23999\' font-size=\'14\'%3E请放入赞助图片%3C/text%3E%3C/svg%3E';">
 
-            <div style="font-size:10px;color:var(--txt3);font-family:var(--mono)">感谢支持</div>
+            <div style="font-size:10px;color:var(--txt3);font-family:var(--mono)" data-i18n>感谢支持</div>
 
-            <button class="overlay-close" onclick="hideSponsor()">关闭</button>
+            <button class="overlay-close" onclick="hideSponsor()" data-i18n>关闭</button>
 
-            <button class="save-btn" onclick="saveSponsorToGallery()">保存到相册</button>
+            <button class="save-btn" onclick="saveSponsorToGallery()" data-i18n>保存到相册</button>
 
         </div>
 
@@ -687,11 +678,11 @@
 
         <div class="bottom-bar">
 
-            <button class="btm-btn" onclick="handleLogClick(event)"><span class="btm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span class="btm-text">日志</span></button>
+            <button class="btm-btn" onclick="handleLogClick(event)"><span class="btm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span class="btm-text" data-i18n>日志</span></button>
 
-            <button class="btm-btn" onclick="handleQQClick(event)"><span class="btm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="btm-text">社群</span></button>
+            <button class="btm-btn" onclick="handleQQClick(event)"><span class="btm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="btm-text" data-i18n>社群</span></button>
 
-            <button class="btm-btn" onclick="handleSponsorClick(event)"><span class="btm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span><span class="btm-text">支持</span></button>
+            <button class="btm-btn" onclick="handleSponsorClick(event)"><span class="btm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span><span class="btm-text" data-i18n>支持</span></button>
 
         </div>
 

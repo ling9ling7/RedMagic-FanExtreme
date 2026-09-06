@@ -75,6 +75,12 @@
 
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
+        .lang-btn{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--txt3);background:transparent;border:1px solid var(--txt3);border-radius:10px;padding:3px 8px;cursor:pointer;transition:all .25s;line-height:1}
+
+        .lang-btn:active{transform:scale(.9)}
+
+        .lang-btn:hover{color:var(--txt);border-color:var(--txt)}
+
         .gauge-section{display:flex;align-items:center;gap:24px;margin-bottom:28px;padding:0 4px}
 
         .gauge-ring{width:140px;height:140px;position:relative;flex-shrink:0}
