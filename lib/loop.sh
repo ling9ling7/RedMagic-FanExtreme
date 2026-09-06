@@ -13,9 +13,11 @@ webui_loop() {
           auto_fan)
             if [ "$value" = "on" ]; then
               touch "$AUTO_FAN_FILE"
+              cfg_set '风扇极速' 1
               su system -c "chmod 644 $FAN_LEVEL $FAN_ENABLE 2>/dev/null; echo 1 > $FAN_ENABLE; echo 5 > $FAN_LEVEL; chmod 444 $FAN_LEVEL" 2>/dev/null
             else
               rm -f "$AUTO_FAN_FILE"
+              cfg_set '风扇极速' 0
               su system -c "chmod 644 $FAN_ENABLE 2>/dev/null; echo 0 > $FAN_ENABLE" 2>/dev/null
             fi
             ;;
@@ -68,8 +70,10 @@ webui_loop() {
           auto_charge)
             if [ "$value" = "on" ]; then
               touch "$AUTO_CHARGE_FILE"
+              cfg_set '充电分离' 1
             else
               rm -f "$AUTO_CHARGE_FILE"
+              cfg_set '充电分离' 0
               local cs_now=$(settings get global charge_separation_switch 2>/dev/null)
               if [ "$cs_now" = "1" ]; then
                 settings put global charge_separation_switch 0
@@ -99,11 +103,13 @@ webui_loop() {
           touch_boost)
             if [ "$value" = "on" ]; then
               touch "$AUTO_TOUCH_FILE"
+              cfg_set '触控优化' 1
               local TP=/proc/touchscreen
               [ -e "$TP/tp_report_rate" ] && { echo 4 > $TP/tp_report_rate; echo 1 > $TP/play_game; echo 4 > $TP/follow_hand_level; }
               settings put system touch_sampling_rate 960 2>/dev/null
             else
               rm -f "$AUTO_TOUCH_FILE"
+              cfg_set '触控优化' 0
               [ -e /proc/touchscreen/tp_report_rate ] && { echo 1 > /proc/touchscreen/tp_report_rate; echo 0 > /proc/touchscreen/play_game; echo 1 > /proc/touchscreen/follow_hand_level; }
               settings delete system touch_sampling_rate 2>/dev/null
             fi
@@ -111,8 +117,10 @@ webui_loop() {
           vibe_boost)
             if [ "$value" = "on" ]; then
               touch "$MODDIR/auto_vibe"
+              cfg_set '振动增强' 1
             else
               rm -f "$MODDIR/auto_vibe"
+              cfg_set '振动增强' 0
             fi
             ;;
           vibe_gain)
@@ -169,8 +177,10 @@ webui_loop() {
           auto_pump)
             if [ "$value" = "on" ]; then
               touch "$MODDIR/auto_pump"
+              cfg_set '水冷控制' 1
             else
               rm -f "$MODDIR/auto_pump"
+              cfg_set '水冷控制' 0
               echo 0 > /proc/driver/micropump/enable 2>/dev/null
             fi
             ;;
