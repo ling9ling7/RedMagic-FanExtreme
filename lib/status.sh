@@ -106,6 +106,10 @@ webui_status() {
       [ -z "$hw_min" ] && hw_min=$hw_avail_min
       [ "$hw_avail_max" -gt "$hw_max" ] 2>/dev/null && hw_max=$hw_avail_max
       [ "$hw_avail_min" -lt "$hw_min" ] 2>/dev/null && hw_min=$hw_avail_min
+      b=$(cat /sys/devices/system/cpu/$c/cpufreq/scaling_boost_frequencies 2>/dev/null)
+      [ -n "$b" ] && st="$st,$(echo $b | tr ' ' ',')"
+      case ",$st," in *",$hw_max,"*) ;; *) st="$st,$hw_max" ;; esac
+      st=$(echo "$st" | tr ',' '\n' | grep -E '^[0-9]+$' | sort -n | uniq | tr '\n' ',' | sed 's/,$//')
     else
       [ -z "$hw_min" ] && hw_min=$(echo $a | awk '{print $1}')
       [ -z "$hw_max" ] && hw_max=$(echo $a | awk '{print $NF}')
