@@ -1,21 +1,28 @@
+
+//环境兼容拦截
 if (typeof ksu === 'undefined') {
     window.ksu = { exec: function (cmd) { console.log('[ksu模拟]', cmd); return ''; } };
 }
+//双语翻译
 var I18N_EN = {
+    //启动遮罩
     "点击屏幕跳过": "Tap anywhere to skip",
     "确认": "Confirm",
     "每行一个包名，如\ncom.tencent.tmgp.sgame\ncom.miHoYo.Yuanshen": "One package name per line, e.g.\ncom.tencent.tmgp.sgame\ncom.miHoYo.Yuanshen",
+    //头部/仪表盘
     "RUNNING": "RUNNING",
     "STANDBY": "STANDBY",
     "温度": "Temp",
     "功率": "Power",
     "触控": "Touch",
+    //卡片标题
     "风扇极速": "Fan Gear",
     "充电分离": "Charge Separation",
     "触控优化": "Touch Boost",
     "液冷控制": "Liquid Cooling",
     "振动增强": "Vibration Control",
     "频率控制": "Freq Control",
+    //通用控件
     "档位": "Level",
     "挡位": "Level",
     "应用": "Apply",
@@ -34,6 +41,7 @@ var I18N_EN = {
     "大核": "Big",
     "调度器": "Governor",
     "省电": "Power Save",
+    "性能": "Performance",
     "熄屏保持开启": "Keep on when screen off",
     "温度联动": "Thermal Link",
     "触发温度": "Trigger Temp",
@@ -41,14 +49,18 @@ var I18N_EN = {
     "自定义开启": "Custom",
     "全局": "Global",
     "指定应用": "Per-App",
+    //频率选择器
     "↑ 上下滑动查看更多挡位 ↑": "↑ Scroll for more levels ↑",
     " 频率挡位": " Freq Levels",
     " 个可选挡位": " levels available",
     "频率挡位加载中，请稍后": "Loading frequency levels...",
+    //危险警告弹窗
     "危险操作警告": "DANGER WARNING",
     "确认 (30s)": "Confirm (30s)",
+    "不再显示": "Don't show again",
     "修改 CPU/GPU 最高频率和调度策略属于低层硬件操作，设置不当可能导致：<br><br>• 系统不稳定、莫名重启或死机<br>• 过热降频/烧毁硬件<br>• 开机卡 logo 无法进系统<br>• 需要重新刷机或恢复备份才能救回<br><br><b>作者不对因使用本功能导致的任何数据丢失、硬件损坏或系统变砖承担任何责任。</b>请确保你已完全理解上述风险并愿意自行承担后果。":
         "Modifying CPU/GPU max frequencies and governors is a low-level hardware operation. Misconfiguration may cause:<br><br>• System instability, random reboots or freezes<br>• Overheating / thermal throttling / hardware damage<br>• Boot loop (stuck at logo)<br>• Reflashing or backup restore required<br><br><b>The author takes NO responsibility for any data loss, hardware damage or bricking caused by this feature.</b>Proceed only if you fully understand and accept these risks.",
+    //底部导航
     "日志": "Logs",
     "社群": "Community",
     "支持": "Sponsor",
@@ -56,6 +68,7 @@ var I18N_EN = {
     "保存到相册": "Save to Gallery",
     "赞助": "Sponsor",
     "请放入赞助图片": "Add sponsor image",
+    //关于页
     "作者 & 维护者": "Author & Maintainer",
     "项目地址：": "Repository:",
     "官网：": "Website:",
@@ -63,6 +76,7 @@ var I18N_EN = {
     "版本：": "Version:",
     "内核模块 · 仅限红魔设备": "KernelSU Module · RedMagic devices only",
     "贡献者": "Contributors",
+    //CPU 调度器说明
     "关于 CPU 调度器": "About CPU Governors",
     "CPU 调度器决定处理器频率如何根据负载自动升降，不同的调度策略会影响手机的流畅度和耗电。": "The CPU governor decides how frequencies scale with load, affecting smoothness and battery life.",
     "（默认）：高通 WALT 调度，比 schedutil 更跟手省电": " (default): Qualcomm WALT, more responsive & efficient than schedutil",
@@ -70,6 +84,7 @@ var I18N_EN = {
     "：始终锁定最高频率，性能最强但明显费电发热": ": Locks max frequency, best performance but hot & power-hungry",
     "：始终锁定最低频率，极致省电但会卡顿": ": Locks min frequency, extreme battery saving but laggy",
     "：缓慢升降频率曲线，偏向省电保守": ": Slow ramping curve, conservative & battery-friendly",
+    //动态状态文案
     "待应用: LV.": "Pending: LV.",
     "正在写入内核...": "Writing to kernel...",
     "内核对齐中...": "Syncing kernel...",
@@ -91,6 +106,7 @@ var I18N_EN = {
     " · 运行中": " · Running",
     "% 时长": "% Dur ",
     "ms 上限": "ms Max ",
+    //Toast 消息
     "风扇已开启": "Fan ON",
     "风扇已关闭": "Fan OFF",
     "风扇档位已设为 LV.": "Fan level set to LV.",
@@ -182,6 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
         applyLang();
     } catch (e) { console.error('i18n init error:', e); }
 });
+//切换页面交互
 let gaugeAnimating = false;
 let introSkipped = false;
 let currentPage = 0;
@@ -240,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (dot) goToPage(parseInt(dot.getAttribute('data-page')));
     });
 });
+//启动动画（打字机）
 function skipIntro() {
     if (introSkipped) return;
     introSkipped = true;
@@ -280,6 +298,7 @@ let introTimer;
         }
     }, charDelay);
 })();
+//仪表启动动画
 function easeInOutCubic(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 function animateNumber(el, maxValue, durationUp, durationPause, durationDown, suffix, callback) {
     let startTime = null, animId = null;
@@ -351,6 +370,7 @@ function restoreRealData() {
         animateNumber(document.getElementById('touchRate'), s.touch_boost ? 960 : 0, 600, 0, 0, 'Hz', onAnimDone);
     } catch (e) { gaugeAnimating = false; refresh(); }
 }
+//动态背景
 (function () {
     var c = document.getElementById('bg'), ctx = c.getContext('2d'), W, H;
     function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
@@ -376,9 +396,11 @@ function restoreRealData() {
     }
     draw();
 })();
+//状态机和路径配置
 var CMD = '/data/adb/modules/FanExtreme/webui_cmd';
 var STATUS = '/data/adb/modules/FanExtreme/webui_status';
 var LOG_PATH = '/sdcard/Download/FanExtreme_debug.log';
+//前端解耦状态机：拦截内核旧数据对前端输入状态的强行覆盖
 var uiState = {
     fanLevel: { pending: null, applying: null },
     threshold: { pending: null, applying: null },
@@ -433,6 +455,7 @@ function dot(el, on, color) {
     el.style.color = on ? color : 'var(--txt3)';
     if (on) el.classList.add('on'); else el.classList.remove('on');
 }
+//组件交互逻辑
 function handleFanToggle(e) {
     e.stopPropagation();
     var el = document.getElementById('fanSw');
@@ -757,6 +780,7 @@ function handleTouchToggle(e) {
 function handleLogClick(e) { triggerCardJelly(e.currentTarget, e); try { genLog(); } catch (err) { } }
 function handleQQClick(e) { triggerCardJelly(e.currentTarget, e); try { joinQQ(); } catch (err) { } }
 function handleSponsorClick(e) { triggerCardJelly(e.currentTarget, e); try { showSponsor(); } catch (err) { } }
+//按钮卡片点击立体果冻效果
 function triggerCardJelly(btn, e) {
     const card = btn.closest('.ctrl-card') || btn;
     if (card.classList.contains('disabled')) return;
@@ -779,15 +803,18 @@ function setGauge(pct) {
     el.style.stroke = pct >= 100 ? '#27ae60' : pct > 60 ? '#4caf50' : pct > 20 ? '#e17055' : '#d63031';
     document.getElementById('batPct').textContent = pct;
 }
+//高精度隔离对齐刷新引擎
 function refresh() {
     if (gaugeAnimating) return;
     try {
         var raw = ksu.exec('cat ' + STATUS + ' 2>/dev/null');
         if (!raw) return;
         var s = JSON.parse(raw);
+        //仪表盘基础状态更新
         if (s.battery) setGauge(parseInt(s.battery));
         if (s.temp_deg) document.getElementById('batTemp').textContent = s.temp_deg + '°';
         document.getElementById('chgPower').textContent = s.power ? s.power + 'W' : '--';
+        //FAN刷新保护
         var cFan = document.getElementById('cFan');
         if (s.fan_enabled === 1) {
             cFan.classList.remove('disabled');
@@ -822,9 +849,11 @@ function refresh() {
             if (uiState.tempControl.applying && !uiState.tempControl.pending) {
                 uiState.tempControl.applying = false;
             }
+            //检查写入是否完成对齐
             if (uiState.fanLevel.applying !== null && String(s.fan_level) === String(uiState.fanLevel.applying)) {
                 uiState.fanLevel.applying = null;
             }
+            //控制权展现分配
             if (uiState.fanLevel.pending !== null) {
                 document.getElementById('fanRv').textContent = uiState.fanLevel.pending;
             } else if (uiState.fanLevel.applying !== null) {
@@ -838,6 +867,7 @@ function refresh() {
                 cFan.classList.remove('pending');
             }
         } else { cFan.classList.add('disabled'); }
+        //CHARGE刷新保护
         var cCharge = document.getElementById('cCharge');
         if (s.charge_enabled === 1) {
             cCharge.classList.remove('disabled');
@@ -847,13 +877,16 @@ function refresh() {
             var sep = s.cs === '1';
             dot(document.getElementById('chargeDot'), sep, 'var(--gauge-green)');
             if (sep) cCharge.classList.add('active'); else cCharge.classList.remove('active');
+            //检查写入是否完成对齐
             if (uiState.threshold.applying !== null && String(s.threshold) === String(uiState.threshold.applying)) {
                 uiState.threshold.applying = null;
             }
+            //超时兜底：5秒未对齐则放弃，避免永久卡同步
             if (uiState.threshold.applying !== null && Date.now() - (uiState.threshold._t || 0) > 5000) {
                 uiState.threshold.applying = null;
             }
             if (uiState.threshold.pending !== null) {
+                //打字编辑中不做覆盖
             } else if (uiState.threshold.applying !== null) {
                 document.getElementById('thrVal').value = uiState.threshold.applying;
                 document.getElementById('chargeDesc').textContent = t('同步内核中...');
@@ -863,6 +896,7 @@ function refresh() {
                 cCharge.classList.remove('pending');
             }
         } else { cCharge.classList.add('disabled'); }
+        //VIBE刷新保护
         var cVibe = document.getElementById('cVibe');
         if (s.vibe_enabled === 1) {
             cVibe.classList.remove('disabled');
@@ -877,6 +911,7 @@ function refresh() {
             var isAnyPending = (uiState.vibeGain.pending !== null || uiState.vibeDur.pending !== null || uiState.vibeVmax.pending !== null);
             var isAnyApplying = (uiState.vibeGain.applying !== null || uiState.vibeDur.applying !== null || uiState.vibeVmax.applying !== null);
             if (isAnyPending) {
+                //输入中不做任何轮询打扰
             } else if (isAnyApplying) {
                 document.getElementById('vibeDesc').textContent = t('内核对齐中...');
                 if (uiState.vibeGain.applying !== null) document.getElementById('vibeGain').value = uiState.vibeGain.applying;
@@ -890,6 +925,7 @@ function refresh() {
                 cVibe.classList.remove('pending');
             }
         } else { cVibe.classList.add('disabled'); }
+        //PUMP刷新保护
         var cPump = document.getElementById('cPump');
         if (s.pump_available === 1) {
             cPump.classList.remove('disabled');
@@ -940,6 +976,7 @@ function refresh() {
                 cPump.classList.remove('pending');
             }
         } else { cPump.classList.add('disabled'); }
+        //TOUCH刷新分支
         var cTouch = document.getElementById('cTouch');
         if (s.touch_enabled === 1) {
             cTouch.classList.remove('disabled');
@@ -959,6 +996,7 @@ function refresh() {
             }
             document.getElementById('touchRate').textContent = touchOn ? '960Hz' : '--';
         } else { cTouch.classList.add('disabled'); }
+        //PERF主开关刷新
         if (typeof s.perf_enabled !== 'undefined') {
             perfThermalOk = s.thermal_enabled === 1;
             if (!perfThermalOk) {
@@ -975,6 +1013,7 @@ function refresh() {
             if (perfOn) document.getElementById('cPerfMaster').classList.add('active');
             else document.getElementById('cPerfMaster').classList.remove('active');
         }
+        //每轮刷新更新频率挡位
         if (s.cpu0_steps) perfStepLists.cpu0 = s.cpu0_steps.split(',').map(Number).sort(function (a, b) { return a - b; });
         if (s.cpu4_steps) perfStepLists.cpu4 = s.cpu4_steps.split(',').map(Number).sort(function (a, b) { return a - b; });
         if (s.cpu7_steps) perfStepLists.cpu7 = s.cpu7_steps.split(',').map(Number).sort(function (a, b) { return a - b; });
@@ -1050,6 +1089,7 @@ function loadPerfStatus() {
         dot(document.getElementById('perfMasterDot'), perfOn, 'var(--gauge-green)');
         document.getElementById('perfMasterDesc').textContent = perfOn ? t('运行中') : 'STANDBY';
         if (perfOn) document.getElementById('cPerfMaster').classList.add('active');
+        //从后端加载频率步进列表
         if (s.cpu0_steps) perfStepLists.cpu0 = s.cpu0_steps.split(',').map(Number).sort(function (a, b) { return a - b; });
         if (s.cpu4_steps) perfStepLists.cpu4 = s.cpu4_steps.split(',').map(Number).sort(function (a, b) { return a - b; });
         if (s.cpu7_steps) perfStepLists.cpu7 = s.cpu7_steps.split(',').map(Number).sort(function (a, b) { return a - b; });
@@ -1119,6 +1159,7 @@ function loadPerfStatus() {
         }
     } catch (e) { }
 }
+//频率控制（不要动）
 var perfTimer = null;
 var perfCountdownId = null;
 var perfPendingPayload = null;
@@ -1130,7 +1171,8 @@ var freqPickerTarget = '';
 var perfExpect = { master: null };
 var perfThermalOk = false;
 var PERF_DEFAULTS = {
-    powersave: { min: true, gov: 'powersave', label: '省电' }
+    powersave: { min: true, gov: 'powersave', label: '省电' },
+    performance: { min: false, pct: 1, gov: 'performance', label: '性能' }
 };
 var perfHw = { cpu0_max: 2265600, cpu4_max: 3148800, cpu7_max: 3052800, gpu_max: 903000000 };
 function snapToStep(val, steps) {
@@ -1160,10 +1202,11 @@ function applyPerfProfile(prof, e) {
     fillPerfInputs(prof);
     updatePerfPresetBtns(prof);
     toast(t('已选择「') + t(PERF_DEFAULTS[prof].label) + t('」预设，请点击应用'));
-    triggerCardJelly(document.getElementById('cPerf'), e);
+    triggerCardJelly(e.currentTarget, e);
 }
 function updatePerfPresetBtns(active) {
-    var btn = document.getElementById('prefPowersave'); if (btn) btn.classList.toggle('active', active === 'powersave');
+    var b1 = document.getElementById('prefPowersave'); if (b1) b1.classList.toggle('active', active === 'powersave');
+    var b2 = document.getElementById('prefPerformance'); if (b2) b2.classList.toggle('active', active === 'performance');
 }
 function onPerfInput() {
     perfActiveProfile = '';
@@ -1205,8 +1248,18 @@ function applyPerf(e) {
     }
     perfPendingPayload = [cpu0, cpu4, cpu7, gpu, gov, profile].join('|');
     document.getElementById('cPerf').classList.remove('pending');
-    document.getElementById('perfOv').classList.add('show');
-    startPerfCountdown();
+    if (localStorage.getItem('fex_perf_warn') === '1') {
+        cmd('perf_apply', perfPendingPayload);
+        toast(t('调度已确认，已生效'));
+        setTimeout(function () {
+            perfInitialized = true;
+            perfInputsSet = true;
+            perfRetry = 0;
+        }, 3000);
+    } else {
+        document.getElementById('perfOv').classList.add('show');
+        startPerfCountdown();
+    }
     triggerCardJelly(e.currentTarget, e);
 } function startPerfCountdown() {
     var sec = 15;
@@ -1240,6 +1293,8 @@ function confirmPerf() {
     if (perfCountdownId) { toast(t('请等待 15 秒冷静期结束后再确认')); return; }
     clearInterval(perfCountdownId);
     perfCountdownId = null;
+    var chk = document.getElementById('perfWarnChk');
+    if (chk && chk.checked) localStorage.setItem('fex_perf_warn', '1');
     cmd('perf_apply', perfPendingPayload);
     document.getElementById('perfOv').classList.remove('show');
     toast(t('调度已确认，已生效'));
@@ -1285,6 +1340,33 @@ function updatePerfGauges(cpuMax, cpuCur, gpuMax, gpuCur, perfOn) {
     var eu = document.getElementById('cpuUnit'); if (eu) eu.textContent = 'GHz';
     var eu2 = document.getElementById('gpuUnit'); if (eu2) eu2.textContent = 'MHz';
 }
+//仪表盘高频直读：两个值分开读取，杜绝串位；带范围校验，脏值直接丢弃保留上次有效值
+function readFreqNode(path) {
+    try {
+        var r = ksu.exec('cat ' + path + ' 2>/dev/null');
+        var m = String(r == null ? '' : r).match(/\d+/);
+        return m ? parseInt(m[0], 10) : 0;
+    } catch (e) { return 0; }
+}
+function fastPerfGaugePoll() {
+    if (document.hidden) return;
+    var cpuHw = perfHw.cpu7_max || 3052800;
+    var gpuHw = perfHw.gpu_max || 903000000;
+    var circ = 2 * Math.PI * 42;
+    var cpuCur = readFreqNode('/sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq');
+    if (cpuCur > 0 && cpuCur <= cpuHw * 1.2) {
+        var cr = document.getElementById('cpuRing');
+        if (cr) { cr.style.strokeDasharray = circ; cr.style.strokeDashoffset = circ - (Math.min(100, Math.round(cpuCur / cpuHw * 100)) / 100) * circ; }
+        var ep = document.getElementById('cpuPct'); if (ep) ep.textContent = (cpuCur / 1000000).toFixed(2);
+    }
+    var gpuCur = readFreqNode('/sys/class/kgsl/kgsl-3d0/devfreq/cur_freq');
+    if (gpuCur > 0 && gpuCur <= gpuHw * 1.2) {
+        var gr = document.getElementById('gpuRing');
+        if (gr) { gr.style.strokeDasharray = circ; gr.style.strokeDashoffset = circ - (Math.min(100, Math.round(gpuCur / gpuHw * 100)) / 100) * circ; }
+        var ep2 = document.getElementById('gpuPct'); if (ep2) ep2.textContent = Math.round(gpuCur / 1000000);
+    }
+}
+//日志生成逻辑（完整诊断报告由 lib/diag.sh 生成）
 function genLog() {
     if (logDebounceTimer) clearTimeout(logDebounceTimer);
     logDebounceTimer = setTimeout(function () {
@@ -1304,6 +1386,7 @@ function saveSponsorToGallery() {
     ksu.exec('am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://' + dst);
     toast(t('已保存到相册'));
 }
+//撒花特效
 function spawnConfetti() {
     const container = document.createElement('div');
     container.className = 'confetti-container';
@@ -1344,5 +1427,7 @@ function spawnConfetti() {
 }
 function showSponsor() { document.getElementById('ov').classList.add('show'); spawnConfetti(); }
 function hideSponsor() { document.getElementById('ov').classList.remove('show'); }
+//启动高频平滑轮询
 setInterval(refresh, 1000);
+setInterval(fastPerfGaugePoll, 600);
 refresh();
