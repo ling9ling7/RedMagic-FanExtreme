@@ -158,6 +158,17 @@ Custom License © 酷安@ling_凌
 
 本模块**保留所有权利**，采用白名单设备授权机制。源码公开供学习/审查/个人调试，未经授权不得安装运行于设备（白名单外使用需购买商业授权），禁止商用与二次公开分发。
 
+## 💰 赞助
+
+<table>
+  <tr>
+    <td><img width="350" alt="支付宝支付码" src="https://github.com/user-attachments/assets/ec9146d0-0586-4d31-aabc-2dc825b49b93" />
+</td>
+    <td><img width="350" alt="sponsor" src="https://github.com/user-attachments/assets/f93c533f-fd21-46e7-9e41-2fab894a5540" />
+</td>
+  </tr>
+</table>
+
 ---
 ## ⚠️ 新闻
 
