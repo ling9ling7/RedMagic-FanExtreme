@@ -3,5 +3,5 @@ name=更好的红魔
 version=v3.2.2
 versionCode=37
 author=酷安@ling_凌
-updateJson=https://raw.githubusercontent.com/ling9ling7/FanExtreme/main/update.json
+updateJson=https://raw.githubusercontent.com/ling9ling7/RedMagic-FanExtreme/main/update.json
 description=通过修改系统节点实现对风扇、液冷、云控等功能控制，超10个优化项，开放红魔对系统的隐藏限制
