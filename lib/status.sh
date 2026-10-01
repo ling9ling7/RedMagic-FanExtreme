@@ -20,7 +20,7 @@ webui_status() {
   local auto_charge=0
   [ -f "$AUTO_CHARGE_FILE" ] && auto_charge=1
   local charge_enabled=0
-  [ "$(cfg '充电分离')" = "1" ] && charge_enabled=1
+  [ "$(st '充电分离')" = "1" ] && charge_enabled=1
   local fan_level=""
   [ -e "$FAN_LEVEL" ] && fan_level=$(cat "$FAN_LEVEL" 2>/dev/null)
   local auto_fan=0
@@ -34,9 +34,9 @@ webui_status() {
   local temp_ctrl_threshold="40"
   [ -f "$TEMP_CTRL_THRESHOLD_FILE" ] && temp_ctrl_threshold=$(cat "$TEMP_CTRL_THRESHOLD_FILE")
   local fan_enabled=0
-  [ "$(cfg '风扇极速')" = "1" ] && fan_enabled=1
+  [ "$(st '风扇极速')" = "1" ] && fan_enabled=1
   local touch_enabled=0
-  [ "$(cfg '触控优化')" = "1" ] && touch_enabled=1
+  [ "$(st '触控优化')" = "1" ] && touch_enabled=1
   local touch_boost=0
   local touch_mode="global"
   [ -f "$TOUCH_MODE_FILE" ] && touch_mode=$(cat "$TOUCH_MODE_FILE")
@@ -44,7 +44,7 @@ webui_status() {
   [ -f "$TOUCH_APPS_FILE" ] && touch_apps=$(cat "$TOUCH_APPS_FILE" | tr "\n" ",")
   [ -f "$AUTO_TOUCH_FILE" ] && touch_boost=1
   local vibe_enabled=0
-  [ "$(cfg '振动增强')" = "1" ] && vibe_enabled=1
+  [ "$(st '振动增强')" = "1" ] && vibe_enabled=1
   local auto_vibe=0
   [ -f "$MODDIR/auto_vibe" ] && auto_vibe=1
   local vibe_gain=""
@@ -53,11 +53,11 @@ webui_status() {
   [ -f "$MODDIR/vibe_duration" ] && vibe_duration=$(cat "$MODDIR/vibe_duration")
   local vibe_vmax=""
   [ -f "$MODDIR/vibe_vmax" ] && vibe_vmax=$(cat "$MODDIR/vibe_vmax")
-  local vibe_gain_def=$(cfg "振动增益" | sed 's/%%//g; s/%//g')
+  local vibe_gain_def=$(st "振动增益" | sed 's/%%//g; s/%//g')
   [ -z "$vibe_gain_def" ] && vibe_gain_def=168
-  local vibe_dur_def=$(cfg "振动时长" | sed 's/ms//g')
+  local vibe_dur_def=$(st "振动时长" | sed 's/ms//g')
   [ -z "$vibe_dur_def" ] && vibe_dur_def=18
-  local vibe_vmax_def=$(cfg "振动上限")
+  local vibe_vmax_def=$(st "振动上限")
   [ -z "$vibe_vmax_def" ] && vibe_vmax_def=128
   local perf_pending=0
   [ -f "$PERF_PENDING" ] && perf_pending=1
@@ -164,7 +164,7 @@ webui_status() {
   local perf_enabled=0
   [ -f "$AUTO_PERF_FILE" ] && perf_enabled=1
   local thermal_enabled=0
-  [ "$(cfg '温控移除')" = "1" ] && thermal_enabled=1
+  [ "$(st '温控移除')" = "1" ] && thermal_enabled=1
   local pump_available=0
   if [ -e /proc/driver/micropump/speed ]; then
     pump_available=1
