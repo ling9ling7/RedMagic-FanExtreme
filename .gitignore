@@ -1,5 +1,5 @@
 # 模块运行必需：service.sh post-fs-data.sh customize.sh module.prop config.txt update.json lib/ vendor/ webroot/
-# 开发工具不上传
+# service.sh 为加密版，未加密源码在 开发工具/补丁备份/
 开发工具/
 *.zip
 .DS_Store
