@@ -1,15 +1,9 @@
 cfg() {
     grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tail -1
 }
-
-jstr() {
-    printf '%s' "$1" | tr -d '\r\n' | sed 's/\\/\\\\/g; s/"/\\"/g'
-}
-
 st() {
     grep -o "^$1=.*" "$STATE" 2>/dev/null | cut -d= -f2 | tail -1
 }
-
 cfg_set() {
     if [ ! -f "$STATE" ]; then
         [ -f "$CONFIG" ] && cp "$CONFIG" "$STATE" 2>/dev/null
@@ -22,7 +16,9 @@ cfg_set() {
         echo "$1=$2" >> "$STATE" 2>/dev/null
     fi
 }
-
+jstr() {
+    printf '%s' "$1" | tr -d '\r\n' | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
 vibe_apply() {
     local g="$1" d="$2" v="$3" EL VB
     EL="${ERRLOG:-/dev/null}"
@@ -35,7 +31,6 @@ vibe_apply() {
     [ -e "$VB/cont_brk_time" ] && echo 0x01 > "$VB/cont_brk_time" 2>>"$EL"
     [ -e "$VB/cont_wait_num" ] && echo 0x03 > "$VB/cont_wait_num" 2>>"$EL"
 }
-
 gpu_max_hz() {
     local v=""
     [ -e /sys/class/kgsl/kgsl-3d0/devfreq/max_freq ] && v=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 2>/dev/null)
@@ -54,7 +49,6 @@ gpu_max_hz() {
     fi
     echo "$v"
 }
-
 gpu_cur_hz() {
     local v=""
     [ -e /sys/class/kgsl/kgsl-3d0/devfreq/cur_freq ] && v=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/cur_freq 2>/dev/null)

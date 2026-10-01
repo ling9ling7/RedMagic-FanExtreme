@@ -20,7 +20,7 @@ webui_status() {
   local auto_charge=0
   [ -f "$AUTO_CHARGE_FILE" ] && auto_charge=1
   local charge_enabled=0
-  [ "$(st '充电分离')" = "1" ] && charge_enabled=1
+  [ "$(cfg '充电分离')" = "1" ] && charge_enabled=1
   local fan_level=""
   [ -e "$FAN_LEVEL" ] && fan_level=$(cat "$FAN_LEVEL" 2>/dev/null)
   local auto_fan=0
@@ -34,9 +34,9 @@ webui_status() {
   local temp_ctrl_threshold="40"
   [ -f "$TEMP_CTRL_THRESHOLD_FILE" ] && temp_ctrl_threshold=$(cat "$TEMP_CTRL_THRESHOLD_FILE")
   local fan_enabled=0
-  [ "$(st '风扇极速')" = "1" ] && fan_enabled=1
+  [ "$(cfg '风扇极速')" = "1" ] && fan_enabled=1
   local touch_enabled=0
-  [ "$(st '触控优化')" = "1" ] && touch_enabled=1
+  [ "$(cfg '触控优化')" = "1" ] && touch_enabled=1
   local touch_boost=0
   local touch_mode="global"
   [ -f "$TOUCH_MODE_FILE" ] && touch_mode=$(cat "$TOUCH_MODE_FILE")
@@ -44,7 +44,7 @@ webui_status() {
   [ -f "$TOUCH_APPS_FILE" ] && touch_apps=$(cat "$TOUCH_APPS_FILE" | tr "\n" ",")
   [ -f "$AUTO_TOUCH_FILE" ] && touch_boost=1
   local vibe_enabled=0
-  [ "$(st '振动增强')" = "1" ] && vibe_enabled=1
+  [ "$(cfg '振动增强')" = "1" ] && vibe_enabled=1
   local auto_vibe=0
   [ -f "$MODDIR/auto_vibe" ] && auto_vibe=1
   local vibe_gain=""
@@ -53,11 +53,11 @@ webui_status() {
   [ -f "$MODDIR/vibe_duration" ] && vibe_duration=$(cat "$MODDIR/vibe_duration")
   local vibe_vmax=""
   [ -f "$MODDIR/vibe_vmax" ] && vibe_vmax=$(cat "$MODDIR/vibe_vmax")
-  local vibe_gain_def=$(st "振动增益" | sed 's/%%//g; s/%//g')
+  local vibe_gain_def=$(cfg "振动增益" | sed 's/%%//g; s/%//g')
   [ -z "$vibe_gain_def" ] && vibe_gain_def=168
-  local vibe_dur_def=$(st "振动时长" | sed 's/ms//g')
+  local vibe_dur_def=$(cfg "振动时长" | sed 's/ms//g')
   [ -z "$vibe_dur_def" ] && vibe_dur_def=18
-  local vibe_vmax_def=$(st "振动上限")
+  local vibe_vmax_def=$(cfg "振动上限")
   [ -z "$vibe_vmax_def" ] && vibe_vmax_def=128
   local perf_pending=0
   [ -f "$PERF_PENDING" ] && perf_pending=1
@@ -70,7 +70,13 @@ webui_status() {
   local cpu7_max=""
   [ -e /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq ] && cpu7_max=$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq)
   local gpu_max=""
-  gpu_max=$(gpu_max_hz)
+  if [ -e /sys/class/kgsl/kgsl-3d0/devfreq/max_freq ]; then
+    gpu_max=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/max_freq)
+  elif [ -e /sys/class/kgsl/kgsl-3d0/max_clock_mhz ]; then
+    gpu_max=$(( $(cat /sys/class/kgsl/kgsl-3d0/max_clock_mhz 2>/dev/null) * 1000000 ))
+  elif [ -e "$GPU_MAX_CLOCK" ]; then
+    gpu_max=$(( $(cat "$GPU_MAX_CLOCK" 2>/dev/null) * 1000000 ))
+  fi
   local cpu_gov=""
   [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ] && cpu_gov=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
   local cpu_avail_gov=""
@@ -85,15 +91,12 @@ webui_status() {
   done
   local a=""
   local hw_min="" hw_max="" st=""
-  #CPU：读取+合成（优先真实档位表，其次按100MHz合成）
   for c in cpu0 cpu4 cpu7; do
     hw_min=""; hw_max=""; st=""
-    #优先使用cpuinfo_max_freq/min_freq
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_max_freq 2>/dev/null)
     [ -n "$a" ] && hw_max=$a
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/cpuinfo_min_freq 2>/dev/null)
     [ -n "$a" ] && hw_min=$a
-    #真实档位表：scaling_available_frequencies（精确，优先用于Picker）
     a=$(cat /sys/devices/system/cpu/$c/cpufreq/scaling_available_frequencies 2>/dev/null)
     if [ -n "$a" ]; then
       st=$(echo $a | tr ' ' ',')
@@ -128,7 +131,6 @@ webui_status() {
         cpu7_hw_min=$hw_min; cpu7_hw_max=$hw_max; cpu7_steps=$st ;;
     esac
   done
-  # GPU：读取+合成（兼容 SM8650 旧接口 / SM8750 新 MHz 接口 / 红魔节点）
   gpu_hw_min=""; gpu_hw_max=""; gpu_steps=""
   a=$(cat "$GPU_FREQ_TABLE" 2>/dev/null)
   if [ -z "$a" ]; then
@@ -160,11 +162,17 @@ webui_status() {
   local cpu_cur=""
   [ -e /sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq ] && cpu_cur=$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq)
   local gpu_cur=""
-  gpu_cur=$(gpu_cur_hz)
+  if [ -e /sys/class/kgsl/kgsl-3d0/devfreq/cur_freq ]; then
+    gpu_cur=$(cat /sys/class/kgsl/kgsl-3d0/devfreq/cur_freq)
+  elif [ -e /sys/class/kgsl/kgsl-3d0/clock_mhz ]; then
+    gpu_cur=$(( $(cat /sys/class/kgsl/kgsl-3d0/clock_mhz 2>/dev/null) * 1000000 ))
+  elif [ -e /sys/kernel/gpu/gpu_clock ]; then
+    gpu_cur=$(( $(cat /sys/kernel/gpu/gpu_clock 2>/dev/null) * 1000000 ))
+  fi
   local perf_enabled=0
   [ -f "$AUTO_PERF_FILE" ] && perf_enabled=1
   local thermal_enabled=0
-  [ "$(st '温控移除')" = "1" ] && thermal_enabled=1
+  [ "$(cfg '温控移除')" = "1" ] && thermal_enabled=1
   local pump_available=0
   if [ -e /proc/driver/micropump/speed ]; then
     pump_available=1
