@@ -1,6 +1,0 @@
-# 模块运行必需：service.sh post-fs-data.sh customize.sh module.prop config.txt update.json lib/ vendor/ webroot/
-# service.sh 为加密版，未加密源码在 开发工具/补丁备份/
-开发工具/
-*.zip
-.DS_Store
-Thumbs.db
