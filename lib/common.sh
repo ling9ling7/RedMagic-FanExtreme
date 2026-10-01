@@ -2,6 +2,10 @@ cfg() {
     grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tail -1
 }
 
+jstr() {
+    printf '%s' "$1" | tr -d '\r\n' | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
 st() {
     grep -o "^$1=.*" "$STATE" 2>/dev/null | cut -d= -f2 | tail -1
 }
