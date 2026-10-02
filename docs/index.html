@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FanExtreme — 更好的红魔 | KernelSU Module</title>
 <style>
-  /* 主题色板：暗色打底，红魔红做强调 */
+  /* 配色 */
   :root {
     --bg: #0d1117;
     --panel: #161b22;
@@ -36,7 +36,7 @@
     -webkit-user-select: none;
   }
 
-  /* 入场 */
+  /* 开场动画 */
   @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   body.loading .bg-fx { opacity: 0; }
@@ -50,7 +50,7 @@
   .hero-actions { animation-delay: .65s; }
   .hero-meta { animation-delay: .8s; }
 
-/* 滚动显现 */
+/* 滚动淡入 */
   .reveal { opacity: 0; transform: translateY(40px); transition: opacity .8s cubic-bezier(.2,0,0,1), transform .8s cubic-bezier(.2,0,0,1); }
   .reveal.show { opacity: 1; transform: translateY(0); }
   .reveal-d1 { transition-delay: 0s; }
@@ -70,7 +70,7 @@
   .reveal-scale { opacity: 0; transform: scale(.92); transition: opacity .8s cubic-bezier(.2,0,0,1), transform .8s cubic-bezier(.2,0,0,1); }
   .reveal-scale.show { opacity: 1; transform: scale(1); }
 
-  /* 背景：网格 + 光晕，慢慢飘，别抢戏 */
+  /* 背景 */
   .bg-fx { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
   .bg-fx::before {
     content: '';
@@ -106,32 +106,20 @@
   @keyframes gridPan { from { background-position: 0 0; } to { background-position: 56px 56px; } }
   @keyframes glowA { 0%,100% { transform: translate(0,0) scale(1); opacity:.45; } 50% { transform: translate(40px,30px) scale(1.15); opacity:.65; } }
   @keyframes glowB { 0%,100% { transform: translate(0,0) scale(1); opacity:.35; } 50% { transform: translate(-50px,-20px) scale(1.2); opacity:.55; } }
-  /* 功能卡片跟随鼠标微转 */
-  .features-grid { perspective: 900px; }
-  .feature-card {
-    transition: transform .12s ease-out, box-shadow .35s, border-color .35s;
-    transform-style: preserve-3d;
-    will-change: transform;
-    transform: translateZ(0);
-  }
-  .feature-card::before {
+  /* 功能行 hover */
+  .feature-row::before {
     content: '';
     position: absolute; inset: 0;
-    border-radius: 12px;
-    background: radial-gradient(600px circle at var(--mx,50%) var(--my,50%), rgba(227,76,38,.1), transparent 60%);
+    background: radial-gradient(400px circle at var(--mx,50%) var(--my,50%), rgba(227,76,38,.08), transparent 65%);
     opacity: 0;
     transition: opacity .35s;
     pointer-events: none;
   }
-  .feature-card:hover::before { opacity: 1; }
-  .feature-card:hover {
-    border-color: rgba(227,76,38,.4);
-    box-shadow: 0 12px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(227,76,38,.15);
-  }
-  .feature-card .feature-icon { transition: transform .35s cubic-bezier(.2,0,0,1); }
-  .feature-card:hover .feature-icon { transform: scale(1.12) rotate(4deg); }
-  .feature-card .feature-tag { transition: all .3s; }
-  .feature-card:hover .feature-tag {
+  .feature-row:hover::before { opacity: 1; }
+  .feature-row .feature-icon { transition: transform .35s cubic-bezier(.2,0,0,1); }
+  .feature-row:hover .feature-icon { transform: scale(1.1); }
+  .feature-row .feature-tag { transition: all .3s; }
+  .feature-row:hover .feature-tag {
     background: rgba(63,185,80,.18);
     border-color: rgba(63,185,80,.35);
   }
@@ -181,8 +169,7 @@
   }
   .step-num { transition: all .3s cubic-bezier(.2,0,0,1); }
 
-  .config-table tr { transition: background .25s; }
-  .config-table tbody tr:hover { background: rgba(88,166,255,.04); }
+  .config-table tbody tr:hover td { background: var(--panel-hi); }
 
   .nav-logo { transition: all .3s; }
   .nav-logo:hover { transform: translateX(2px); }
@@ -243,18 +230,18 @@
   @media (prefers-reduced-motion: reduce) {
     .bg-fx::before, .bg-fx .grid, .bg-fx .glow { animation: none !important; }
     *, *::before, *::after { transition: none !important; animation: none !important; }
-    .feature-card:hover, .btn:hover, .feature-card .feature-icon, .feature-card .feature-tag { transform: none !important; }
+    .feature-row:hover, .btn:hover, .feature-row .feature-icon, .feature-row .feature-tag { transform: none !important; }
     .reveal, .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; }
   }
   a { color: var(--blue); text-decoration: none; transition: color .2s; }
   a:hover { color: var(--accent-soft); }
 
-  /* 布局 */
+  /* 主体布局 */
   .container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
   section { padding: 80px 0; border-bottom: 1px solid var(--border); }
   section:last-child { border-bottom: none; }
 
-  /* 顶部导航 */
+  /* 导航 */
   nav {
     position: fixed; top: 0; left: 0; right: 0;
     z-index: 100;
@@ -279,7 +266,7 @@
   .nav-links a { color: var(--muted); font-size: .85rem; font-weight: 500; }
   .nav-links a:hover { color: #fff; }
 
-  /* Hero 主视觉 */
+  /* 首屏 */
   .hero {
     padding: 140px 0 100px;
     border-bottom: 1px solid var(--border);
@@ -379,7 +366,7 @@
   .hero-meta-item .value.green { color: var(--green); }
   .hero-meta-item .value.blue { color: var(--blue); }
 
-  /* 区块标题 */
+  /* 标题 */
   .section-label {
     font-size: .7rem;
     text-transform: uppercase;
@@ -397,48 +384,47 @@
   }
   .section-desc { color: var(--muted); max-width: 560px; margin-bottom: 48px; }
 
-  /* 功能五列 */
-  #features .container.features-wide { max-width: 1180px; }
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
-  }
-  .feature-card {
+  /* 功能清单 */
+  .feature-list {
+    display: flex; flex-direction: column;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px 16px;
-    transition: all .25s;
-    position: relative;
     overflow: hidden;
   }
-  .feature-card:hover {
-    border-color: rgba(227,76,38,.3);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  .feature-row {
+    display: flex; align-items: center; gap: 18px;
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: background .25s;
   }
+  .feature-row:last-child { border-bottom: none; }
+  .feature-row:hover { background: rgba(88,166,255,.04); }
   .feature-icon {
     width: 40px; height: 40px;
+    flex-shrink: 0;
     border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     font-size: 18px;
-    margin-bottom: 16px;
   }
   .fi-red { background: rgba(227,76,38,.15); }
   .fi-green { background: rgba(63,185,80,.15); }
   .fi-blue { background: rgba(88,166,255,.15); }
   .fi-purple { background: rgba(188,140,255,.15); }
   .fi-orange { background: rgba(249,115,22,.15); }
-  .feature-card h3 {
-    font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 8px;
+  .feature-info { flex: 1; min-width: 0; }
+  .feature-info h3 {
+    font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 4px;
   }
-  .feature-card p {
+  .feature-info p {
     font-size: .85rem; color: var(--muted); line-height: 1.65;
   }
   .feature-tag {
     display: inline-block;
-    margin-top: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
     padding: 2px 10px;
     background: rgba(63,185,80,.1);
     border: 1px solid rgba(63,185,80,.2);
@@ -448,7 +434,7 @@
     font-weight: 600;
   }
 
-  /* 代码块 */
+  /* 终端窗口 */
   .code-block {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -485,7 +471,7 @@
   .code-body .key { color: var(--blue); }
   .code-body .val { color: var(--green); }
 
-  /* 安装步骤 */
+  /* 步骤 */
   .steps { counter-reset: step; }
   .step {
     display: flex; gap: 20px;
@@ -517,7 +503,7 @@
   .step-content h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
   .step-content p { color: var(--muted); font-size: .9rem; line-height: 1.7; }
 
-  /* 配置表格 */
+  /* 表格 */
   .config-table {
     width: 100%;
     border-collapse: collapse;
@@ -537,6 +523,8 @@
   .config-table td {
     padding: 12px 16px;
     border: 1px solid var(--border);
+    background: var(--panel);
+    transition: background .25s;
     color: var(--text);
   }
   .config-table td:first-child {
@@ -552,7 +540,7 @@
   .toggle-on { color: var(--green) !important; font-weight: 600; }
   .toggle-off { color: var(--muted) !important; }
 
-  /* sysfs 节点 */
+  /* 节点列表 */
   .sysfs-list {
     display: grid;
     gap: 12px;
@@ -571,8 +559,17 @@
   .sysfs-item:hover { border-color: rgba(88,166,255,.3); }
   .sysfs-path { color: var(--code); word-break: break-all; }
   .sysfs-desc { color: var(--muted); font-family: var(--font-sans); font-size: .82rem; }
+  .sysfs-group-title {
+    margin: 28px 0 12px;
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    letter-spacing: .06em;
+    color: var(--text);
+  }
+  .sysfs-group-title:first-child { margin-top: 0; }
+  .sysfs-group-title span { color: var(--muted); margin-left: 10px; font-size: .75rem; letter-spacing: 0; }
 
-  /* 授权说明 */
+  /* 授权面板 */
   .license-box {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -583,8 +580,17 @@
     line-height: 1.7;
   }
   .license-box strong { color: var(--text); }
+  .lic-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .lic-item:first-child { padding-top: 0; }
+  .lic-item:last-of-type { border-bottom: none; padding-bottom: 0; }
+  .lic-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .lic-ver { font-family: var(--font-mono); font-size: .85rem; font-weight: 600; color: var(--text); }
+  .lic-item p { font-size: .85rem; color: var(--muted); line-height: 1.7; }
+  .lic-foot { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: .8rem; color: var(--muted); }
+  .tag-blue { background: rgba(88,166,255,.1); border-color: rgba(88,166,255,.25); color: var(--blue); }
+  .tag-soft { background: rgba(255,255,255,.04); border-color: var(--border); color: var(--muted); }
 
-  /* 常见问题 */
+  /* FAQ */
   .faq-list { display: flex; flex-direction: column; gap: 16px; }
   .faq-item {
     background: var(--panel);
@@ -620,7 +626,7 @@
     border-radius: 4px;
   }
 
-  /* 页脚 */
+  /* footer */
   footer {
     padding: 48px 0;
     border-top: 1px solid var(--border);
@@ -638,7 +644,7 @@
   footer .copy { color: #484f58; font-size: .75rem; }
   footer .sync-info { color: #30363d; font-size: .7rem; }
 
-  /* 社区引导 */
+  /* 加群 */
   .qq-cta {
     margin-top: 48px;
     text-align: center;
@@ -671,7 +677,7 @@
   }
   .qq-cta .btn-qq:hover { background: #109ed1; color: #fff; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(18,183,245,.2); }
 
-  /* 社区双卡片 */
+  /* 两张卡片 */
   .community-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -700,15 +706,12 @@
     .community-grid { grid-template-columns: 1fr; }
   }
 
-  /* 小屏适配 */
-  @media (max-width: 1024px) {
-    .features-grid { grid-template-columns: repeat(3, 1fr); }
-  }
+  /* 手机上 */
   @media (max-width: 640px) {
     .hero-meta { flex-direction: column; gap: 16px; }
     .nav-links { display: none; }
-    .features-grid { grid-template-columns: repeat(2, 1fr); }
-    .feature-card { padding: 16px 14px; }
+    .feature-row { flex-wrap: wrap; padding: 16px 14px; gap: 12px; }
+    .feature-row .feature-tag { margin-left: 52px; }
     .config-table { font-size: .75rem; }
     .config-table th, .config-table td { padding: 8px 10px; }
   }
@@ -716,7 +719,7 @@
 </head>
 <body class="loading">
 
-<!-- 背景特效 -->
+<!-- 背景 -->
 <div class="bg-fx">
   <div class="grid"></div>
   <div class="glow g1"></div>
@@ -728,7 +731,7 @@
 
 
 
-<!-- 顶栏 -->
+<!-- 导航条 -->
 <nav>
   <div class="container">
     <div class="nav-logo">
@@ -749,7 +752,7 @@
   </div>
 </nav>
 
-<!-- 首屏 -->
+<!-- hero -->
 <section class="hero">
   <div class="container">
     <div class="hero-badge">
@@ -801,83 +804,103 @@
   </div>
 </section>
 
-<!-- 功能 -->
+<!-- 功能列表 -->
 <section id="features">
     <div class="container">
     <div class="section-label reveal">Features</div>
     <h2 class="section-title reveal">多项核心优化</h2>
     <p class="section-desc reveal">每一项都针对红魔手机的痛点，通过 sysfs 节点直接调优内核参数，配置文件一键开关，WebUI 实时可视化调节。</p>
     </div>
-    <div class="container features-wide">
-    <div class="features-grid">
+    <div class="container">
+    <div class="feature-list">
 
-      <div class="feature-card reveal reveal-d1">
+      <div class="feature-row reveal reveal-d1">
         <div class="feature-icon fi-red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e34c26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14c3.5-1 6-1.5 8-1.5 2 0 5 .5 7 1.5"/><path d="M5 10c3.5-1 6-1.5 8-1.5 2 0 5 .5 7 1.5"/><path d="M7 6c3.5-1 6-1.5 8-1.5 2 0 5 .5 7 1.5"/><path d="M4 18c3.5-1 6-1.5 8-1.5 2 0 4.5.5 6 1.5"/></svg></div>
-        <h3>风扇极速</h3>
-        <p>5 档可调风扇转速，解锁被限制的风扇性能，散热拉满。</p>
+        <div class="feature-info">
+          <h3>风扇极速</h3>
+          <p>5 档可调风扇转速，解锁被限制的风扇性能，散热拉满。</p>
+        </div>
         <span class="feature-tag">/sys/kernel/fan/</span>
       </div>
 
-      <div class="feature-card reveal reveal-d2">
+      <div class="feature-row reveal reveal-d2">
         <div class="feature-icon fi-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/><line x1="10" y1="10" x2="10" y2="14"/></svg></div>
-        <h3>充电分离</h3>
-        <p>游戏时手机由充电器直供，电池暂停充放电。可调阈值 20%-100%。</p>
+        <div class="feature-info">
+          <h3>充电分离</h3>
+          <p>游戏时手机由充电器直供，电池暂停充放电。可调阈值 20%-100%。</p>
+        </div>
         <span class="feature-tag">电池保护</span>
       </div>
 
-      <div class="feature-card reveal reveal-d3">
+      <div class="feature-row reveal reveal-d3">
         <div class="feature-icon fi-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.7-9c.5.1.9.2 1.3.2a4.5 4.5 0 1 1 .5 8.8Z"/><line x1="20" y1="4" x2="4" y2="20"/></svg></div>
-        <h3>云控屏蔽</h3>
-        <p>屏蔽厂商云端下发的一键限流策略，性能不被远程干预。</p>
+        <div class="feature-info">
+          <h3>云控屏蔽</h3>
+          <p>屏蔽厂商云端下发的一键限流策略，性能不被远程干预。</p>
+        </div>
         <span class="feature-tag">云端限制</span>
       </div>
 
-      <div class="feature-card reveal reveal-d4">
+      <div class="feature-row reveal reveal-d4">
         <div class="feature-icon fi-orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.2-2.4-2-4-2-7 0 0 3 3.5 3 7 0 1.5-.5 2.5-.5 2.5"/><path d="M14 13c0 3.3-2.2 6-5 6s-5-2.7-5-6c0-2.5 1-4.5 2-6"/><path d="M17 17c.7-1.5 1-3.2 1-5 0-2.5-1-4.5-2-6"/></svg></div>
-        <h3>温控移除</h3>
-        <p>所有温度墙拉到 95°C，满血释放性能。</p>
+        <div class="feature-info">
+          <h3>温控移除</h3>
+          <p>所有温度墙拉到 95°C，满血释放性能。</p>
+        </div>
         <span class="feature-tag">thermal-engine</span>
       </div>
 
-      <div class="feature-card reveal reveal-d5">
+      <div class="feature-row reveal reveal-d5">
         <div class="feature-icon fi-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bc8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8v8"/><path d="M6 5v14"/><path d="M10 2v20"/><path d="M14 5v14"/><path d="M18 4v16"/><path d="M22 8v8"/></svg></div>
-        <h3>振动增强</h3>
-        <p>提升 x 轴线性马达振动强度，增益 / 时长 / 上限均可自定义。</p>
+        <div class="feature-info">
+          <h3>振动增强</h3>
+          <p>提升 x 轴线性马达振动强度，增益 / 时长 / 上限均可自定义。</p>
+        </div>
         <span class="feature-tag">Haptic Boost</span>
       </div>
 
-      <div class="feature-card reveal reveal-d6">
+      <div class="feature-row reveal reveal-d6">
         <div class="feature-icon fi-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.1.3 2.1.8 3"/><path d="M20 12a8 8 0 0 0-14.5-5"/><path d="M6 17.5A5.5 5.5 0 0 1 10 8"/><path d="M18 12a6 6 0 0 0-9-4"/><path d="M14 12a2 2 0 0 0-1-1.7"/><path d="M9.1 15.5a8 8 0 0 1 2.1-1.3"/><path d="M7.5 19.5A10 10 0 0 1 12 6"/></svg></div>
-        <h3>触控优化</h3>
-        <p>触控采样率提升至 960Hz，加入游戏模式，60s 看门狗防止回滚。</p>
+        <div class="feature-info">
+          <h3>触控优化</h3>
+          <p>触控采样率提升至 960Hz，加入游戏模式，60s 看门狗防止回滚。</p>
+        </div>
         <span class="feature-tag">960Hz</span>
       </div>
 
-      <div class="feature-card reveal reveal-d7">
+      <div class="feature-row reveal reveal-d7">
         <div class="feature-icon fi-orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-        <h3>充电加速</h3>
-        <p>移除充电电流软限制，让快充以最大支持功率运行。</p>
+        <div class="feature-info">
+          <h3>充电加速</h3>
+          <p>移除充电电流软限制，让快充以最大支持功率运行。</p>
+        </div>
         <span class="feature-tag">Fast Charge</span>
       </div>
 
-      <div class="feature-card reveal reveal-d8">
+      <div class="feature-row reveal reveal-d8">
         <div class="feature-icon fi-red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e34c26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="16"/><line x1="9" y1="20" x2="9" y2="10"/><line x1="14" y1="20" x2="14" y2="6"/><line x1="19" y1="20" x2="19" y2="2"/></svg></div>
-        <h3>频率控制</h3>
-        <p>自定义 CPU 各核心与 GPU 最高频率，支持频率挡位选择与调度器切换，内置省电预设一键启用，精细掌控性能与功耗。</p>
+        <div class="feature-info">
+          <h3>频率控制</h3>
+          <p>自定义 CPU 各核心与 GPU 最高频率，支持频率挡位选择与调度器切换，内置省电预设一键启用，精细掌控性能与功耗。</p>
+        </div>
         <span class="feature-tag">CPU / GPU</span>
       </div>
 
-      <div class="feature-card reveal reveal-d9">
+      <div class="feature-row reveal reveal-d9">
         <div class="feature-icon fi-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6 6 0 0 0-3.68 10.72c.65.53 1.08 1.28 1.13 2.28h5.1c.05-1 .48-1.75 1.13-2.28A6 6 0 0 0 12 2Z"/><path d="m11 8.2 2 2M13 8.2l-2 2"/></svg></div>
-        <h3>亮度解锁</h3>
-        <p>红魔 11 Pro 系列可激发最大屏幕亮度，户外强光下依然清晰可见。</p>
+        <div class="feature-info">
+          <h3>亮度解锁</h3>
+          <p>红魔 11 Pro 系列可激发最大屏幕亮度，户外强光下依然清晰可见。</p>
+        </div>
         <span class="feature-tag">Brightness</span>
       </div>
 
-      <div class="feature-card reveal reveal-d10">
+      <div class="feature-row reveal reveal-d10">
         <div class="feature-icon fi-red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e34c26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
-        <h3>液冷控制</h3>
-        <p>支持红魔11 Pro 内置液冷水泵四档调速，按需主动降温。</p>
+        <div class="feature-info">
+          <h3>液冷控制</h3>
+          <p>支持红魔11 Pro 内置液冷水泵四档调速，按需主动降温。</p>
+        </div>
         <span class="feature-tag">Liquid Cooling</span>
       </div>
 
@@ -885,7 +908,7 @@
   </div>
 </section>
 
-<!-- 安装 -->
+<!-- 步骤 -->
 <section id="install">
   <div class="container">
     <div class="section-label reveal">Installation</div>
@@ -917,7 +940,7 @@
   </div>
 </section>
 
-<!-- 配置 -->
+<!-- config -->
 <section id="config">
   <div class="container">
     <div class="section-label reveal">Configuration</div>
@@ -971,98 +994,251 @@
   </div>
 </section>
 
-<!-- 内核节点 -->
+<!-- sysfs 节点 -->
 <section id="sysfs">
   <div class="container">
     <div class="section-label reveal">Technical</div>
-    <h2 class="section-title reveal">Sysfs 接口</h2>
-    <p class="section-desc reveal">模块通过 sysfs 节点直接与内核交互，以下是主要操作路径。</p>
-    <div class="sysfs-list">
-      <div class="sysfs-item reveal reveal-d1">
-        <span class="sysfs-path">/sys/kernel/fan/fan_speed_level</span>
-        <span class="sysfs-desc">风扇速度等级 (1-5)</span>
+    <h2 class="section-title reveal">Sysfs / 内核节点</h2>
+    <p class="section-desc reveal">模块通过 sysfs 与 procfs 节点直接和内核交互，以下为脚本中实际读写的主要路径。不同机型节点存在差异，代码内置自动探测与回退（例如 <code style="color:var(--code);font-family:var(--font-mono);font-size:.85em">/sys/kernel/fan/</code> 不存在时回退到 <code style="color:var(--code);font-family:var(--font-mono);font-size:.85em">/sys/kernel/</code>）。</p>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">风扇控制 <span>/sys/kernel/fan/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/kernel/fan/fan_speed_level</span>
+          <span class="sysfs-desc">风扇速度等级 (1-5)，写入后 chmod 444 锁定防止回滚</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/kernel/fan/fan_enable</span>
+          <span class="sysfs-desc">风扇开关 (0/1)</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/kernel/fan_speed_level、/sys/kernel/fan_enable</span>
+          <span class="sysfs-desc">无 fan/ 子目录机型的回退路径</span>
+        </div>
       </div>
-      <div class="sysfs-item reveal reveal-d2">
-        <span class="sysfs-path">/sys/kernel/fan/fan_enable</span>
-        <span class="sysfs-desc">风扇开关控制</span>
+    </div>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">电池 / 充电 <span>/sys/class/qcom-battery/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/qcom-battery/restrict_cur</span>
+          <span class="sysfs-desc">充电限制电流</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/qcom-battery/restrict_chg</span>
+          <span class="sysfs-desc">充电限制开关</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/qcom-battery/charging_enabled</span>
+          <span class="sysfs-desc">充电使能控制（充电分离时置 0）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/qcom-battery/charge_mode</span>
+          <span class="sysfs-desc">充电模式选择</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/qcom-battery/screen_is_on</span>
+          <span class="sysfs-desc">亮屏状态标志（充电加速时写 0 绕过亮屏限流）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/power_supply/battery/temp</span>
+          <span class="sysfs-desc">电池温度（0.1°C，温控 / 液冷自动档取此值）</span>
+        </div>
       </div>
-      <div class="sysfs-item reveal reveal-d3">
-        <span class="sysfs-path">/sys/class/qcom-battery/restrict_cur</span>
-        <span class="sysfs-desc">充电限制电流</span>
+    </div>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">CPU <span>/sys/devices/system/cpu/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq</span>
+          <span class="sysfs-desc">CPU 最高频率（按核心 / 簇设置，写入后可 chmod 444 锁定）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq</span>
+          <span class="sysfs-desc">CPU 最低频率</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor</span>
+          <span class="sysfs-desc">CPU 调度器（Governor）切换</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_max_freq、cpuinfo_min_freq</span>
+          <span class="sysfs-desc">硬件频率范围（挡位表生成依据）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/kernel/cpu_max_freq_limit_cluster*</span>
+          <span class="sysfs-desc">厂商限频节点（写 99999999 解除限制）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/kernel/msm_performance/parameters/cpu_max_freq</span>
+          <span class="sysfs-desc">按核心限频，格式 "0:hz 1:hz … 7:hz"，恢复时写回备份</span>
+        </div>
       </div>
-      <div class="sysfs-item reveal reveal-d4">
-        <span class="sysfs-path">/sys/class/qcom-battery/restrict_chg</span>
-        <span class="sysfs-desc">充电限制开关</span>
+    </div>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">GPU（Adreno / KGSL）<span>/sys/class/kgsl/kgsl-3d0/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/kgsl/kgsl-3d0/devfreq/cur_freq、max_freq、min_freq</span>
+          <span class="sysfs-desc">GPU 当前 / 最高 / 最低频率</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/kgsl/kgsl-3d0/gpuclk、max_gpuclk、clock_mhz、max_clock_mhz、min_clock_mhz</span>
+          <span class="sysfs-desc">不同内核版本的 GPU 频率节点（按存在性自动选择）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/kgsl/kgsl-3d0/freq_table_mhz</span>
+          <span class="sysfs-desc">GPU 频率挡位表</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/kgsl/kgsl-3d0/thermal_pwrlevel</span>
+          <span class="sysfs-desc">GPU 温控降频挡位（写 0 解除）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/kgsl/kgsl-3d0/pwrscale、default_pwrlevel、max_pwrlevel、min_pwrlevel</span>
+          <span class="sysfs-desc">GPU 功耗等级（锁频时备份并恢复）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/kernel/gpu/gpu_clock、gpu_max_clock</span>
+          <span class="sysfs-desc">MTK / 新平台 GPU 频率节点（备选 /sys/kernel/gpu_max_clock）</span>
+        </div>
       </div>
-      <div class="sysfs-item reveal reveal-d5">
-        <span class="sysfs-path">/sys/class/qcom-battery/charging_enabled</span>
-        <span class="sysfs-desc">充电使能控制</span>
+    </div>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">振动（Haptic）<span>/sys/class/leds/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/leds/vibrator/gain、duration、duration_aw、vmax</span>
+          <span class="sysfs-desc">振动增益 / 时长 / 幅度上限（十六进制写入）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/leds/vibrator/cont_brk_time、cont_wait_num</span>
+          <span class="sysfs-desc">连续振动间隔参数（写 0x01 / 0x03）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/leds/zte_vibrator/gain</span>
+          <span class="sysfs-desc">中兴驱动机型的振动节点（存在时自动切换）</span>
+        </div>
       </div>
-      <div class="sysfs-item reveal reveal-d6">
-        <span class="sysfs-path">/sys/class/qcom-battery/charge_mode</span>
-        <span class="sysfs-desc">充电模式选择</span>
+    </div>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">触控 <span>/proc/touchscreen/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/proc/touchscreen/tp_report_rate</span>
+          <span class="sysfs-desc">报点率（写 4 → 960Hz）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/proc/touchscreen/play_game</span>
+          <span class="sysfs-desc">触控游戏模式（写 1）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/proc/touchscreen/follow_hand_level</span>
+          <span class="sysfs-desc">跟手等级（写 4）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">settings system touch_sampling_rate</span>
+          <span class="sysfs-desc">采样率设置项（置 960，关闭时删除）</span>
+        </div>
       </div>
-      <div class="sysfs-item reveal reveal-d7">
-        <span class="sysfs-path">/sys/kernel/gpu/</span>
-        <span class="sysfs-desc">GPU 调频与负载信息</span>
+    </div>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">亮度 <span>/sys/class/backlight/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/backlight/panel0-backlight/brightness</span>
+          <span class="sysfs-desc">屏幕亮度（红魔 11 Pro 触发值 7030 提升至 8190）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/backlight/panel0-backlight/max_brightness</span>
+          <span class="sysfs-desc">最大亮度值（目标值以实际硬件上限为准）</span>
+        </div>
       </div>
-      <div class="sysfs-item reveal reveal-d8">
-        <span class="sysfs-path">/sys/devices/system/cpu/cpu*/cpufreq/</span>
-        <span class="sysfs-desc">CPU 调频与 Governor 设置</span>
+    </div>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">液冷泵（红魔 11 Pro）<span>/proc/driver/micropump/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/proc/driver/micropump/enable</span>
+          <span class="sysfs-desc">水泵开关 (0/1)</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/proc/driver/micropump/freq</span>
+          <span class="sysfs-desc">水泵频率（写 4）</span>
+        </div>
+        <div class="sysfs-item">
+          <span class="sysfs-path">/proc/driver/micropump/speed</span>
+          <span class="sysfs-desc">水泵转速，四挡对应 40 / 60 / 80 / 90，写入后 chmod 444 锁定</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="sysfs-group-title">温控 <span>/sys/class/thermal/</span></div>
+      <div class="sysfs-list">
+        <div class="sysfs-item">
+          <span class="sysfs-path">/sys/class/thermal/thermal_zone*/</span>
+          <span class="sysfs-desc">BCL / SOC 温控点，锁频时按类型备份并解除限制</span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 项目结构 -->
+<!-- 目录结构 -->
 <section id="structure">
   <div class="container">
     <div class="section-label reveal">Structure</div>
     <h2 class="section-title reveal">项目结构</h2>
-    <p class="section-desc reveal">模块按职责拆分为 lib 功能库，全部由 service.sh 统一加载；根目录即模块安装目录，打包时直接压缩根目录即可。</p>
+    <p class="section-desc reveal">以下是模块安装到 <code style="color:var(--code);font-family:var(--font-mono);font-size:.85em">/data/adb/modules/FanExtreme</code> 后的目录结构。模块按职责拆分为 lib 功能库，由 service.sh 统一加载。</p>
 
     <div class="code-block reveal reveal-scale">
       <div class="code-header">
         <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
         项目结构
       </div>
-      <div class="code-body"><span class="cmt">FanExtreme/</span>
+      <div class="code-body"><span class="cmt">FanExtreme/</span>                     <span class="cmt"># 模块安装目录 /data/adb/modules/FanExtreme</span>
 │
-├── <span class="key">module.prop</span>            <span class="cmt"># 模块元数据</span>
-├── <span class="key">customize.sh</span>           <span class="cmt"># 安装时执行</span>
-├── <span class="key">service.sh</span>             <span class="cmt"># 主守护进程</span>
-├── <span class="key">config.txt</span>             <span class="cmt"># 配置文件</span>
+├── <span class="key">module.prop</span>            <span class="cmt"># 模块元数据（id / 版本 / 更新地址）</span>
+├── <span class="key">customize.sh</span>           <span class="cmt"># 安装时执行（迁移配置、环境检查）</span>
+├── <span class="key">service.sh</span>             <span class="cmt"># 主守护进程（开机启动，加载 lib 功能库）</span>
+├── <span class="key">post-fs-data.sh</span>        <span class="cmt"># 早期启动：bind mount 温控配置</span>
+├── <span class="key">config.txt</span>             <span class="cmt"># 功能开关配置</span>
 ├── <span class="key">update.json</span>            <span class="cmt"># 在线更新描述</span>
+│   <span class="cmt"># state.txt / webui_status / webui_cmd / auto_* 为运行时生成</span>
 │
 ├── <span class="key">lib/</span>                   <span class="cmt"># 功能库</span>
-│   ├── <span class="key">common.sh</span>          <span class="cmt"># cfg() 读 config.txt 配置</span>
-│   ├── <span class="key">whitelist.sh</span>       <span class="cmt"># 白名单授权检查</span>
-│   ├── <span class="key">patch.sh</span>           <span class="cmt"># 拉取 GitHub 热补丁</span>
-│   ├── <span class="key">ding.sh</span>            <span class="cmt"># 安装成功回传</span>
-│   ├── <span class="key">features.sh</span>        <span class="cmt"># 各功能开关实现</span>
+│   ├── <span class="key">common.sh</span>          <span class="cmt"># cfg() 配置读写 / vibe_apply() / GPU 频率读取</span>
+│   ├── <span class="key">features.sh</span>        <span class="cmt"># 各功能实现（风扇/云控/温控/振动/触控/亮度）</span>
 │   ├── <span class="key">status.sh</span>          <span class="cmt"># 生成 WebUI 状态 JSON</span>
-│   ├── <span class="key">perf.sh</span>            <span class="cmt"># CPU/GPU 频率与锁频控制</span>
-│   └── <span class="key">loop.sh</span>            <span class="cmt"># WebUI 命令循环</span>
+│   ├── <span class="key">perf.sh</span>            <span class="cmt"># CPU/GPU 锁频与 msm_performance 解锁</span>
+│   ├── <span class="key">loop.sh</span>            <span class="cmt"># WebUI 命令循环（读取 webui_cmd）</span>
+│   └── <span class="key">diag.sh</span>            <span class="cmt"># 调试日志导出</span>
 │
 ├── <span class="key">webroot/</span>               <span class="cmt"># WebUI 控制面板</span>
 │   ├── <span class="key">index.html</span>         <span class="cmt"># 页面骨架</span>
 │   ├── <span class="key">style.css</span>          <span class="cmt"># 样式</span>
-│   ├── <span class="key">app.js</span>             <span class="cmt"># 前端逻辑</span>
-│   ├── <span class="key">avatar.png</span>         <span class="cmt"># 页面头像</span>
-│   ├── <span class="key">sponsor.jpg</span>        <span class="cmt"># 赞助图</span>
-│   └── <span class="key">xmtx.png</span>           <span class="cmt"># 社区贡献者头像</span>
+│   ├── <span class="key">app.js</span>             <span class="cmt"># 前端逻辑（经 ksu.exec 下发命令）</span>
+│   └── <span class="key">avatar.png</span> · <span class="key">sponsor.jpg</span> · <span class="key">xmtx.png</span>   <span class="cmt"># 头像 / 赞助图 / 贡献者头像</span>
 │
-└── <span class="key">vendor/etc/</span>
-    └── <span class="key">thermal-engine.conf</span>   <span class="cmt"># 温控引擎配置</span></div>
+└── <span class="key">vendor/etc/thermal-engine.conf</span>   <span class="cmt"># 温控引擎配置（bind mount 覆盖原文件）</span></div>
     </div>
 
     <div class="license-box reveal reveal-left">
-      <p><strong>开发环境</strong> — 模块本体纯 shell (system/bin/sh) + JS/CSS，无需编译；测试设备为红魔 9 Pro (NX769J, Android 16, KernelSU)；打包 ZIP 直接压缩模块根目录即可。</p>
+      <p><strong>开发环境</strong> — 模块本体纯 shell (system/bin/sh) + JS/CSS，无需编译；测试设备为红魔 9 Pro (NX769J, Android 16, KernelSU)。</p>
     </div>
   </div>
 </section>
 
-<!-- 兼容性 -->
+<!-- 机型 -->
 <section id="compat">
   <div class="container">
     <div class="section-label reveal">Compatibility</div>
@@ -1090,7 +1266,7 @@
   </div>
 </section>
 
-<!-- 常见问题 -->
+<!-- FAQ -->
 <section id="faq">
   <div class="container">
     <div class="section-label reveal">FAQ</div>
@@ -1137,18 +1313,41 @@
   </div>
 </section>
 
-<!-- 协议 -->
+<!-- 授权 -->
 <section id="license">
   <div class="container">
     <div class="section-label reveal">License</div>
-    <h2 class="section-title reveal">开源协议</h2>
+    <h2 class="section-title reveal">授权协议</h2>
+    <p class="section-desc reveal">本项目采用<strong style="color:var(--text)">自定义授权协议</strong>（保留所有权利），不同版本范围的授权方式如下。</p>
+
     <div class="license-box reveal reveal-left">
-      <p>本项目采用 <strong>自定义授权协议</strong>（保留所有权利），采用白名单设备授权机制。源码公开供学习/审查，未经授权禁止安装运行、商用与二次公开分发。作者：酷安@ling_凌</p>
+      <div class="lic-item">
+        <div class="lic-head">
+          <span class="lic-ver">低于 v3.1.5</span>
+          <span class="feature-tag">免费开源 · 允许个人修改</span>
+        </div>
+        <p>历史版本保持免费开源，允许为个人非商业用途修改与调试；禁止商用与公开再分发修改版。</p>
+      </div>
+      <div class="lic-item">
+        <div class="lic-head">
+          <span class="lic-ver">v3.1.5 及之后</span>
+          <span class="feature-tag tag-blue">仅授权（赞助）用户</span>
+        </div>
+        <p>源码公开仅供学习与审查；<span class="toggle-off">未授权禁止安装运行与修改</span>；<span class="toggle-on">已授权用户可为个人用途修改</span>，修改版同样禁止商用与公开再分发。授权通过设备白名单（序列号）验证。</p>
+      </div>
+      <div class="lic-item">
+        <div class="lic-head">
+          <span class="lic-ver">数据收集</span>
+          <span class="feature-tag tag-soft">仅机型信息</span>
+        </div>
+        <p>模块安装成功后会上报设备型号信息，仅用于统计支持的机型范围，不收集任何个人隐私数据。</p>
+      </div>
+      <div class="lic-foot">完整条款见仓库 <a href="https://github.com/ling9ling7/RedMagic-FanExtreme/blob/main/LICENSE" target="_blank">LICENSE</a> 文件。作者：酷安@ling_凌</div>
     </div>
   </div>
 </section>
 
-<!-- 新闻 -->
+<!-- 动态 -->
 <section id="news">
   <div class="container">
     <div class="section-label reveal">News</div>
@@ -1175,7 +1374,7 @@
   </div>
 </section>
 
-<!-- 加群 -->
+<!-- 群 -->
 <section id="community" style="border-bottom: none;">
   <div class="container">
     <div class="community-grid">
@@ -1200,7 +1399,7 @@
   </div>
 </section>
 
-<!-- 页脚 -->
+<!-- footer -->
 <footer>
   <div class="container">
     <div class="footer-links reveal">
@@ -1215,26 +1414,18 @@
 </footer>
 
 <script>
-/* 卡片跟随鼠标轻微 3D 倾斜 */
+// 功能行光斑
 (function(){
-  document.querySelectorAll('.feature-card').forEach(card => {
-    card.addEventListener('mousemove', e => {
-      const r = card.getBoundingClientRect();
-      const x = e.clientX - r.left;
-      const y = e.clientY - r.top;
-      card.style.setProperty('--mx', x + 'px');
-      card.style.setProperty('--my', y + 'px');
-      const rotX = (y / r.height - .5) * -18;
-      const rotY = (x / r.width - .5) * 18;
-      card.style.transform = `translateY(-3px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
+  document.querySelectorAll('.feature-row').forEach(row => {
+    row.addEventListener('mousemove', e => {
+      const r = row.getBoundingClientRect();
+      row.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      row.style.setProperty('--my', (e.clientY - r.top) + 'px');
     });
   });
 })();
 
-/* 首屏视差（鼠标平滑跟随） */
+// 首屏 3D 跟随
 (function(){
   const hero = document.querySelector('.hero');
   if (!hero) return;
@@ -1252,12 +1443,12 @@
   tick();
 })();
 
-/* 进页面强制回到顶部 */
+// 禁用滚动记忆
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 if (location.hash) history.replaceState(null, '', location.pathname + location.search);
 window.scrollTo(0, 0);
 
-/* 加载完清掉入场动画 */
+// load 完收尾
 window.addEventListener('load', () => {
   document.body.classList.remove('loading');
   setTimeout(() => {
@@ -1268,7 +1459,7 @@ window.addEventListener('load', () => {
   }, 1200);
 });
 
-// 滚动显现
+// 滚动淡入
 (function(){
   if (!window.IntersectionObserver) return;
   const observer = new IntersectionObserver(entries => {
@@ -1295,7 +1486,7 @@ window.addEventListener('load', () => {
 
   let version = null;
 
-  // Step 1: module.prop（没有限流）
+  // 版本号先读 module.prop，raw 接口不限流
   try {
     const res = await fetch('https://raw.githubusercontent.com/' + REPO + '/main/module.prop');
     if (res.ok) {
@@ -1304,7 +1495,7 @@ window.addEventListener('load', () => {
     }
   } catch (e) {}
 
-  // Step 2: tags 兜底
+  // 不行就查 tags
   if (!version) {
     try {
       const res = await fetch('https://api.github.com/repos/' + REPO + '/tags');
@@ -1315,13 +1506,13 @@ window.addEventListener('load', () => {
     } catch (e) {}
   }
 
-  // Step 3: 实在拿不到就写死一个
+  // 还拿不到就先顶一个
   if (!version) version = 'v1.0.0';
 
   versionEl.textContent = 'v' + version;
   syncDot.style.display = 'inline-block';
 
-  // Repo stats (GitHub API)
+  // stars / forks
   try {
     const res = await fetch('https://api.github.com/repos/' + REPO);
     if (res.ok) {
@@ -1338,7 +1529,7 @@ window.addEventListener('load', () => {
     syncInfo.textContent = '数据加载失败（显示缓存值）';
   }
 
-  // Step 4: 汇总所有 release 的下载量
+  // 下载量是全部 release 加起来的
   try {
     const res = await fetch('https://api.github.com/repos/' + REPO + '/releases');
     if (res.ok) {
