@@ -1,8 +1,8 @@
 cfg() {
-    grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tail -1
+    grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tr -d '\r\t' | sed 's/ *$//' | tail -1
 }
 st() {
-    grep -o "^$1=.*" "$STATE" 2>/dev/null | cut -d= -f2 | tail -1
+    grep -o "^$1=.*" "$STATE" 2>/dev/null | cut -d= -f2 | tr -d '\r\t' | sed 's/ *$//' | tail -1
 }
 cfg_set() {
     if [ ! -f "$STATE" ]; then
@@ -17,7 +17,7 @@ cfg_set() {
     fi
 }
 jstr() {
-    printf '%s' "$1" | tr -d '\r\n' | sed 's/\\/\\\\/g; s/"/\\"/g'
+    printf '%s' "$1" | tr -d '\r\n\t' | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 vibe_apply() {
     local g="$1" d="$2" v="$3" EL VB

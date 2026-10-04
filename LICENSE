@@ -1,7 +1,8 @@
 Custom License — FanExtreme
-Copyright (c) 2026 ling_凌 (酷安@ling_凌)
 
-本模块保留所有权利 (All Rights Reserved)。
+版权所有 © 2026 ling凌（酷安 @ling_凌），保留所有权利（All Rights Reserved）。
+
+本许可协议（下称"本协议"）是您与本模块著作权人（下称"作者"）之间就 FanExtreme（更好的红魔）模块（下称"本模块"）订立的许可协议。下载、安装或使用本模块，即表示您已阅读并同意本协议的全部条款；如不同意，请勿使用并删除所有副本。未在本协议中明确授予的权利，均由作者保留。
 
 一、版本划分
 1. 历史版本：低于 v3.1.5 的所有版本，保持免费开源；
@@ -11,26 +12,32 @@ Copyright (c) 2026 ling_凌 (酷安@ling_凌)
 1. 允许为个人非商业用途下载、安装与使用；
 2. 允许查看、复制源码，并为个人用途进行修改（含个人调试）；
 3. 禁止任何商业用途，包括转售、打包出售、提供付费代刷/代安装服务；
-4. 禁止公开再分发修改后的版本。
+4. 禁止公开再分发修改后的版本；
+5. 该版本不再维护，不提供技术支持或更新。
 
 三、现行及后续版本（v3.1.5 及之后）
 1. 源码公开仅供学习与审查之用；
-2. 未经作者授权，禁止安装运行，禁止对模块进行修改（含二次开发），禁止商用与任何形式的再分发；
-3. 已获授权（赞助）的用户，可在其授权设备上安装使用，并允许为个人用途修改模块；
+2. 未经作者授权，禁止安装运行，禁止对本模块进行修改（含二次开发），禁止商用与任何形式的再分发；
+3. 已获授权（赞助）的用户，可在其授权设备上安装使用，并允许为个人用途修改本模块；
 4. 授权用户的个人修改版本同样禁止商用与公开再分发；
-5. 作者有权对未授权使用行为终止授权并追究相应责任。
+5. 禁止规避、绕过或破坏授权验证机制（含白名单验证）；
+6. 作者有权对未授权使用行为终止授权并追究相应责任。
 
 四、署名与转载
-转载本项目（含源码、文档与安装包）需在显著位置标明原作者（酷安@ling_凌）与项目地址（https://github.com/ling9ling7/RedMagic-FanExtreme）。
+转载本项目（含源码、文档与安装包）需在显著位置标明原作者（酷安 @ling_凌）与项目地址（https://github.com/ling9ling7/RedMagic-FanExtreme）。转载须符合上述授权范围，仅标注署名不构成再分发授权。
 
 五、数据收集说明
-1. 模块安装成功后，会上报设备型号信息，仅用于统计模块支持的机型范围；
+1. 本模块安装成功后，会上报设备型号信息，仅用于统计本模块支持的机型范围；
 2. 除上述机型信息外，不收集任何个人信息、设备文件内容或其他隐私数据。
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+六、免责声明与责任限制
+1. 本模块按"现状"提供，作者不作任何明示或默示的保证，包括但不限于适销性、特定用途适用性及不侵权的保证；
+2. 在适用法律允许的最大范围内，作者不对任何直接或间接损失（包括利润损失、数据丢失、设备损坏等）承担责任，因使用本模块产生的一切风险与后果由使用者自行承担；
+3. 本模块涉及系统级散热与性能调度调整，使用前请自行备份重要数据。
+
+七、附则
+1. 违反本协议任一条款的，授权自动终止，您应立即停止使用并销毁全部副本；
+2. 本协议适用中华人民共和国法律，争议协商不成的，提交作者住所地有管辖权的人民法院处理；
+3. 本协议任一条款无效不影响其余条款效力；修订后的条款自作者在项目仓库公布之日起生效。
+
+版权所有 © 2026 ling凌（酷安 @ling_凌）。保留所有权利。

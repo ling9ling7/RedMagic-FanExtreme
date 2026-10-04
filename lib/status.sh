@@ -20,7 +20,7 @@ webui_status() {
   local auto_charge=0
   [ -f "$AUTO_CHARGE_FILE" ] && auto_charge=1
   local charge_enabled=0
-  [ "$(cfg '充电分离')" = "1" ] && charge_enabled=1
+  [ "$(cfg '充电分离')" != "0" ] && charge_enabled=1
   local fan_level=""
   [ -e "$FAN_LEVEL" ] && fan_level=$(cat "$FAN_LEVEL" 2>/dev/null)
   local auto_fan=0
@@ -34,9 +34,9 @@ webui_status() {
   local temp_ctrl_threshold="40"
   [ -f "$TEMP_CTRL_THRESHOLD_FILE" ] && temp_ctrl_threshold=$(cat "$TEMP_CTRL_THRESHOLD_FILE")
   local fan_enabled=0
-  [ "$(cfg '风扇极速')" = "1" ] && fan_enabled=1
+  [ "$(cfg '风扇极速')" != "0" ] && fan_enabled=1
   local touch_enabled=0
-  [ "$(cfg '触控优化')" = "1" ] && touch_enabled=1
+  [ "$(cfg '触控优化')" != "0" ] && touch_enabled=1
   local touch_boost=0
   local touch_mode="global"
   [ -f "$TOUCH_MODE_FILE" ] && touch_mode=$(cat "$TOUCH_MODE_FILE")
@@ -44,7 +44,7 @@ webui_status() {
   [ -f "$TOUCH_APPS_FILE" ] && touch_apps=$(cat "$TOUCH_APPS_FILE" | tr "\n" ",")
   [ -f "$AUTO_TOUCH_FILE" ] && touch_boost=1
   local vibe_enabled=0
-  [ "$(cfg '振动增强')" = "1" ] && vibe_enabled=1
+  [ "$(cfg '振动增强')" != "0" ] && vibe_enabled=1
   local auto_vibe=0
   [ -f "$MODDIR/auto_vibe" ] && auto_vibe=1
   local vibe_gain=""
@@ -172,7 +172,7 @@ webui_status() {
   local perf_enabled=0
   [ -f "$AUTO_PERF_FILE" ] && perf_enabled=1
   local thermal_enabled=0
-  [ "$(cfg '温控移除')" = "1" ] && thermal_enabled=1
+  [ "$(cfg '温控移除')" != "0" ] && thermal_enabled=1
   local pump_available=0
   if [ -e /proc/driver/micropump/speed ]; then
     pump_available=1
@@ -196,5 +196,5 @@ webui_status() {
   [ -f "$PUMP_TEMP_CTRL_MODE_FILE" ] && pump_temp_ctrl_mode=$(cat "$PUMP_TEMP_CTRL_MODE_FILE")
   local pump_temp_ctrl_threshold="40"
   [ -f "$PUMP_TEMP_CTRL_THRESHOLD_FILE" ] && pump_temp_ctrl_threshold=$(cat "$PUMP_TEMP_CTRL_THRESHOLD_FILE")
-  echo "{\"battery\":\"$(jstr "$bat")\",\"temp_deg\":\"$(jstr "$temp_deg")\",\"power\":\"$(jstr "$power")\",\"cs\":\"$(jstr "$cs")\",\"threshold\":\"$(jstr "$threshold")\",\"auto_charge\":${auto_charge},\"charge_enabled\":${charge_enabled},\"fan_level\":\"$(jstr "$fan_level")\",\"auto_fan\":${auto_fan},\"auto_fan_screen_off\":${auto_fan_screen_off},\"temp_control\":${temp_ctrl},\"temp_ctrl_mode\":\"$(jstr "$temp_ctrl_mode")\",\"temp_ctrl_threshold\":\"$(jstr "$temp_ctrl_threshold")\",\"fan_enabled\":${fan_enabled},\"touch_enabled\":${touch_enabled},\"touch_boost\":${touch_boost},\"touch_mode\":\"$(jstr "$touch_mode")\",\"touch_apps\":\"$(jstr "$touch_apps")\",\"vibe_enabled\":${vibe_enabled},\"auto_vibe\":${auto_vibe},\"vibe_gain\":\"$(jstr "$vibe_gain")\",\"vibe_duration\":\"$(jstr "$vibe_duration")\",\"vibe_vmax\":\"$(jstr "$vibe_vmax")\",\"vibe_gain_def\":\"$(jstr "$vibe_gain_def")\",\"vibe_dur_def\":\"$(jstr "$vibe_dur_def")\",\"vibe_vmax_def\":\"$(jstr "$vibe_vmax_def")\",\"pump_available\":${pump_available},\"pump_level\":\"$(jstr "$pump_level")\",\"auto_pump\":${auto_pump},\"auto_pump_screen_off\":${auto_pump_screen_off},\"pump_temp_control\":${pump_temp_ctrl},\"pump_temp_ctrl_mode\":\"$(jstr "$pump_temp_ctrl_mode")\",\"pump_temp_ctrl_threshold\":\"$(jstr "$pump_temp_ctrl_threshold")\",\"perf_pending\":${perf_pending},\"perf_profile\":\"$(jstr "$perf_profile")\",\"perf_enabled\":${perf_enabled},\"thermal_enabled\":${thermal_enabled},\"cluster_count\":${cluster_count},\"cpu0_max\":\"$(jstr "$cpu0_max")\",\"cpu4_max\":\"$(jstr "$cpu4_max")\",\"cpu7_max\":\"$(jstr "$cpu7_max")\",\"gpu_max\":\"$(jstr "$gpu_max")\",\"cpu_cur\":\"$(jstr "$cpu_cur")\",\"gpu_cur\":\"$(jstr "$gpu_cur")\",\"cpu_gov\":\"$(jstr "$cpu_gov")\",\"cpu_avail_gov\":\"$(jstr "$cpu_avail_gov")\",\"cpu0_hw_min\":\"$(jstr "$cpu0_hw_min")\",\"cpu0_hw_max\":\"$(jstr "$cpu0_hw_max")\",\"cpu4_hw_min\":\"$(jstr "$cpu4_hw_min")\",\"cpu4_hw_max\":\"$(jstr "$cpu4_hw_max")\",\"cpu7_hw_min\":\"$(jstr "$cpu7_hw_min")\",\"cpu7_hw_max\":\"$(jstr "$cpu7_hw_max")\",\"gpu_hw_min\":\"$(jstr "$gpu_hw_min")\",\"gpu_hw_max\":\"$(jstr "$gpu_hw_max")\",\"cpu0_steps\":\"$(jstr "$cpu0_steps")\",\"cpu4_steps\":\"$(jstr "$cpu4_steps")\",\"cpu7_steps\":\"$(jstr "$cpu7_steps")\",\"gpu_steps\":\"$(jstr "$gpu_steps")\"}" > "$WEBUI_STATUS"
+  printf '%s\n' "{\"battery\":\"$(jstr "$bat")\",\"temp_deg\":\"$(jstr "$temp_deg")\",\"power\":\"$(jstr "$power")\",\"cs\":\"$(jstr "$cs")\",\"threshold\":\"$(jstr "$threshold")\",\"auto_charge\":${auto_charge},\"charge_enabled\":${charge_enabled},\"fan_level\":\"$(jstr "$fan_level")\",\"auto_fan\":${auto_fan},\"auto_fan_screen_off\":${auto_fan_screen_off},\"temp_control\":${temp_ctrl},\"temp_ctrl_mode\":\"$(jstr "$temp_ctrl_mode")\",\"temp_ctrl_threshold\":\"$(jstr "$temp_ctrl_threshold")\",\"fan_enabled\":${fan_enabled},\"touch_enabled\":${touch_enabled},\"touch_boost\":${touch_boost},\"touch_mode\":\"$(jstr "$touch_mode")\",\"touch_apps\":\"$(jstr "$touch_apps")\",\"vibe_enabled\":${vibe_enabled},\"auto_vibe\":${auto_vibe},\"vibe_gain\":\"$(jstr "$vibe_gain")\",\"vibe_duration\":\"$(jstr "$vibe_duration")\",\"vibe_vmax\":\"$(jstr "$vibe_vmax")\",\"vibe_gain_def\":\"$(jstr "$vibe_gain_def")\",\"vibe_dur_def\":\"$(jstr "$vibe_dur_def")\",\"vibe_vmax_def\":\"$(jstr "$vibe_vmax_def")\",\"pump_available\":${pump_available},\"pump_level\":\"$(jstr "$pump_level")\",\"auto_pump\":${auto_pump},\"auto_pump_screen_off\":${auto_pump_screen_off},\"pump_temp_control\":${pump_temp_ctrl},\"pump_temp_ctrl_mode\":\"$(jstr "$pump_temp_ctrl_mode")\",\"pump_temp_ctrl_threshold\":\"$(jstr "$pump_temp_ctrl_threshold")\",\"perf_pending\":${perf_pending},\"perf_profile\":\"$(jstr "$perf_profile")\",\"perf_enabled\":${perf_enabled},\"thermal_enabled\":${thermal_enabled},\"cluster_count\":${cluster_count},\"cpu0_max\":\"$(jstr "$cpu0_max")\",\"cpu4_max\":\"$(jstr "$cpu4_max")\",\"cpu7_max\":\"$(jstr "$cpu7_max")\",\"gpu_max\":\"$(jstr "$gpu_max")\",\"cpu_cur\":\"$(jstr "$cpu_cur")\",\"gpu_cur\":\"$(jstr "$gpu_cur")\",\"cpu_gov\":\"$(jstr "$cpu_gov")\",\"cpu_avail_gov\":\"$(jstr "$cpu_avail_gov")\",\"cpu0_hw_min\":\"$(jstr "$cpu0_hw_min")\",\"cpu0_hw_max\":\"$(jstr "$cpu0_hw_max")\",\"cpu4_hw_min\":\"$(jstr "$cpu4_hw_min")\",\"cpu4_hw_max\":\"$(jstr "$cpu4_hw_max")\",\"cpu7_hw_min\":\"$(jstr "$cpu7_hw_min")\",\"cpu7_hw_max\":\"$(jstr "$cpu7_hw_max")\",\"gpu_hw_min\":\"$(jstr "$gpu_hw_min")\",\"gpu_hw_max\":\"$(jstr "$gpu_hw_max")\",\"cpu0_steps\":\"$(jstr "$cpu0_steps")\",\"cpu4_steps\":\"$(jstr "$cpu4_steps")\",\"cpu7_steps\":\"$(jstr "$cpu7_steps")\",\"gpu_steps\":\"$(jstr "$gpu_steps")\"}" > "$WEBUI_STATUS.tmp" 2>/dev/null && mv -f "$WEBUI_STATUS.tmp" "$WEBUI_STATUS" 2>/dev/null
 }

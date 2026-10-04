@@ -441,7 +441,7 @@ var TA = MDIR + '/touch_apps';
 var TAC = MDIR + '/.touch_active';
 function cmd(a, v) {
     var d = JSON.stringify({ action: a, value: v || '' });
-    ksu.exec("echo '" + d + "' >> " + CMD);
+    ksu.exec("printf '%s\\n' '" + d.replace(/'/g, "'\\''") + "' >> " + CMD);
 }
 function toast(m) {
     var t = document.getElementById('toast');
@@ -817,7 +817,7 @@ function refresh() {
         document.getElementById('chgPower').textContent = s.power ? s.power + 'W' : '--';
         //FAN刷新保护
         var cFan = document.getElementById('cFan');
-        if (s.fan_enabled === 1) {
+        if (Number(s.fan_enabled) === 1) {
             cFan.classList.remove('disabled');
             var fanOn = s.auto_fan === 1;
             if (Date.now() < locks.fan && expect.fan !== null && fanOn === expect.fan) { expect.fan = null; }
@@ -870,7 +870,7 @@ function refresh() {
         } else { cFan.classList.add('disabled'); }
         //CHARGE刷新保护
         var cCharge = document.getElementById('cCharge');
-        if (s.charge_enabled === 1) {
+        if (Number(s.charge_enabled) === 1) {
             cCharge.classList.remove('disabled');
             var chargeOn = s.auto_charge === 1;
             if (Date.now() < locks.charge && expect.charge !== null && chargeOn === expect.charge) { expect.charge = null; }
@@ -899,7 +899,7 @@ function refresh() {
         } else { cCharge.classList.add('disabled'); }
         //VIBE刷新保护
         var cVibe = document.getElementById('cVibe');
-        if (s.vibe_enabled === 1) {
+        if (Number(s.vibe_enabled) === 1) {
             cVibe.classList.remove('disabled');
             var vibeOn = s.auto_vibe === 1;
             if (Date.now() < locks.vibe && expect.vibe !== null && vibeOn === expect.vibe) { expect.vibe = null; }
@@ -928,7 +928,7 @@ function refresh() {
         } else { cVibe.classList.add('disabled'); }
         //PUMP刷新保护
         var cPump = document.getElementById('cPump');
-        if (s.pump_available === 1) {
+        if (Number(s.pump_available) === 1) {
             cPump.classList.remove('disabled');
             var pumpOn = s.auto_pump === 1;
             if (Date.now() < locks.pump && expect.pump !== null && pumpOn === expect.pump) { expect.pump = null; }
@@ -979,7 +979,7 @@ function refresh() {
         } else { cPump.classList.add('disabled'); }
         //TOUCH刷新分支
         var cTouch = document.getElementById('cTouch');
-        if (s.touch_enabled === 1) {
+        if (Number(s.touch_enabled) === 1) {
             cTouch.classList.remove('disabled');
             var touchOn = s.touch_boost === 1;
             if (Date.now() < locks.touch && expect.touch !== null && touchOn === expect.touch) { expect.touch = null; }
@@ -999,7 +999,7 @@ function refresh() {
         } else { cTouch.classList.add('disabled'); }
         //PERF主开关刷新
         if (typeof s.perf_enabled !== 'undefined') {
-            perfThermalOk = s.thermal_enabled === 1;
+            perfThermalOk = Number(s.thermal_enabled) === 1;
             if (!perfThermalOk) {
                 document.getElementById('cPerfMaster').classList.add('disabled');
                 document.getElementById('perfMasterDesc').textContent = t('需开启温控移除');
@@ -1080,7 +1080,7 @@ function loadPerfStatus() {
             var r4 = document.getElementById('cpu4Row'); if (r4) r4.style.display = showMid ? '' : 'none';
             var h4 = document.getElementById('cpu4Hint'); if (h4) h4.style.display = showMid ? '' : 'none';
         }
-        perfThermalOk = s.thermal_enabled === 1;
+        perfThermalOk = Number(s.thermal_enabled) === 1;
         if (!perfThermalOk) {
             document.getElementById('cPerfMaster').classList.add('disabled');
             document.getElementById('perfMasterDesc').textContent = t('需开启温控移除');

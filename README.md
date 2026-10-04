@@ -6,11 +6,8 @@
   <a href="https://github.com/ling9ling7/RedMagic-FanExtreme/releases/latest"><img src="https://img.shields.io/github/v/release/ling9ling7/RedMagic-FanExtreme?style=flat-square&cacheSeconds=3600" alt="GitHub Release"></a><a href="LICENSE"><img src="https://img.shields.io/badge/License-Custom-red?style=flat-square" alt="License"></a><a href="https://github.com/ling9ling7/RedMagic-FanExtreme/stargazers"><img src="https://img.shields.io/github/stars/ling9ling7/RedMagic-FanExtreme?style=flat-square" alt="Stars"></a><img src="https://img.shields.io/github/downloads/ling9ling7/RedMagic-FanExtreme/total.svg?style=flat-square" alt="Downloads">
 </div>
 
-<div align="center">
-红魔手机 KernelSU 模块 · 多合一性能优化 · WebUI 可视化控制面板 · 在线更新
-</div>
+一款为 RedMagic 红魔手机打造 KernelSU 模块，**通过修改系统 Sysfs 节点实现对官方功能限制的解除**，节点写入后再用 chmod 444 锁定，防止系统回读覆盖。
 
-> 为红魔手机而生：风扇极速、充电分离、云控屏蔽、温控移除、振动增强、触控优化、充电加速等，一站式解决性能调校。
 <table>
   <tr>
     <td><img width="350" alt="展示1" src="https://github.com/user-attachments/assets/d2f60b83-b1d7-4f62-9b48-cc03f717f0fb" />
@@ -154,7 +151,7 @@ A: 这不是模块的bug而是系统导致的，触控优化功能提供了两�
 
 ## 📄 License
 
-Custom License © 酷安@ling_凌（完整条款见 [LICENSE](LICENSE)）
+Custom License © 酷安@ling_凌（FanExtreme 自定义许可协议，完整条款见 [LICENSE](LICENSE)）
 
 本模块**保留所有权利**，按版本范围授权：
 
@@ -175,9 +172,4 @@ Custom License © 酷安@ling_凌（完整条款见 [LICENSE](LICENSE)）
 
 ---
 ## ⚠️ 新闻
-
-> ⚠️ **2026年6月14日：FanExtreme 正式停止更新** 因个人原因，我的心理问题导致我没精力继续更新下去，在未来可能时不时的发布新的版本，况且现在模块功能已趋近完备，可做的都做了。所以决定停止更新休诊一下。
-
-> ⚠️ **2026年7月26日：FanExtreme 恢复更新** 在熬过一个艰难的时期后，我有精力继续维护这个项目，在未来项目会继续保持更新，感谢大家的支持与陪伴
-
 > ⚠️ **2026年8月7日：FanExtreme 仅赞助用户可用** 自首次发布以来模块已经经过了20以上的版本迭代，随着模块体量的增加，模块的维护与更新成本也在上升。最终在与模块用户的讨论中决定，FanExtreme-更好的红魔 从v3.1.5版本开始正式实施仅赞助用户可安装使用，低于v3.1.5的版本仍然保持开源免费使用，但不再对其版本进行维护。如有用户想继续更新和使用最新版本，赞助模块 15R 支持开发后联系开发者即可永久使用此模块

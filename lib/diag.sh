@@ -1,6 +1,3 @@
-#!/system/bin/sh
-# FanExtreme 运行诊断报告生成器（WebUI「运行日志」按钮调用）
-# 逐功能交叉验证：UI标记文件 <-> state.txt <-> 内核节点/系统设置
 MODDIR=/data/adb/modules/FanExtreme
 CONFIG=$MODDIR/config.txt
 STATE=$MODDIR/state.txt
@@ -8,8 +5,8 @@ STATUS=$MODDIR/webui_status
 L=/sdcard/Download/FanExtreme_debug.log
 . "$MODDIR/lib/common.sh"
 
-cfg(){ grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tail -1; }
-st(){ grep -o "^$1=.*" "$STATE" 2>/dev/null | cut -d= -f2 | tail -1; }
+cfg(){ grep -o "^$1=.*" "$CONFIG" 2>/dev/null | cut -d= -f2 | tr -d '\r\t' | sed 's/ *$//' | tail -1; }
+st(){ grep -o "^$1=.*" "$STATE" 2>/dev/null | cut -d= -f2 | tr -d '\r\t' | sed 's/ *$//' | tail -1; }
 rd(){ [ -e "$1" ] && cat "$1" 2>/dev/null || echo "N/A"; }
 mf(){ [ -f "$1" ] && echo 1 || echo 0; }
 
