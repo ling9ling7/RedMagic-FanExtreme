@@ -8,6 +8,7 @@
 <base target="_blank">
 </head>
 <body>
+    <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><filter id="fex-glass" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox"><feTurbulence type="fractalNoise" baseFrequency="0.002 0.008" numOctaves="1" seed="17" result="turbulence"/><feGaussianBlur in="turbulence" stdDeviation="2" result="softMap"/><feDisplacementMap in="SourceGraphic" in2="softMap" scale="24" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="fex-card" x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.012" numOctaves="1" seed="17" result="turb"/><feGaussianBlur in="turb" stdDeviation="2" result="soft"/><feDisplacementMap in="SourceGraphic" in2="soft" scale="12" xChannelSelector="R" yChannelSelector="G" result="dR"/><feColorMatrix in="dR" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="chR"/><feDisplacementMap in="SourceGraphic" in2="soft" scale="14" xChannelSelector="R" yChannelSelector="G" result="dG"/><feColorMatrix in="dG" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="chG"/><feDisplacementMap in="SourceGraphic" in2="soft" scale="16" xChannelSelector="R" yChannelSelector="G" result="dB"/><feColorMatrix in="dB" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="chB"/><feBlend in="chR" in2="chG" mode="screen" result="rg"/><feBlend in="rg" in2="chB" mode="screen"/></filter></svg>
     <div id="introOverlay">
         <div id="introText"></div>
         <div id="skipHint" data-i18n>点击屏幕跳过</div>
@@ -21,7 +22,7 @@
                         <div class="header">
                             <div class="brand">
                                 <div class="brand-name">FanExtreme</div>
-                                <div class="brand-sub"><span id="brandVersion">v3.2.3</span> · NUbia RedMagic</div>
+                                <div class="brand-sub"><span id="brandVersion">v3.2.4</span> · NUbia RedMagic</div>
                             </div>
                             <div class="status-dot">RUNNING</div>
                         </div>
@@ -296,18 +297,8 @@
                         <div class="about-item"><span data-i18n>官网：</span><br><span class="about-link" onclick="openInBrowser('https://ling9ling7.github.io/RedMagic-FanExtreme/')">ling9ling7.github.io/RedMagic-FanExtreme</span></div>
                         <div class="about-item"><span data-i18n>TG频道：</span><br><span class="about-link" onclick="openInBrowser('https://t.me/FanExtreme')">t.me/FanExtreme</span></div>
                         <div class="about-divider"></div>
-                        <div class="about-item"><span data-i18n>版本：</span><span id="aboutVersion">v3.2.3</span></div>
+                        <div class="about-item"><span data-i18n>版本：</span><span id="aboutVersion">v3.2.4</span></div>
                         <div class="about-item" data-i18n>内核模块 · 仅限红魔设备</div>
-                        <div class="about-divider"></div>
-                        <div class="contrib-section">
-                            <div class="contrib-title" data-i18n>贡献者</div>
-                            <div class="contrib-list">
-                                <div class="contrib-card" onclick="openInBrowser('https://kittenlink.netlify.app/')">
-                                    <img src="xmtx.png" class="contrib-avatar" onerror="this.style.display='none'">
-                                    <span class="contrib-name">小猫</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                             </div>
                         </div>
