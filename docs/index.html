@@ -128,12 +128,6 @@
   @keyframes glowB { 0%,100% { transform: translate(0,0) scale(1); opacity:.35; } 50% { transform: translate(-50px,-20px) scale(1.2); opacity:.55; } }
   /* 功能卡片跟随鼠标微转 */
   .features-grid { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .feature-card {
-    transition: transform .12s ease-out, box-shadow .35s, border-color .35s;
-    transform-style: preserve-3d;
-    will-change: transform;
-    transform: translateZ(0);
-  }
   .feature-card::before {
     content: '';
     position: absolute; inset: 0;
@@ -751,6 +745,24 @@
     .config-table { font-size: .75rem; }
     .config-table th, .config-table td { padding: 8px 10px; }
   }
+
+  /* 移动端性能降级：去模糊、减光晕、跳过屏外渲染 */
+  @media (pointer:coarse), (max-width: 640px) {
+    section { content-visibility: auto; contain-intrinsic-size: auto 800px; }
+    .bg-fx::before { animation: none; }
+    .bg-fx .grid2, .bg-fx .grid-spot { display: none; }
+    .bg-fx .glow { animation: none !important; filter: blur(60px); mix-blend-mode: normal; opacity: .3; }
+    .bg-fx .glow.g4, .bg-fx .glow.g5 { display: none; }
+    nav, .features-grid, .code-block, .license-box, .faq-item, .sysfs-item, .qq-cta {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    nav { background: #f5f0eb; }
+    .features-grid, .code-block, .license-box, .faq-item, .sysfs-item, .qq-cta { background: #fff; }
+    .feature-card { flex-wrap: wrap; }
+    .feature-card .feature-body { flex: 1 1 calc(100% - 62px); }
+    .feature-card .feature-tag { margin: 10px 0 0 62px; }
+  }
 </style>
 </head>
 <body class="loading">
@@ -1286,15 +1298,21 @@
 (function(){
   const hero = document.querySelector('.hero');
   if (!hero) return;
+  if (!window.matchMedia || !window.matchMedia('(pointer:fine)').matches) return;
   const inner = hero.querySelector('.container');
-  let mx = 0, my = 0, tx = 0, ty = 0;
+  let mx = 0, my = 0, tx = 0, ty = 0, visible = true;
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(hero);
+  }
   document.addEventListener('mousemove', e => {
     mx = (e.clientX / window.innerWidth - .5);
     my = (e.clientY / window.innerHeight - .5);
   });
   function tick() {
-    tx += (mx - tx) * .06; ty += (my - ty) * .06;
-    inner.style.transform = `rotateY(${tx * 12}deg) rotateX(${ty * -12}deg)`;
+    if (visible) {
+      tx += (mx - tx) * .06; ty += (my - ty) * .06;
+      inner.style.transform = `rotateY(${tx * 12}deg) rotateX(${ty * -12}deg)`;
+    }
     requestAnimationFrame(tick);
   }
   tick();
@@ -1304,6 +1322,7 @@
 (function(){
   const fx = document.querySelector('.bg-fx');
   if (!fx) return;
+  if (!window.matchMedia || !window.matchMedia('(pointer:fine)').matches) return;
   document.addEventListener('mousemove', e => {
     fx.style.setProperty('--gx', e.clientX + 'px');
     fx.style.setProperty('--gy', e.clientY + 'px');

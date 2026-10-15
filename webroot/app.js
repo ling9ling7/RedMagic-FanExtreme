@@ -209,6 +209,7 @@ function goToPage(index) {
     if (index < 0 || index >= totalPages) return;
     currentPage = index;
     pageContainer.style.transform = `translateX(-${currentPage * (100 / totalPages)}%)`;
+    if (window.__bgPause) window.__bgPause(450);
     updateDots();
 }
 function updateDots() {
@@ -372,15 +373,18 @@ function restoreRealData() {
 }
 //动态背景
 (function () {
-    var c = document.getElementById('bg'), ctx = c.getContext('2d'), W, H;
-    function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+    var c = document.getElementById('bg'), ctx = c.getContext('2d'), W, H, frame = 0, bgPauseUntil = 0;
+    var SC = .5;
+    function resize() { W = c.width = Math.ceil(window.innerWidth * SC); H = c.height = Math.ceil(window.innerHeight * SC); frame = 0; }
     resize(); window.addEventListener('resize', resize);
+    function bgPause(ms) { bgPauseUntil = Date.now() + ms; } window.__bgPause = bgPause;
     var blobs = [
         { x: 0, y: 0, vx: .0012, vy: .0009, r: .7, hue: 340, sat: 50 }, { x: .5, y: 0, vx: -.0008, vy: .0011, r: .65, hue: 220, sat: 40 },
         { x: 1, y: .5, vx: -.001, vy: -.0007, r: .6, hue: 160, sat: 35 }, { x: 0, y: 1, vx: .0009, vy: -.001, r: .55, hue: 30, sat: 45 },
         { x: .5, y: 1, vx: .0011, vy: .0008, r: .5, hue: 270, sat: 30 }
     ];
     function draw() {
+        if (Date.now() < bgPauseUntil || frame++ % 5 !== 0) { requestAnimationFrame(draw); return; }
         ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#f2efe8'; ctx.fillRect(0, 0, W, H);
         for (var i = 0; i < blobs.length; i++) {
             var b = blobs[i]; b.x += b.vx; b.y += b.vy;
