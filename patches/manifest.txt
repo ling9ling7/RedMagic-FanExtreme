@@ -1,2 +1,0 @@
-# FanExtreme patch manifest v2 id|rel|ver|type|desc
-p001|p001.sh||t|dingtalk patch test
