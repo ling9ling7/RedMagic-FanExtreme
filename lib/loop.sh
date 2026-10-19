@@ -74,6 +74,7 @@ webui_loop() {
               cfg_set '充电分离' 1
             else
               rm -f "$AUTO_CHARGE_FILE"
+              rm -f "$AUTO_SEPARATION_FILE"
               cfg_set '充电分离' 0
               local cs_now=$(settings get global charge_separation_switch 2>/dev/null)
               if [ "$cs_now" = "1" ]; then
@@ -296,7 +297,7 @@ webui_loop() {
             su system -c "chmod 644 $FAN_ENABLE $FAN_LEVEL 2>/dev/null; echo 1 > $FAN_ENABLE; echo $target_level > $FAN_LEVEL; chmod 444 $FAN_LEVEL" 2>/dev/null
           fi
         else
-          if [ ! -f "$AUTO_FAN_FILE" ] && [ "$fe" = "1" ]; then
+          if [ "$fe" = "1" ]; then
             su system -c "chmod 644 $FAN_ENABLE 2>/dev/null; echo 0 > $FAN_ENABLE" 2>/dev/null
           fi
         fi
