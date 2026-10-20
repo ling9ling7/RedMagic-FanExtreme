@@ -1049,39 +1049,62 @@
   <div class="container">
     <div class="section-label reveal">Technical</div>
     <h2 class="section-title reveal">Sysfs 接口</h2>
-    <p class="section-desc reveal">模块通过 sysfs 节点直接与内核交互，以下是主要操作路径。</p>
+    <p class="section-desc reveal">以下列出模块实际读取或控制的主要 sysfs 节点。节点名称会因机型、内核版本和驱动实现而异，带 * 的路径表示通配目录或可选节点。</p>
     <div class="sysfs-list">
       <div class="sysfs-item reveal reveal-d1">
-        <span class="sysfs-path">/sys/kernel/fan/fan_speed_level</span>
-        <span class="sysfs-desc">风扇速度等级 (1-5)</span>
+        <span class="sysfs-path">/sys/kernel/fan/{fan_enable,fan_speed_level} 或 /sys/kernel/{fan_enable,fan_speed_level}</span>
+        <span class="sysfs-desc">风扇开关与速度等级 (1-5)，按设备选择其中一种布局</span>
       </div>
       <div class="sysfs-item reveal reveal-d2">
-        <span class="sysfs-path">/sys/kernel/fan/fan_enable</span>
-        <span class="sysfs-desc">风扇开关控制</span>
+        <span class="sysfs-path">/sys/class/qcom-battery/{restrict_cur,restrict_chg,charging_enabled,charge_mode}</span>
+        <span class="sysfs-desc">充电限制电流、限制开关、充电使能和充电模式</span>
       </div>
       <div class="sysfs-item reveal reveal-d3">
-        <span class="sysfs-path">/sys/class/qcom-battery/restrict_cur</span>
-        <span class="sysfs-desc">充电限制电流</span>
+        <span class="sysfs-path">/sys/class/power_supply/battery/{temp,current_now,voltage_now}</span>
+        <span class="sysfs-desc">电池温度、电流与电压，用于状态读取及温度控制</span>
       </div>
       <div class="sysfs-item reveal reveal-d4">
-        <span class="sysfs-path">/sys/class/qcom-battery/restrict_chg</span>
-        <span class="sysfs-desc">充电限制开关</span>
+        <span class="sysfs-path">/sys/class/leds/{vibrator,zte_vibrator}/{gain,duration,duration_aw,vmax,cont_brk_time,cont_wait_num}</span>
+        <span class="sysfs-desc">振动增益、时长、幅度上限及连续振动参数；节点按驱动提供情况使用</span>
       </div>
       <div class="sysfs-item reveal reveal-d5">
-        <span class="sysfs-path">/sys/class/qcom-battery/charging_enabled</span>
-        <span class="sysfs-desc">充电使能控制</span>
+        <span class="sysfs-path">/sys/class/backlight/*/{brightness,max_brightness}</span>
+        <span class="sysfs-desc">屏幕亮度和设备支持的最大亮度</span>
       </div>
       <div class="sysfs-item reveal reveal-d6">
-        <span class="sysfs-path">/sys/class/qcom-battery/charge_mode</span>
-        <span class="sysfs-desc">充电模式选择</span>
+        <span class="sysfs-path">/sys/devices/system/cpu/cpu*/cpufreq/{cpuinfo_min_freq,cpuinfo_max_freq,scaling_min_freq,scaling_max_freq,scaling_available_frequencies,scaling_governor,scaling_available_governors}</span>
+        <span class="sysfs-desc">CPU 各簇频率范围、可用频率及调速器</span>
       </div>
       <div class="sysfs-item reveal reveal-d7">
-        <span class="sysfs-path">/sys/kernel/gpu/</span>
-        <span class="sysfs-desc">GPU 调频与负载信息</span>
+        <span class="sysfs-path">/sys/class/kgsl/kgsl-3d0/{devfreq/{min_freq,max_freq,cur_freq},min_clock_mhz,max_clock_mhz,gpuclk,max_gpuclk,freq_table_mhz,thermal_pwrlevel,num_pwrlevels,pwrscale,default_pwrlevel,min_pwrlevel,max_pwrlevel}</span>
+        <span class="sysfs-desc">GPU 频率上下限、当前频率与性能级别；具体节点随 KGSL 驱动而异</span>
       </div>
       <div class="sysfs-item reveal reveal-d8">
-        <span class="sysfs-path">/sys/devices/system/cpu/cpu*/cpufreq/</span>
-        <span class="sysfs-desc">CPU 调频与 Governor 设置</span>
+        <span class="sysfs-path">/sys/kernel/{cpu_*_cluster*,gpu_*clock*,gpu_*pwrlevel*}、/sys/kernel/gpu/*</span>
+        <span class="sysfs-desc">部分机型提供的 CPU 频率限制与 GPU 频率控制节点</span>
+      </div>
+      <div class="sysfs-item reveal reveal-d9">
+        <span class="sysfs-path">/sys/kernel/msm_performance/parameters/cpu_max_freq</span>
+        <span class="sysfs-desc">部分内核的 CPU 性能频率限制</span>
+      </div>
+      <div class="sysfs-item reveal reveal-d10">
+        <span class="sysfs-path">/sys/module/*/parameters/{accept_userset_freq_min,accept_userset_freq_max,accept_userset_gpu_freq_min,accept_userset_gpu_freq_max}</span>
+        <span class="sysfs-desc">部分内核模块提供的 CPU/GPU 用户频率设置开关</span>
+      </div>
+      <div class="sysfs-item reveal reveal-d10">
+        <span class="sysfs-path">/sys/class/thermal/thermal_zone*/{type,mode}</span>
+        <span class="sysfs-desc">识别温控热区并读取或切换热区模式</span>
+      </div>
+    </div>
+    <h3 class="section-title reveal" style="font-size:1.2rem;margin-top:40px">相关 Proc 接口</h3>
+    <div class="sysfs-list">
+      <div class="sysfs-item reveal reveal-d1">
+        <span class="sysfs-path">/proc/touchscreen/{tp_report_rate,play_game,follow_hand_level}</span>
+        <span class="sysfs-desc">触控采样率、游戏模式与跟手等级</span>
+      </div>
+      <div class="sysfs-item reveal reveal-d2">
+        <span class="sysfs-path">/proc/driver/micropump/{enable,freq,speed}</span>
+        <span class="sysfs-desc">液冷水泵开关、频率与转速；仅在提供该节点的机型上可用</span>
       </div>
     </div>
   </div>
@@ -1092,50 +1115,35 @@
   <div class="container">
     <div class="section-label reveal">Structure</div>
     <h2 class="section-title reveal">项目结构</h2>
-    <p class="section-desc reveal">模块按职责拆分为 lib 功能库，全部由 service.sh 统一加载；根目录即模块安装目录，打包时直接压缩根目录即可。</p>
+    <p class="section-desc reveal">打包 ZIP 中模块文件的目录与用途。</p>
 
     <div class="code-block reveal reveal-scale">
       <div class="code-header">
         <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-        项目结构
+        刷入模块文件
       </div>
       <div class="code-body"><span class="cmt">FanExtreme/</span>
-│
-├── <span class="key">module.prop</span>            <span class="cmt"># 模块元数据</span>
-├── <span class="key">customize.sh</span>           <span class="cmt"># 安装时执行</span>
-├── <span class="key">service.sh</span>             <span class="cmt"># 主守护进程</span>
-├── <span class="key">config.txt</span>             <span class="cmt"># 配置文件</span>
-├── <span class="key">update.json</span>            <span class="cmt"># 在线更新描述</span>
-│
-├── <span class="key">lib/</span>                   <span class="cmt"># 功能库</span>
-│   ├── <span class="key">common.sh</span>          <span class="cmt"># cfg() 读 config.txt 配置</span>
-│   ├── <span class="key">whitelist.sh</span>       <span class="cmt"># 白名单授权检查</span>
-│   ├── <span class="key">patch.sh</span>           <span class="cmt"># 拉取 GitHub 热补丁</span>
-│   ├── <span class="key">ding.sh</span>            <span class="cmt"># 安装成功回传</span>
-│   ├── <span class="key">features.sh</span>        <span class="cmt"># 各功能开关实现</span>
-│   ├── <span class="key">status.sh</span>          <span class="cmt"># 生成 WebUI 状态 JSON</span>
-│   ├── <span class="key">perf.sh</span>            <span class="cmt"># CPU/GPU 频率与锁频控制</span>
-│   └── <span class="key">loop.sh</span>            <span class="cmt"># WebUI 命令循环</span>
-│
-├── <span class="key">webroot/</span>               <span class="cmt"># WebUI 控制面板</span>
-│   ├── <span class="key">index.html</span>         <span class="cmt"># 页面骨架</span>
-│   ├── <span class="key">style.css</span>          <span class="cmt"># 样式</span>
-│   ├── <span class="key">app.js</span>             <span class="cmt"># 前端逻辑</span>
-│   ├── <span class="key">avatar.png</span>         <span class="cmt"># 页面头像</span>
-│   └── <span class="key">sponsor.jpg</span>        <span class="cmt"># 赞助图</span>
-│
-├── <span class="key">system/etc/init/</span>       <span class="cmt"># KernelSU init 服务占位</span>
-│   ├── <span class="key">init.thermal-engine.rc</span>
-│   ├── <span class="key">init.thermald.rc</span>
-│   ├── <span class="key">init.perfservice.rc</span>
-│   └── <span class="key">init.zperfcube.rc</span>
-│
-└── <span class="key">vendor/etc/</span>
-    └── <span class="key">thermal-engine.conf</span>   <span class="cmt"># 温控引擎配置</span></div>
-    </div>
-
-    <div class="license-box reveal reveal-left">
-      <p><strong>开发环境</strong> — 模块本体纯 shell (system/bin/sh) + JS/CSS，无需编译；测试设备为红魔 9 Pro (NX769J, Android 16, KernelSU)；打包 ZIP 直接压缩模块根目录即可。</p>
+    ├── <span class="key">module.prop</span>             <span class="cmt"># 模块名称、版本及更新信息</span>
+    ├── <span class="key">customize.sh</span>            <span class="cmt"># 安装时验证授权并处理配置</span>
+    ├── <span class="key">post-fs-data.sh</span>         <span class="cmt"># 开机早期挂载温控配置</span>
+    ├── <span class="key">service.sh</span>              <span class="cmt"># 启动模块功能及 WebUI 后台循环</span>
+    ├── <span class="key">uninstall.sh</span>            <span class="cmt"># 卸载时恢复节点权限并清理模块文件</span>
+    ├── <span class="key">config.txt</span>              <span class="cmt"># 功能开关及默认参数</span>
+    ├── <span class="key">update.json</span>             <span class="cmt"># 模块版本与在线更新地址</span>
+    ├── <span class="key">lib/</span>                    <span class="cmt"># 后台功能脚本</span>
+    │   ├── <span class="key">common.sh</span>             <span class="cmt"># 配置读写、状态读写及共用函数</span>
+    │   ├── <span class="key">features.sh</span>           <span class="cmt"># 风扇、云控、温控、振动、触控及亮度功能</span>
+    │   ├── <span class="key">status.sh</span>             <span class="cmt"># 采集设备状态并生成 WebUI 数据</span>
+    │   ├── <span class="key">perf.sh</span>               <span class="cmt"># CPU/GPU 频率控制与性能预设</span>
+    │   ├── <span class="key">loop.sh</span>               <span class="cmt"># 处理 WebUI 操作并运行自动控制</span>
+    │   └── <span class="key">diag.sh</span>               <span class="cmt"># 收集运行状态并生成诊断日志</span>
+    ├── <span class="key">webroot/</span>                <span class="cmt"># WebUI 控制面板</span>
+    │   ├── <span class="key">index.html</span>            <span class="cmt"># 控制面板页面结构</span>
+    │   ├── <span class="key">style.css</span>             <span class="cmt"># 控制面板样式</span>
+    │   ├── <span class="key">app.js</span>                <span class="cmt"># 状态显示与交互逻辑</span>
+    │   ├── <span class="key">avatar.png</span>            <span class="cmt"># 面板头像图片</span>
+    │   └── <span class="key">sponsor.jpg</span>           <span class="cmt"># 面板赞助图片</span>
+    └── <span class="key">vendor/etc/thermal-engine.conf</span> <span class="cmt"># 温控引擎配置文件</span></div>
     </div>
   </div>
 </section>
