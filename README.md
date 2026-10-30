@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🔥 FanExtreme — 更好的红魔</h1>
+  <h1>🔥 RedMagic-FanExtreme—更好的红魔</h1>
 </div>
 
 <div align="center">
@@ -10,9 +10,9 @@
 
 <table>
   <tr>
-    <td><img width="350" alt="展示1" src="https://github.com/user-attachments/assets/d2f60b83-b1d7-4f62-9b48-cc03f717f0fb" />
+    <td><img width="350" alt="model-1" src="https://github.com/user-attachments/assets/e2e81a43-2ac4-47f7-98fc-268d0a5e328b" />
 </td>
-    <td><img width="350" alt="展示2" src="https://github.com/user-attachments/assets/2f13d68a-3a92-40f5-9749-ab9b3c6631b5" />
+    <td><img width="350" alt="mode-2" src="https://github.com/user-attachments/assets/cb051672-b2bc-4c0c-b6b2-283ceb866aa6" />
 </td>
   </tr>
 </table>
@@ -94,16 +94,14 @@ FanExtreme/
 │   ├── app.js             # 前端逻辑
 │   ├── avatar.png         # 页面头像
 │   ├── sponsor.jpg        # 赞助图
-│   └── xmtx.png           # 社区贡献者头像
 │
 └── vendor/etc/
     └── thermal-engine.conf   # 温控引擎配置
 ```
 
 ## 🛠️ 开发环境
-- 模块本体纯 shell (system/bin/sh) + JS/CSS，无需编译
+- 纯 shell (system/bin/sh) + JS/CSS
 - 测试设备红魔 9 Pro (NX769J, Android 16, KernelSU)
-- 打包 ZIP 直接压缩模块根目录即可
 
 ## ❓ 常见问题
 
@@ -138,6 +136,7 @@ A: 这不是模块的bug而是系统导致的，触控优化功能提供了两�
 | 红魔 9 Pro | 16 | 完美适配✅ |
 | 红魔 10 Pro | 16 | 完美适配✅ |
 | 红魔 11 Pro | 16 | 完美适配✅ |
+| 红魔 12 Pro | 16 | 完美适配✅ |  
 | 红魔电竞平板 Pro | 16 | 完美适配✅ |
 | 红魔电竞平板 3 Pro | 16 | 完美适配✅ |
 | 红魔电竞平板 5 Pro | 16 | 完美适配✅ |
@@ -157,7 +156,7 @@ Custom License © 酷安@ling_凌（FanExtreme 自定义许可协议，完整条
 
 - **低于 v3.1.5**：免费、源码公开，允许为个人非商业用途修改与调试；禁止商用与公开再分发修改版。
 - **v3.1.5 及之后**：仅授权（赞助）用户可安装使用（设备白名单验证）；源码公开仅供学习与审查，**未授权禁止修改**，**已授权用户可为个人用途修改**，修改版同样禁止商用与公开再分发。
-- **数据收集**：模块安装成功后会上报设备型号信息，仅用于统计支持的机型范围，不收集任何个人隐私数据。
+
 
 ## 💰 赞助
 
@@ -172,4 +171,4 @@ Custom License © 酷安@ling_凌（FanExtreme 自定义许可协议，完整条
 
 ---
 ## ⚠️ 新闻
-> ⚠️ **2026年8月7日：FanExtreme 仅赞助用户可用** 自首次发布以来模块已经经过了20以上的版本迭代，随着模块体量的增加，模块的维护与更新成本也在上升。最终在与模块用户的讨论中决定，FanExtreme-更好的红魔 从v3.1.5版本开始正式实施仅赞助用户可安装使用，低于v3.1.5的版本仍然保持免费、源码公开（非开源），但不再对其版本进行维护。如有用户想继续更新和使用最新版本，赞助模块 15R 支持开发后联系开发者即可永久使用此模块
+> ⚠️ **2026年8月7日：FanExtreme 仅赞助用户可用** 自首次发布以来模块已经经过了20以上的版本迭代，随着模块体量的增加，模块的维护与更新成本也在上升。最终在与模块用户的讨论中决定，FanExtreme-更好的红魔 从v3.1.5版本开始正式实施仅赞助用户可安装使用，低于v3.1.5的版本仍然保持免费、源码公开，但不再对其版本进行维护。如有用户想继续更新和使用最新版本，赞助模块 15R 支持开发后联系开发者即可永久使用此模块
