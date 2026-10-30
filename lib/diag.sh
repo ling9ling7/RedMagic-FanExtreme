@@ -42,7 +42,7 @@ if [ -n "$MT" ]; then
 else
     fail "webui_status 不存在，主循环未运行"
 fi
-ps -A -o pid,ppid,args 2>/dev/null | grep -E "FanExtreme|service\.sh" | grep -v grep | while read -r pline; do info "    $pline"; done
+ps -A -o pid,ppid,args 2>/dev/null | grep -E "FanExtreme|service\.sh|fex\.[0-9]+\.s" | grep -v grep | while read -r pline; do info "    $pline"; done
 
 FAN_EN=/sys/kernel/fan/fan_enable
 FAN_LVL=/sys/kernel/fan/fan_speed_level

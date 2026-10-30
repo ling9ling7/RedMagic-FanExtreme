@@ -35,11 +35,17 @@ charge_monitor_loop() {
     done
 }
 charge_monitor_start() {
-    local _mp _lt _now _cmd
-    _mp=$(cat "$MODDIR/.charge_mon_pid" 2>/dev/null)
+    local _mp _mt _ss _cmd _now _lt _np _nt
+    _mp=$(cut -d' ' -f1 "$MODDIR/.charge_mon_pid" 2>/dev/null)
+    _mt=$(cut -s -d' ' -f2 "$MODDIR/.charge_mon_pid" 2>/dev/null)
     if [ -n "$_mp" ] && [ -d "/proc/$_mp" ]; then
-      _cmd=$(tr '\0' ' ' < "/proc/$_mp/cmdline" 2>/dev/null)
-      case "$_cmd" in *service.sh*) return 0;; esac
+      if [ -n "$_mt" ]; then
+        _ss=$(awk '{print $3" "$22}' "/proc/$_mp/stat" 2>/dev/null)
+        [ -n "$_ss" ] && [ "${_ss##* }" = "$_mt" ] && [ "${_ss%% *}" != "Z" ] && return 0
+      else
+        _cmd=$(tr '\0' ' ' < "/proc/$_mp/cmdline" 2>/dev/null)
+        case "$_cmd" in *fex.*) kill -9 "$_mp" 2>/dev/null;; esac
+      fi
     fi
     _now=$(date +%s 2>/dev/null)
     _lt=$(stat -c %Y "$MODDIR/.charge_mon_lock" 2>/dev/null)
@@ -48,16 +54,24 @@ charge_monitor_start() {
     fi
     if mkdir "$MODDIR/.charge_mon_lock" 2>/dev/null; then
       charge_monitor_loop &
-      echo $! > "$MODDIR/.charge_mon_pid" 2>/dev/null
+      _np=$!
+      _nt=$(awk '{print $22}' "/proc/$_np/stat" 2>/dev/null)
+      echo "$_np $_nt" > "$MODDIR/.charge_mon_pid" 2>/dev/null
       rmdir "$MODDIR/.charge_mon_lock" 2>/dev/null
     fi
 }
 touch_keepalive_start() {
-    local _tp _lt _now _cmd
-    _tp=$(cat "$MODDIR/.touch_keep_pid" 2>/dev/null)
+    local _tp _tt _ss _cmd _now _lt _np _nt
+    _tp=$(cut -d' ' -f1 "$MODDIR/.touch_keep_pid" 2>/dev/null)
+    _tt=$(cut -s -d' ' -f2 "$MODDIR/.touch_keep_pid" 2>/dev/null)
     if [ -n "$_tp" ] && [ -d "/proc/$_tp" ]; then
-      _cmd=$(tr '\0' ' ' < "/proc/$_tp/cmdline" 2>/dev/null)
-      case "$_cmd" in *service.sh*) return 0;; esac
+      if [ -n "$_tt" ]; then
+        _ss=$(awk '{print $3" "$22}' "/proc/$_tp/stat" 2>/dev/null)
+        [ -n "$_ss" ] && [ "${_ss##* }" = "$_tt" ] && [ "${_ss%% *}" != "Z" ] && return 0
+      else
+        _cmd=$(tr '\0' ' ' < "/proc/$_tp/cmdline" 2>/dev/null)
+        case "$_cmd" in *fex.*) kill -9 "$_tp" 2>/dev/null;; esac
+      fi
     fi
     _now=$(date +%s 2>/dev/null)
     _lt=$(stat -c %Y "$MODDIR/.touch_keep_lock" 2>/dev/null)
@@ -71,7 +85,9 @@ touch_keepalive_start() {
           [ -f "$AUTO_TOUCH_FILE" ] && { [ ! -f "$TOUCH_MODE_FILE" ] || [ "$(cat "$TOUCH_MODE_FILE" 2>/dev/null)" != "perapp" ]; } && touch_boost
         done
       ) &
-      echo $! > "$MODDIR/.touch_keep_pid" 2>/dev/null
+      _np=$!
+      _nt=$(awk '{print $22}' "/proc/$_np/stat" 2>/dev/null)
+      echo "$_np $_nt" > "$MODDIR/.touch_keep_pid" 2>/dev/null
       rmdir "$MODDIR/.touch_keep_lock" 2>/dev/null
       if [ -e /sys/class/backlight/panel0-backlight/brightness ]; then
         if ! ps -A -o args 2>/dev/null | grep -q '[i]notifyd.*panel0-backlight'; then
@@ -440,7 +456,7 @@ webui_loop() {
     fi
     PC_COUNT=$((PC_COUNT + 1))
     if [ -f "$CHECK_NOW" ] || [ "$PC_COUNT" -eq 120 ] || [ $((PC_COUNT % 3600)) -eq 0 ]; then
-      patch_check
+      ( patch_check ) &
     fi
     webui_status
     sleep 1
