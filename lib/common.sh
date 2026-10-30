@@ -63,3 +63,29 @@ gpu_cur_hz() {
     fi
     echo "$v"
 }
+vibe_stock_save() {
+    local VB EL n
+    EL="${ERRLOG:-/dev/null}"
+    VB=/sys/class/leds/vibrator
+    [ -e /sys/class/leds/zte_vibrator/gain ] && VB=/sys/class/leds/zte_vibrator
+    for n in gain duration duration_aw vmax; do
+        [ -e "$VB/$n" ] && [ ! -f "$MODDIR/.vibe_stock_$n" ] && cat "$VB/$n" 2>/dev/null > "$MODDIR/.vibe_stock_$n" 2>>"$EL"
+    done
+}
+vibe_stock_restore() {
+    local VB EL n raw hex
+    EL="${ERRLOG:-/dev/null}"
+    VB=/sys/class/leds/vibrator
+    [ -e /sys/class/leds/zte_vibrator/gain ] && VB=/sys/class/leds/zte_vibrator
+    for n in gain duration duration_aw vmax; do
+        [ -e "$VB/$n" ] && [ -f "$MODDIR/.vibe_stock_$n" ] || continue
+        raw=$(cat "$MODDIR/.vibe_stock_$n" 2>/dev/null)
+        hex=$(printf '%s' "$raw" | grep -o '0x[0-9a-fA-F]*' | tail -1)
+        if [ -n "$hex" ]; then
+            echo "$hex" > "$VB/$n" 2>>"$EL"
+        else
+            raw=$(printf '%s' "$raw" | tr -cd '0-9')
+            [ -n "$raw" ] && echo "$raw" > "$VB/$n" 2>>"$EL"
+        fi
+    done
+}

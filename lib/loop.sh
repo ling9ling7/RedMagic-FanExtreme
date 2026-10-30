@@ -1,3 +1,94 @@
+charge_monitor_loop() {
+    while true; do
+      if [ -f "$AUTO_CHARGE_FILE" ]; then
+        threshold=$(cat "$THRESHOLD_FILE" 2>/dev/null)
+        [ -z "$threshold" ] && threshold=$(cfg "充电分离阈值")
+        case "$threshold" in ''|*[!0-9]*) threshold=100;; esac
+        local_info=$(dumpsys battery 2>/dev/null)
+        [ -z "$local_info" ] && sleep 3 && continue
+        level=$(echo "$local_info" | grep 'level:' | head -1 | tr -d ' ' | cut -d: -f2)
+        case "$level" in ''|*[!0-9]*) sleep 3; continue;; esac
+        ac=$(echo "$local_info" | grep 'AC powered:' | head -1 | awk '{print $3}')
+        usb=$(echo "$local_info" | grep 'USB powered:' | head -1 | awk '{print $3}')
+        wireless=$(echo "$local_info" | grep 'Wireless powered:' | head -1 | awk '{print $3}')
+        current=$(settings get global charge_separation_switch 2>/dev/null)
+        if [ "$current" != "1" ]; then
+          rm -f "$AUTO_SEPARATION_FILE"
+        fi
+        if { [ "$ac" = "true" ] || [ "$usb" = "true" ] || [ "$wireless" = "true" ]; }; then
+          if [ "$level" -ge "$threshold" ]; then
+            if [ "$current" != "1" ]; then
+              settings put global charge_separation_switch 1
+              touch "$AUTO_SEPARATION_FILE"
+            fi
+          elif [ "$level" -le "$((threshold - 3))" ]; then
+            if [ "$current" = "1" ] && [ -f "$AUTO_SEPARATION_FILE" ]; then
+              settings put global charge_separation_switch 0
+              rm -f "$AUTO_SEPARATION_FILE"
+            fi
+          fi
+        fi
+        sleep 3
+      else
+        sleep 3
+      fi
+    done
+}
+charge_monitor_start() {
+    local _mp _lt _now _cmd
+    _mp=$(cat "$MODDIR/.charge_mon_pid" 2>/dev/null)
+    if [ -n "$_mp" ] && [ -d "/proc/$_mp" ]; then
+      _cmd=$(tr '\0' ' ' < "/proc/$_mp/cmdline" 2>/dev/null)
+      case "$_cmd" in *service.sh*) return 0;; esac
+    fi
+    _now=$(date +%s 2>/dev/null)
+    _lt=$(stat -c %Y "$MODDIR/.charge_mon_lock" 2>/dev/null)
+    if [ -n "$_lt" ] && [ -n "$_now" ] && [ $((_now - _lt)) -gt 60 ]; then
+      rmdir "$MODDIR/.charge_mon_lock" 2>/dev/null
+    fi
+    if mkdir "$MODDIR/.charge_mon_lock" 2>/dev/null; then
+      charge_monitor_loop &
+      echo $! > "$MODDIR/.charge_mon_pid" 2>/dev/null
+      rmdir "$MODDIR/.charge_mon_lock" 2>/dev/null
+    fi
+}
+touch_keepalive_start() {
+    local _tp _lt _now _cmd
+    _tp=$(cat "$MODDIR/.touch_keep_pid" 2>/dev/null)
+    if [ -n "$_tp" ] && [ -d "/proc/$_tp" ]; then
+      _cmd=$(tr '\0' ' ' < "/proc/$_tp/cmdline" 2>/dev/null)
+      case "$_cmd" in *service.sh*) return 0;; esac
+    fi
+    _now=$(date +%s 2>/dev/null)
+    _lt=$(stat -c %Y "$MODDIR/.touch_keep_lock" 2>/dev/null)
+    if [ -n "$_lt" ] && [ -n "$_now" ] && [ $((_now - _lt)) -gt 60 ]; then
+      rmdir "$MODDIR/.touch_keep_lock" 2>/dev/null
+    fi
+    if mkdir "$MODDIR/.touch_keep_lock" 2>/dev/null; then
+      (
+        while true; do
+          sleep 60
+          [ -f "$AUTO_TOUCH_FILE" ] && { [ ! -f "$TOUCH_MODE_FILE" ] || [ "$(cat "$TOUCH_MODE_FILE" 2>/dev/null)" != "perapp" ]; } && touch_boost
+        done
+      ) &
+      echo $! > "$MODDIR/.touch_keep_pid" 2>/dev/null
+      rmdir "$MODDIR/.touch_keep_lock" 2>/dev/null
+      if [ -e /sys/class/backlight/panel0-backlight/brightness ]; then
+        if ! ps -A -o args 2>/dev/null | grep -q '[i]notifyd.*panel0-backlight'; then
+          inotifyd - /sys/class/backlight/panel0-backlight/brightness:c | while read -r f; do
+            [ -f "$AUTO_TOUCH_FILE" ] && { [ ! -f "$TOUCH_MODE_FILE" ] || [ "$(cat "$TOUCH_MODE_FILE" 2>/dev/null)" != "perapp" ]; } && touch_boost
+          done &
+        fi
+      fi
+    fi
+}
+pump_apply_last() {
+    local _sp
+    [ -e /proc/driver/micropump/enable ] || return 0
+    _sp=$(cat /proc/driver/micropump/speed 2>/dev/null)
+    case "$_sp" in 40|60|80|90) ;; *) _sp=90;; esac
+    su system -c "chmod 644 /proc/driver/micropump/enable /proc/driver/micropump/freq /proc/driver/micropump/speed 2>/dev/null; echo 1 > /proc/driver/micropump/enable; echo 4 > /proc/driver/micropump/freq; echo $_sp > /proc/driver/micropump/speed; chmod 444 /proc/driver/micropump/speed" 2>/dev/null
+}
 webui_loop() {
     local TC_COUNT=0
     local PC_COUNT=0
@@ -72,6 +163,7 @@ webui_loop() {
             if [ "$value" = "on" ]; then
               touch "$AUTO_CHARGE_FILE"
               cfg_set '充电分离' 1
+              charge_monitor_start
             else
               rm -f "$AUTO_CHARGE_FILE"
               rm -f "$AUTO_SEPARATION_FILE"
@@ -112,6 +204,7 @@ webui_loop() {
               local TP=/proc/touchscreen
               [ -e "$TP/tp_report_rate" ] && { echo 4 > $TP/tp_report_rate; echo 1 > $TP/play_game; echo 4 > $TP/follow_hand_level; }
               settings put system touch_sampling_rate 960 2>/dev/null
+              [ ! -f "$TOUCH_MODE_FILE" ] || [ "$(cat "$TOUCH_MODE_FILE" 2>/dev/null)" != "perapp" ] && touch_keepalive_start
             else
               rm -f "$AUTO_TOUCH_FILE"
               cfg_set '触控优化' 0
@@ -123,9 +216,11 @@ webui_loop() {
             if [ "$value" = "on" ]; then
               touch "$MODDIR/auto_vibe"
               cfg_set '振动增强' 1
+              vibe_boost
             else
               rm -f "$MODDIR/auto_vibe"
               cfg_set '振动增强' 0
+              vibe_stock_restore
             fi
             ;;
           vibe_gain)
@@ -174,6 +269,7 @@ webui_loop() {
             if [ "$value" = "on" ]; then
               touch "$MODDIR/auto_pump"
               cfg_set '水冷控制' 1
+              pump_apply_last
             else
               rm -f "$MODDIR/auto_pump"
               cfg_set '水冷控制' 0
@@ -270,6 +366,9 @@ webui_loop() {
       fi
     fi
     TC_COUNT=$((TC_COUNT + 1))
+    if [ $((TC_COUNT % 10)) -eq 0 ] && [ -f "$AUTO_CHARGE_FILE" ]; then
+      charge_monitor_start
+    fi
     if [ $((TC_COUNT % 3)) -eq 0 ]; then
       perf_hold_once
     fi

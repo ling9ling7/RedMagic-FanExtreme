@@ -48,6 +48,7 @@ vibe_boost() {
         [ -e /sys/class/leds/zte_vibrator/gain ] && break
         sleep 1
     done
+    vibe_stock_save
     vibe_apply "$gain" "$dur" "$vmax"
 }
 touch_firmware() {

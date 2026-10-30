@@ -321,7 +321,7 @@
 .save-btn{background:linear-gradient(180deg,rgba(64,220,132,.5),rgba(39,174,96,.32));border-radius:999px;box-shadow:0 4px 14px rgba(39,174,96,.35);color:#fff}
 .overlay-close{border-radius:999px;background:rgba(255,255,255,.08)}
 .lang-btn{border-radius:999px;background:rgba(255,255,255,.08)}
-.ctrl-toggle.on{background:rgba(9,132,227,.55);border:1px solid rgba(255,255,255,.5);box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}
+.ctrl-toggle.on{background:rgba(9,132,227,.55);border:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 1px 3px rgba(0,0,0,.12)}
 .ctrl-toggle::after{background:linear-gradient(180deg,#ffffff,rgba(238,240,245,.95));box-shadow:0 1px 3px rgba(0,0,0,.2),inset 0 1px 0 #fff}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.action-btn,.mode-btn,.perf-preset-btn,.btm-btn,.freq-opt{background:#f2f3f5}.action-btn::before,.mode-btn::before,.perf-preset-btn::before,.btm-btn::before,.freq-opt::before,.save-btn::before,.overlay-close::before,.lang-btn::before,.action-btn::after,.mode-btn::after,.perf-preset-btn::after,.btm-btn::after,.freq-opt::after,.save-btn::after,.overlay-close::after,.lang-btn::after{display:none}.action-btn.primary,.mode-btn.active,.perf-preset-btn.active,.freq-opt.current{background:#0984e3}.save-btn{background:#27ae60}}
 /* Liquid Glass press: fast sink, springy release */
