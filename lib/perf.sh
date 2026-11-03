@@ -20,7 +20,7 @@ perf_hold_once() {
         [ -e "/sys/kernel/cpu_max_freq_limit_cluster$j" ] && chmod 644 "/sys/kernel/cpu_max_freq_limit_cluster$j" 2>/dev/null
         [ -e "/sys/kernel/cpu_min_freq_limit_cluster$j" ] && chmod 644 "/sys/kernel/cpu_min_freq_limit_cluster$j" 2>/dev/null
     done
-    for f in /sys/module/*/parameters/accept_userset_gpu_freq_min /sys/module/*/parameters/accept_userset_gpu_freq_max /sys/module/*/parameters/accept_userset_freq_min /sys/module/*/parameters/accept_userset_freq_max; do
+    for f in /sys/module/*/parameters/accept_userset_gpu_freq_max /sys/module/*/parameters/accept_userset_freq_max; do
         [ -e "$f" ] && echo 1 > "$f" 2>/dev/null
     done
     [ -e /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel ] && echo 0 > /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel 2>/dev/null
@@ -36,30 +36,42 @@ perf_hold_once() {
     gpu_pwrlevel_hold
     [ -n "$h_gov" ] && for c in /sys/devices/system/cpu/cpu*/cpufreq; do echo "$h_gov" > "$c/scaling_governor" 2>/dev/null; done
     for n in 0 1 2 3 4 5 6 7; do
-        [ -e "/sys/kernel/cpu_max_freq_ceiling_cluster$n" ] && echo 99999 > "/sys/kernel/cpu_max_freq_ceiling_cluster$n" 2>/dev/null
-        [ -e "/sys/kernel/cpu_max_freq_limit_cluster$n" ] && echo 99999999 > "/sys/kernel/cpu_max_freq_limit_cluster$n" 2>/dev/null
-        [ -e "/sys/kernel/cpu_min_freq_limit_cluster$n" ] && echo 0 > "/sys/kernel/cpu_min_freq_limit_cluster$n" 2>/dev/null
+        cl_valid "${FEX_SYSROOT:-}/sys/kernel/cpu_max_freq_ceiling_cluster$n" && echo 99999 > "${FEX_SYSROOT:-}/sys/kernel/cpu_max_freq_ceiling_cluster$n" 2>/dev/null
+        cl_valid "${FEX_SYSROOT:-}/sys/kernel/cpu_max_freq_limit_cluster$n" && echo 99999999 > "${FEX_SYSROOT:-}/sys/kernel/cpu_max_freq_limit_cluster$n" 2>/dev/null
+        cl_valid "${FEX_SYSROOT:-}/sys/kernel/cpu_min_freq_limit_cluster$n" && echo 0 > "${FEX_SYSROOT:-}/sys/kernel/cpu_min_freq_limit_cluster$n" 2>/dev/null
     done
     # 11Pro GPU pwrlevel 解锁（pwrlevel 0=最高频）
-    if [ -e /sys/kernel/gpu_max_pwrlevel_limit ]; then
-        echo 0 > /sys/kernel/gpu_max_pwrlevel_limit 2>/dev/null
-        echo 17 > /sys/kernel/gpu_min_pwrlevel_limit 2>/dev/null
+    if [ -e "${FEX_SYSROOT:-}/sys/kernel/gpu_max_pwrlevel_limit" ]; then
+        cl_valid "${FEX_SYSROOT:-}/sys/kernel/gpu_max_pwrlevel_limit" && echo 0 > "${FEX_SYSROOT:-}/sys/kernel/gpu_max_pwrlevel_limit" 2>/dev/null
+        cl_valid "${FEX_SYSROOT:-}/sys/kernel/gpu_min_pwrlevel_limit" && echo 17 > "${FEX_SYSROOT:-}/sys/kernel/gpu_min_pwrlevel_limit" 2>/dev/null
     fi
-    if [ -e /sys/kernel/gpu/gpu_max_pwrlevel_limit ]; then
-        echo 0 > /sys/kernel/gpu/gpu_max_pwrlevel_limit 2>/dev/null
-        echo 17 > /sys/kernel/gpu/gpu_min_pwrlevel_limit 2>/dev/null
+    if [ -e "${FEX_SYSROOT:-}/sys/kernel/gpu/gpu_max_pwrlevel_limit" ]; then
+        cl_valid "${FEX_SYSROOT:-}/sys/kernel/gpu/gpu_max_pwrlevel_limit" && echo 0 > "${FEX_SYSROOT:-}/sys/kernel/gpu/gpu_max_pwrlevel_limit" 2>/dev/null
+        cl_valid "${FEX_SYSROOT:-}/sys/kernel/gpu/gpu_min_pwrlevel_limit" && echo 17 > "${FEX_SYSROOT:-}/sys/kernel/gpu/gpu_min_pwrlevel_limit" 2>/dev/null
     fi
     for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq; do
         chmod 444 "$f" 2>/dev/null
     done
 }
+cl_valid() {
+    local f="$1" v
+    [ -e "$f" ] || return 1
+    v=$(cat "$f" 2>/dev/null | tr -d ' \t')
+    case "$v" in ''|*[!0-9]*) return 1 ;; esac
+    return 0
+}
 PERF_KILL_DAEMON="$MODDIR/.perf_kill_daemon"
+is_769() {
+    [ -z "$FEX_MODEL" ] && FEX_MODEL=$(getprop ro.product.model 2>/dev/null | tr -d ' \t\r\n')
+    [ "$FEX_MODEL" = "NX769J" ]
+}
 perf_start_kill() {
     perf_stop_kill
+    is_769 || return 0
     cat > "$PERF_KILL_DAEMON" <<'FEEOF'
 #!/system/bin/sh
 while true; do
-  ps -A -o pid,args 2>/dev/null | grep -E 'thermal-engine|thermal-hal|thermal-service|perfservice|perf2-hal|vendor\.qti\.hardware\.perf|limits@|mpdecision|msm_perf|zperfcube|thermald|thermalbridge|android\.hardware\.thermal' | awk '{print $1}' | while read p; do kill -9 $p 2>/dev/null; done
+  ps -A -o pid,args 2>/dev/null | grep -E 'thermal-engine|thermal-hal|thermal-service|perfservice|perf2-hal|vendor\.qti\.hardware\.perf|limits@|mpdecision|zperfcube|thermald|thermalbridge|android\.hardware\.thermal' | awk '{print $1}' | while read p; do kill -9 $p 2>/dev/null; done
   sleep 5
 done
 FEEOF
@@ -113,7 +125,18 @@ gpu_pwrlevel_level() {
     done
     echo "$lvl"
 }
+gpu_pin_allowed() {
+    local v="$1" mx
+    case "$v" in ''|*[!0-9]*) return 1 ;; esac
+    [ "$v" -le 382000000 ] && return 0
+    mx=$(cat /sys/class/kgsl/kgsl-3d0/freq_table_mhz 2>/dev/null | tr ' ' '\n' | sort -n | tail -1)
+    [ -z "$mx" ] && mx=$(cat "$GPU_FREQ_TABLE" 2>/dev/null | tr ' ' '\n' | sort -n | tail -1)
+    [ -z "$mx" ] && return 1
+    [ $((mx * 1000000)) -le 930000000 ] && return 0
+    return 1
+}
 gpu_pwrlevel_pin() {
+    gpu_pin_allowed "$1" || return 0
     local K=/sys/class/kgsl/kgsl-3d0
     [ -e "$K/pwrscale" ] && [ -e "$K/default_pwrlevel" ] || { gpu_pwrlevel_pin_legacy "$1"; return; }
     local lvl=$(gpu_pwrlevel_level "$1")
@@ -151,6 +174,7 @@ gpu_pwrlevel_free() {
 }
 gpu_pwrlevel_hold() {
     [ -f "$PERF_GPU_PWR_BACKUP" ] || return
+    gpu_pin_allowed "$(cat "$PERF_TARGET" 2>/dev/null | cut -d'|' -f4)" || return 0
     local K=/sys/class/kgsl/kgsl-3d0
     local tgt=$(gpu_pwrlevel_level "$(cat "$PERF_TARGET" 2>/dev/null | cut -d'|' -f4)")
     chmod 644 $K/pwrscale $K/default_pwrlevel $K/max_pwrlevel $K/min_pwrlevel 2>/dev/null
@@ -175,17 +199,58 @@ gpu_pwrlevel_restore() {
     rm -f "$PERF_GPU_PWR_BACKUP"
 }
 PERF_MSM_BACKUP="$MODDIR/perf_msm_backup"
+cpu_in_list() {
+    local l="$1" c="$2" part s e
+    for part in $(echo "$l" | tr ',' ' '); do
+        case "$part" in
+            *-*) s="${part%-*}"; e="${part#*-}"
+                if [ "$c" -ge "$s" ] 2>/dev/null && [ "$c" -le "$e" ] 2>/dev/null; then return 0; fi ;;
+            *) [ "$part" = "$c" ] && return 0 ;;
+        esac
+    done
+    return 1
+}
+perf_msm_build() {
+    local c0="$1" c4="$2" c7="$3" mode="$4"
+    local R="${FEX_SYSROOT:-}"
+    local P="$R/sys/kernel/msm_performance/parameters"
+    local map="" c d rc v first=1
+    for c in 0 1 2 3 4 5 6 7; do
+        v=""
+        for d in "$R"/sys/devices/system/cpu/cpufreq/policy*; do
+            [ -d "$d" ] || continue
+            rc=$(cat "$d/related_cpus" 2>/dev/null)
+            cpu_in_list "$rc" "$c" || continue
+            if cpu_in_list "$rc" 7; then v="$c7"
+            elif cpu_in_list "$rc" 0; then v="$c0"
+            elif cpu_in_list "$rc" 4; then v="$c4"; fi
+            break
+        done
+        if [ -z "$v" ]; then
+            if [ "$mode" = "reset" ]; then
+                v=$(cat "$R/sys/devices/system/cpu/cpu$c/cpufreq/cpuinfo_max_freq" 2>/dev/null)
+            else
+                v=$(cat "$P/cpu_max_freq" 2>/dev/null | tr ' \t' '\n' | grep "^$c:" | cut -d: -f2)
+            fi
+        fi
+        [ -z "$v" ] && continue
+        if [ "$first" = "1" ]; then map="$c:$v"; first=0; else map="$map $c:$v"; fi
+    done
+    echo "$map"
+}
 perf_msm_apply() {
     local c0="$1" c4="$2" c7="$3"
-    local P=/sys/kernel/msm_performance/parameters
+    local R="${FEX_SYSROOT:-}"
+    local P="$R/sys/kernel/msm_performance/parameters"
     [ -f "$P/cpu_max_freq" ] || return
-    [ -z "$c0" ] && c0=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null)
-    [ -z "$c4" ] && c4=$(cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2>/dev/null)
-    [ -z "$c7" ] && c7=$(cat /sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq 2>/dev/null)
-    [ -n "$c0" ] && [ -n "$c4" ] && [ -n "$c7" ] || return
+    [ -z "$c0$c4$c7" ] && return
+    [ -z "$c0" ] && c0=$(cat "$R/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq" 2>/dev/null)
+    [ -z "$c4" ] && c4=$(cat "$R/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq" 2>/dev/null)
+    [ -z "$c7" ] && c7=$(cat "$R/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq" 2>/dev/null)
     [ -f "$PERF_MSM_BACKUP" ] || cat "$P/cpu_max_freq" > "$PERF_MSM_BACKUP" 2>/dev/null
     chmod 644 "$P/cpu_max_freq" 2>/dev/null
-    echo "0:$c0 1:$c0 2:$c4 3:$c4 4:$c4 5:$c4 6:$c4 7:$c7" > "$P/cpu_max_freq" 2>/dev/null
+    local map=$(perf_msm_build "$c0" "$c4" "$c7" apply)
+    [ -n "$map" ] && echo "$map" > "$P/cpu_max_freq" 2>/dev/null
     chmod 444 "$P/cpu_max_freq" 2>/dev/null
 }
 perf_msm_restore() {
@@ -199,7 +264,8 @@ perf_msm_restore() {
 PERF_THERM_BACKUP="$MODDIR/perf_therm_backup"
 PERF_THERM_TYPES="pm8550-bcl-lvl0 pm8550-bcl-lvl1 pm8550-bcl-lvl2 pm8550b-bcl-lvl0 pm8550b-bcl-lvl1 pm8550b-bcl-lvl2 socd pm8550vs_d_tz"
 perf_therm_apply() {
-    for z in /sys/class/thermal/thermal_zone*; do
+    local R="${FEX_SYSROOT:-}"
+    for z in "$R"/sys/class/thermal/thermal_zone*; do
         [ -d "$z" ] || continue
         t=$(cat "$z/type" 2>/dev/null)
         match=0
@@ -220,14 +286,16 @@ perf_therm_apply() {
 }
 perf_therm_hold() {
     [ -f "$PERF_THERM_BACKUP" ] || return
+    local R="${FEX_SYSROOT:-}"
     while read -r n; do
-        [ -n "$n" ] && echo disabled > /sys/class/thermal/thermal_zone$n/mode 2>/dev/null
+        [ -n "$n" ] && echo disabled > "$R/sys/class/thermal/thermal_zone$n/mode" 2>/dev/null
     done < "$PERF_THERM_BACKUP"
 }
 perf_therm_restore() {
     [ -f "$PERF_THERM_BACKUP" ] || return
+    local R="${FEX_SYSROOT:-}"
     while read -r n; do
-        [ -n "$n" ] && echo enabled > /sys/class/thermal/thermal_zone$n/mode 2>/dev/null
+        [ -n "$n" ] && echo enabled > "$R/sys/class/thermal/thermal_zone$n/mode" 2>/dev/null
     done < "$PERF_THERM_BACKUP"
     rm -f "$PERF_THERM_BACKUP"
 }
@@ -335,10 +403,12 @@ perf_reset_now() {
     gpu_write_max 903000000
     gpu_write_min 231000000
     gpu_pwrlevel_free
-    local P=/sys/kernel/msm_performance/parameters
+    local R="${FEX_SYSROOT:-}"
+    local P="$R/sys/kernel/msm_performance/parameters"
     if [ -f "$P/cpu_max_freq" ]; then
         chmod 644 "$P/cpu_max_freq" 2>/dev/null
-        echo "0:$h0 1:$h0 2:$h4 3:$h4 4:$h4 5:$h4 6:$h4 7:$h7" > "$P/cpu_max_freq" 2>/dev/null
+        local map=$(perf_msm_build "$h0" "$h4" "$h7" reset)
+        [ -n "$map" ] && echo "$map" > "$P/cpu_max_freq" 2>/dev/null
     fi
     perf_therm_restore
     rm -f "$PERF_BACKUP" "$PERF_MSM_BACKUP" "$PERF_PENDING" "$PERF_TARGET" "$AUTO_PERF_FILE" "$PERF_GPU_PWR_BACKUP" "$PERF_THERM_BACKUP"
