@@ -10,9 +10,9 @@
 
 <table>
   <tr>
-    <td><img width="350" alt="model-1" src="https://github.com/user-attachments/assets/e2e81a43-2ac4-47f7-98fc-268d0a5e328b" />
+    <td><img width="350" alt="model-1.jpg" src="picture/model-1.jpg" />
 </td>
-    <td><img width="350" alt="mode-2" src="https://github.com/user-attachments/assets/cb051672-b2bc-4c0c-b6b2-283ceb866aa6" />
+    <td><img width="350" alt="mode-2.jpg" src="picture/mode-2.jpg" />
 </td>
   </tr>
 </table>
@@ -162,13 +162,98 @@ Custom License © 酷安@ling_凌（FanExtreme 自定义许可协议，完整条
 
 <table>
   <tr>
-    <td><img width="350" alt="支付宝支付码" src="https://github.com/user-attachments/assets/ec9146d0-0586-4d31-aabc-2dc825b49b93" />
+    <td><img width="350" alt="支付宝支付码.jpg" src="picture/支付宝支付码.jpg" />
 </td>
-    <td><img width="350" alt="sponsor" src="https://github.com/user-attachments/assets/f93c533f-fd21-46e7-9e41-2fab894a5540" />
+    <td><img width="350" alt="微信支付.jpg" src="picture/微信支付.jpg" />
 </td>
   </tr>
 </table>
 
+
+<div align="center">
+  <h1>🟢RedMagic-FanExtreme-APK</h1>
+</div>
+
+FanExtreme 的独立应用形态：**一个 APK 搞定全部功能**，不依赖任何模块框架，不刷机、不重启，即装即用。
+与模块版同一套 sysfs 节点，但在生效方式、保活、恢复能力、权限引导上做了完整重做。  
+以 Kotlin、C、C++ 语言开发，全面提升保护性，避免像shll一样可轻易的破解来保护赞助用户的权益，使用 Jetpack Compose 作为核心UI框架
+
+<table>
+  <tr>
+    <td><img width="350" alt="apk-1.jpg" src="picture/apk-1.jpg" />
+</td>
+    <td><img width="350" alt="apk-about.jpg" src="picture/apk-about.jpg" />
+</td>
+  </tr>
+</table>
+
+- 包名：`com.ling.fanextreme`
+- 运行前提：设备已 root（SukiSU / KernelSU 及兼容方案），且序列号在授权名单内
+- **本项目闭源**，保留所有权利
+
+## 💫为什么选软件版
+
+- 精美的UI，采用Material 3，Miuix，LiquidGlass三主题设计
+- 流畅的动画，拒绝模块版的间歇性抽帧，卡顿的流畅度问题
+- 更多的可自定义选项，更多功能可自定义设置，更多元化的选择
+- 快速使用，直接安装即可使用，无需重启设备，提升非常规root方案的上手体验
+- 内置 OTA 更新，下载包验签名后才调起安装。
+
+### 🔑权限引导
+
+root、通知、忽略电池优化、自启动/后台运行——系统要的权限都在首次打开时一次申请完：
+系统弹窗（通知 → 电池）一次弹一个互不挤占；随后给出去设置页的手动路径（设置 → 应用 → FanExtreme → 耗电情况），点按钮先 Toast 指引再跳转。
+权限被撤掉后服务会发现并在下次进应用时重弹引导；自动撤销权限由服务锁死在关，不会被系统偷偷收回。
+
+## ⬇️安装与使用
+
+1. 设备已 root，在 SukiSU / KernelSU 的超级用户列表中允许本应用。
+2. 安装 `FanExtreme-release.apk`，打开后按提示一次过完引导。
+3. **必须手动开一次**：系统设置 → 应用 → FanExtreme → 耗电情况 → 自启动/后台运行设为允许（系统不给应用代开的接口，引导页会指过去）。不开则划卡清后台后服务无法自拉活。
+4. 不要与模块版共存：检测到模块会弹冲突门并停服务，卸载模块重启后再用。
+
+## 📱兼容性
+
+理论支持全版本红魔机型
+
+| 机型 | Android | 适配情况 |
+|------|---------|---------|
+| 红魔 8 Pro | 15 | 完美适配✅ |
+| 红魔 9 Pro | 16 | 完美适配✅ |
+| 红魔 10 Pro | 16 | 完美适配✅ |
+| 红魔 11 Pro | 16 | 完美适配✅ |
+| 红魔 12 Pro | 17 | 完美适配✅ |  
+| 红魔电竞平板 Pro | 16 | 完美适配✅ |
+| 红魔电竞平板 3 Pro | 16 | 完美适配✅ |
+| 红魔电竞平板 5 Pro | 16 | 完美适配✅ |
+
+## ❓常见问题
+
+**Q: 和模块版能一起装吗？**  
+A: 不能，写同一批节点会互相覆盖，无法共存。
+
+**Q: 划掉后台后功能停了？**  
+A: 先确认自启动/后台运行已允许。允许后看门 10 秒内拉活；仍不回来就进应用一次，并用关于页日志反馈。
+
+**Q: 重启后开关还在吗？**  
+A: 在。振动、触控全局、充电加速/伪装、风扇强制、调速器开机自动恢复，其余靠巡检保持。
+
+**Q: 提示"检测到应用被篡改"？**  
+A: 签名与发布证书不一致。请安装官方版本后点"重新校验"。
+
+## 其他
+
+- RedMagic-FanExtreme-APK经提供给赞助用户使用。
+- 禁止反编译、二次打包、提取功能模块后分发；
+- 禁止绕过授权验证、私自修改后传播任何衍生版本；
+- 仅授权用户可在授权设备上安装使用，授权随设备序列号绑定。
+
+第三方组件：Backdrop 液态玻璃（Kyant0，Apache-2.0）、MIUIX 组件库、libsu。
+
 ---
 ## ⚠️ 新闻
-> ⚠️ **2026年8月7日：FanExtreme 仅赞助用户可用** 自首次发布以来模块已经经过了20以上的版本迭代，随着模块体量的增加，模块的维护与更新成本也在上升。最终在与模块用户的讨论中决定，FanExtreme-更好的红魔 从v3.1.5版本开始正式实施仅赞助用户可安装使用，低于v3.1.5的版本仍然保持免费、源码公开，但不再对其版本进行维护。如有用户想继续更新和使用最新版本，赞助模块 15R 支持开发后联系开发者即可永久使用此模块
+> ⚠️ **2026/8/7：FanExtreme 仅赞助用户可用** 自首次发布以来模块已经经过了20以上的版本迭代，随着模块体量的增加，模块的维护与更新成本也在上升。最终在与模块用户的讨论中决定，FanExtreme-更好的红魔 从v3.1.5版本开始正式实施仅赞助用户可安装使用，低于v3.1.5的版本仍然保持免费、源码公开，但不再对其版本进行维护。如有用户想继续更新和使用最新版本，赞助模块 15R 支持开发后联系开发者即可永久使用此模块  
+
+> ⚠️ **2026/11/6：RedMagic-FanExtreme-APK发布** FanExtreme 的独立应用形态：**一个 APK 搞定全部功能**，不依赖任何模块框架，不刷机、不重启，即装即用。
+与模块版同一套 sysfs 节点，但在生效方式、保活、恢复能力、权限引导上做了完整重做。  
+以 Kotlin、C、C++ 语言开发，全面提升保护性，避免像shll一样可轻易的破解来保护赞助用户的权益，使用 Jetpack Compose 作为核心UI框架
